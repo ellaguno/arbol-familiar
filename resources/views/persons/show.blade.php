@@ -1,0 +1,569 @@
+<x-app-layout>
+    @php
+        $isProtectedMinor = $person->shouldProtectMinorData();
+        $displayName = $isProtectedMinor ? $person->first_name : $person->full_name;
+    @endphp
+    <x-slot name="title">{{ $displayName }} - {{ config('app.name') }}</x-slot>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Aviso de menor protegido -->
+        @if($isProtectedMinor)
+            <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    <div>
+                        <p class="font-medium text-amber-800">{{ __('Informacion protegida') }}</p>
+                        <p class="text-sm text-amber-700">{{ __('Esta persona es menor de edad. Su informacion personal esta protegida y solo es visible para quien la registro.') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Breadcrumb -->
+        <nav class="flex mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-1 md:space-x-2">
+                <li class="flex items-center">
+                    <a href="{{ route('persons.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Personas') }}</a>
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-gray-700 font-medium ml-1">{{ $displayName }}</span>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Columna izquierda: Perfil -->
+            <div class="lg:col-span-1">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <!-- Foto (oculta para menores protegidos) -->
+                        @if($isProtectedMinor)
+                            <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                        @elseif($person->photo_path)
+                            <img src="{{ Storage::url($person->photo_path) }}"
+                                 alt="{{ $displayName }}"
+                                 class="w-32 h-32 rounded-full object-cover mx-auto mb-4">
+                        @else
+                            <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                        @endif
+
+                        <h1 class="text-2xl font-bold text-gray-900">{{ $displayName }}</h1>
+                        @if($person->nickname)
+                            <p class="text-gray-500">"{{ $person->nickname }}"</p>
+                        @endif
+
+                        <div class="flex flex-wrap justify-center gap-2 mt-4">
+                            @if($person->gender)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $person->gender === 'M' ? 'bg-blue-100 text-blue-800' : ($person->gender === 'F' ? 'bg-pink-100 text-pink-800' : 'bg-gray-100 text-gray-800') }}">
+                                    {{ $person->gender === 'M' ? __('Masculino') : ($person->gender === 'F' ? __('Femenino') : __('Otro')) }}
+                                </span>
+                            @endif
+                            @if($person->marital_status)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                    {{ config('mi-familia.marital_statuses')[$person->marital_status] ?? $person->marital_status }}
+                                </span>
+                            @endif
+                            @if($person->has_ethnic_heritage)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    HR
+                                </span>
+                            @endif
+                        </div>
+
+                        @if(!$person->is_living)
+                            <p class="text-gray-500 mt-2">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {{ __('Fallecido/a') }}
+                            </p>
+                        @endif
+
+                        <!-- Acciones -->
+                        <div class="mt-6 flex flex-col gap-2">
+                            {{-- Botones "Este soy yo" / "Fusionar con mi perfil" --}}
+                            @php
+                                $user = auth()->user();
+                                $isOwnPerson = $user->person_id === $person->id;
+                                $canClaim = !$user->person_id && !$person->user_id;
+
+                                // Verificar si la persona ya está en el árbol del usuario
+                                $isAlreadyInTree = false;
+                                if ($user->person_id && $user->person_id !== $person->id) {
+                                    $userPerson = $user->person;
+                                    if ($userPerson) {
+                                        // Ya está en el árbol si: fue creada por el mismo usuario,
+                                        // o es familiar directo del usuario
+                                        $isAlreadyInTree = $person->created_by === $user->id
+                                            || in_array($person->id, $userPerson->directFamilyIds);
+                                    }
+                                }
+                                $canAddToTree = $user->person_id && $user->person_id !== $person->id && !$isAlreadyInTree;
+
+                                $hasPendingClaim = \App\Models\Message::where('sender_id', $user->id)
+                                    ->where('related_person_id', $person->id)
+                                    ->where('type', 'person_claim')
+                                    ->where('action_status', 'pending')
+                                    ->exists();
+                            @endphp
+
+                            @if($isOwnPerson)
+                                <div class="p-3 bg-blue-100  border border-blue-200 rounded-lg text-center mb-2">
+                                    <span class="text-blue-800 font-medium">
+                                        <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        {{ __('Este es tu perfil') }}
+                                    </span>
+                                </div>
+                            @elseif($hasPendingClaim)
+                                <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center mb-2">
+                                    <span class="text-yellow-700 text-sm">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        {{ __('Solicitud pendiente de aprobacion') }}
+                                    </span>
+                                </div>
+                            @elseif($canClaim)
+                                {{-- Usuario sin perfil puede reclamar --}}
+                                <a href="{{ route('persons.claim', $person) }}" style="line-height : 21.06px; color :#EF4034; color : rgb(239, 64, 52);" class="btn-primary w-full ">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    {{ __('Este soy yo') }}
+                                </a>
+                            @elseif($isAlreadyInTree)
+                                {{-- La persona ya está en el árbol del usuario --}}
+                                <div class="p-3 bg-green-50 border border-green-200 rounded-lg text-center mb-2">
+                                    <span class="text-green-700 text-sm">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        {{ __('En tu árbol') }}
+                                    </span>
+                                </div>
+                            @elseif($canAddToTree)
+                                {{-- Usuario CON perfil puede agregar a su árbol --}}
+                                <a href="{{ route('persons.add-to-tree', $person) }}" class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors" style="background-color: #DC2626; hover:background-color: #B91C1C;">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    {{ __('Agregar a mi árbol') }}
+                                </a>
+                            @elseif($person->user_id && $person->user_id !== $user->id)
+                                <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg text-center mb-2">
+                                    <span class="text-gray-600 text-sm">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                        {{ __('Perfil vinculado a otro usuario') }}
+                                    </span>
+                                </div>
+                            @endif
+
+                            <a href="{{ route('persons.edit', $person) }}" class="btn-primary w-full">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                {{ __('Editar') }}
+                            </a>
+                            <a href="{{ route('persons.relationships', $person) }}" class="btn-outline w-full">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                                {{ __('Relaciones') }}
+                            </a>
+                            <a href="{{ route('tree.view', $person) }}" class="btn-outline w-full">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                {{ __('Ver en arbol') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Informacion -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Datos personales -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-lg font-semibold">{{ __('Datos personales') }}</h2>
+                    </div>
+                    <div class="card-body">
+                        @if($isProtectedMinor)
+                            <div class="text-center py-6">
+                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                <p class="text-gray-500">{{ __('Informacion protegida por ser menor de edad.') }}</p>
+                            </div>
+                        @else
+                            <dl class="grid md:grid-cols-2 gap-4">
+                                @if($person->birth_year || $person->birth_date)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Nacimiento') }}</dt>
+                                        <dd class="text-gray-900">
+                                            {{ $person->birth_date_formatted ?? ($person->birth_date ? $person->birth_date->format('d/m/Y') : '') }}
+                                            @if($person->birth_date_approx)
+                                                <span class="text-gray-500">({{ __('aprox.') }})</span>
+                                            @endif
+                                            @if($person->age && $person->is_living)
+                                                <span class="text-gray-500">({{ $person->age }} {{ __('años') }})</span>
+                                            @endif
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                @if($person->birth_place || $person->birth_country)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Lugar de nacimiento') }}</dt>
+                                        <dd class="text-gray-900">
+                                            {{ collect([$person->birth_place, $person->birth_country])->filter()->join(', ') }}
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                @if(!$person->is_living && ($person->death_year || $person->death_date))
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Defuncion') }}</dt>
+                                        <dd class="text-gray-900">
+                                            {{ $person->death_date_formatted ?? ($person->death_date ? $person->death_date->format('d/m/Y') : '') }}
+                                            @if($person->death_date_approx)
+                                                <span class="text-gray-500">({{ __('aprox.') }})</span>
+                                            @endif
+                                            @if($person->age)
+                                                <span class="text-gray-500">({{ $person->age }} {{ __('años') }})</span>
+                                            @endif
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                @if(!$person->is_living && ($person->death_place || $person->death_country))
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Lugar de defuncion') }}</dt>
+                                        <dd class="text-gray-900">
+                                            {{ collect([$person->death_place, $person->death_country])->filter()->join(', ') }}
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                @if($person->residence_place || $person->residence_country)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Residencia') }}</dt>
+                                        <dd class="text-gray-900">
+                                            {{ collect([$person->residence_place, $person->residence_country])->filter()->join(', ') }}
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                @if($person->occupation)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Ocupacion') }}</dt>
+                                        <dd class="text-gray-900">{{ $person->occupation }}</dd>
+                                    </div>
+                                @endif
+                            </dl>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Herencia cultural -->
+                @if($person->has_ethnic_heritage)
+                    <div class="card">
+                        <div class="card-header flex items-center gap-2">
+                             <div class="flex gap-1">
+
+                            </div>
+                            <h2 class="text-lg font-semibold">{{ __('Herencia cultural') }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <dl class="grid md:grid-cols-2 gap-4">
+                                @if($person->heritage_region)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Region de origen') }}</dt>
+                                        <dd class="text-gray-900">{{ config('mi-familia.heritage_regions.' . $person->heritage_region, $person->heritage_region) }}</dd>
+                                    </div>
+                                @endif
+
+                                @if($person->origin_town)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Pueblo/Ciudad') }}</dt>
+                                        <dd class="text-gray-900">{{ $person->origin_town }}</dd>
+                                    </div>
+                                @endif
+
+                                @if($person->migration_decade)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Decada de migracion') }}</dt>
+                                        <dd class="text-gray-900">{{ config('mi-familia.migration_decades')[$person->migration_decade] ?? $person->migration_decade }}</dd>
+                                    </div>
+                                @endif
+
+                                @if($person->migration_destination)
+                                    <div>
+                                        <dt class="text-sm text-gray-500">{{ __('Destino') }}</dt>
+                                        <dd class="text-gray-900">{{ $person->migration_destination }}</dd>
+                                    </div>
+                                @endif
+                            </dl>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Familia -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-lg font-semibold">{{ __('Familia') }}</h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <!-- Padres -->
+                        @if($person->father || $person->mother)
+                            <div>
+                                <h3 class="font-medium text-gray-700 mb-2">{{ __('Padres') }}</h3>
+                                <div class="flex flex-wrap gap-4">
+                                    @if($person->father)
+                                        <a href="{{ route('persons.show', $person->father) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                            @if($person->father->photo_path)
+                                                <img src="{{ Storage::url($person->father->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <span class="text-blue-600 font-medium">{{ substr($person->father->first_name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $person->father->full_name }}</p>
+                                                <p class="text-sm text-gray-500">{{ __('Padre') }}</p>
+                                            </div>
+                                        </a>
+                                    @endif
+                                    @if($person->mother)
+                                        <a href="{{ route('persons.show', $person->mother) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                            @if($person->mother->photo_path)
+                                                <img src="{{ Storage::url($person->mother->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+                                                    <span class="text-pink-600 font-medium">{{ substr($person->mother->first_name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $person->mother->full_name }}</p>
+                                                <p class="text-sm text-gray-500">{{ __('Madre') }}</p>
+                                            </div>
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Cónyuges (todos, actuales y anteriores) -->
+                        @if($person->allSpouses->isNotEmpty())
+                            <div>
+                                <h3 class="font-medium text-gray-700 mb-2">
+                                    {{ $person->allSpouses->count() > 1 ? __('Cónyuges') : __('Cónyuge') }}
+                                </h3>
+                                <div class="flex flex-wrap gap-4">
+                                    @foreach($person->allSpouses as $spouseInfo)
+                                        @php $spouse = $spouseInfo['person']; @endphp
+                                        <a href="{{ route('persons.show', $spouse) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                            @if($spouse->photo_path)
+                                                <img src="{{ Storage::url($spouse->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-{{ $spouse->gender === 'M' ? 'blue' : 'pink' }}-100 flex items-center justify-center">
+                                                    <span class="text-{{ $spouse->gender === 'M' ? 'blue' : 'pink' }}-600 font-medium">{{ substr($spouse->first_name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $spouse->full_name }}</p>
+                                                <p class="text-sm text-gray-500">
+                                                    {{ $spouse->gender === 'M' ? __('Esposo') : __('Esposa') }}
+                                                    @if($spouseInfo['status'] && $spouseInfo['status'] !== 'married')
+                                                        <span class="text-xs text-gray-400">
+                                                            ({{ __($spouseInfo['status']) }})
+                                                        </span>
+                                                    @endif
+                                                    @if($spouseInfo['marriage_date'])
+                                                        <span class="text-xs text-gray-400">
+                                                            - {{ $spouseInfo['marriage_date']->format('Y') }}
+                                                        </span>
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            @if($spouseInfo['is_current'])
+                                                <span class="ml-1 w-2 h-2 bg-green-500 rounded-full" title="{{ __('Actual') }}"></span>
+                                            @endif
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Hermanos -->
+                        @if($person->siblings->isNotEmpty())
+                            <div>
+                                <h3 class="font-medium text-gray-700 mb-2">{{ __('Hermanos') }}</h3>
+                                <div class="flex flex-wrap gap-4">
+                                    @foreach($person->siblings as $sibling)
+                                        <a href="{{ route('persons.show', $sibling) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                            @if($sibling->photo_path)
+                                                <img src="{{ Storage::url($sibling->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                                    <span class="text-gray-600 font-medium">{{ substr($sibling->first_name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $sibling->full_name }}</p>
+                                                <p class="text-sm text-gray-500">{{ $sibling->gender === 'M' ? __('Hermano') : __('Hermana') }}</p>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Hijos -->
+                        @if($person->children->isNotEmpty())
+                            <div>
+                                <h3 class="font-medium text-gray-700 mb-2">{{ __('Hijos') }}</h3>
+                                <div class="flex flex-wrap gap-4">
+                                    @foreach($person->children as $child)
+                                        <a href="{{ route('persons.show', $child) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                            @if($child->photo_path)
+                                                <img src="{{ Storage::url($child->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
+                                            @else
+                                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                                    <span class="text-gray-600 font-medium">{{ substr($child->first_name, 0, 1) }}</span>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $child->full_name }}</p>
+                                                <p class="text-sm text-gray-500">{{ $child->gender === 'M' ? __('Hijo') : __('Hija') }}</p>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(!$person->father && !$person->mother && !$person->current_spouse && $person->siblings->isEmpty() && $person->children->isEmpty())
+                            <p class="text-gray-500 text-center py-4">
+                                {{ __('No hay relaciones familiares registradas.') }}
+                                <a href="{{ route('persons.relationships', $person) }}" class="text-mf-primary hover:underline">
+                                    {{ __('Agregar relaciones') }}
+                                </a>
+                            </p>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Eventos -->
+                @if($person->events && $person->events->isNotEmpty())
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="text-lg font-semibold">{{ __('Eventos') }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <ul class="space-y-3">
+                                @foreach($person->events as $event)
+                                    <li class="flex items-start gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-mf-primary mt-2"></div>
+                                        <div>
+                                            <p class="font-medium">{{ $event->type }}</p>
+                                            @if($event->date)
+                                                <p class="text-sm text-gray-500">{{ $event->date->format('d/m/Y') }}</p>
+                                            @endif
+                                            @if($event->place)
+                                                <p class="text-sm text-gray-500">{{ $event->place }}</p>
+                                            @endif
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Galeria y Documentos -->
+                <div class="card">
+                    <div class="card-header flex justify-between items-center">
+                        <h2 class="text-lg font-semibold">
+                            <a href="{{ route('media.index', ['person_id' => $person->id]) }}" class="hover:text-mf-primary">
+                                {{ __('Galeria y Documentos') }}
+                            </a>
+                        </h2>
+                        <a href="{{ route('media.create', ['person_id' => $person->id]) }}" class="text-sm text-mf-primary hover:underline flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            {{ __('Agregar') }}
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if($person->media && $person->media->isNotEmpty())
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                @foreach($person->media->take(8) as $media)
+                                    <a href="{{ route('media.show', $media) }}" class="group relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                        @if(in_array($media->type, ['image', 'photo']))
+                                            <img src="{{ Storage::url($media->file_path) }}"
+                                                 alt="{{ $media->title }}"
+                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                        @else
+                                            <div class="w-full h-full flex flex-col items-center justify-center p-2">
+                                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                </svg>
+                                                <span class="text-xs text-gray-500 mt-1 text-center truncate w-full">{{ $media->title ?? $media->original_filename }}</span>
+                                            </div>
+                                        @endif
+                                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                            @if($person->media->count() > 8)
+                                <div class="mt-4 text-center">
+                                    <a href="{{ route('media.person', $person) }}" class="text-mf-primary hover:underline">
+                                        {{ __('Ver todos') }} ({{ $person->media->count() }})
+                                    </a>
+                                </div>
+                            @endif
+                        @else
+                            <div class="text-center py-8">
+                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <p class="text-gray-500 mb-3">{{ __('No hay fotos ni documentos.') }}</p>
+                                <a href="{{ route('media.create', ['person_id' => $person->id]) }}" class="btn-outline inline-flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    {{ __('Subir foto o documento') }}
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
