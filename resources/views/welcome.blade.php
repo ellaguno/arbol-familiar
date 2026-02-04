@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}">
 
     <title>{{ config('app.name', 'Mi Familia') }} - {{ __('Tu arbol genealogico') }}</title>
 
