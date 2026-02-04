@@ -17,6 +17,19 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Dynamic colors -->
+    @if(isset($siteColors))
+    <style>
+        :root {
+            --mf-primary: {{ $siteColors['primary'] ?? '#3b82f6' }};
+            --mf-secondary: {{ $siteColors['secondary'] ?? '#2563eb' }};
+            --mf-accent: {{ $siteColors['accent'] ?? '#f59e0b' }};
+            --mf-light: {{ $siteColors['light'] ?? '#dbeafe' }};
+            --mf-dark: {{ $siteColors['dark'] ?? '#1d4ed8' }};
+        }
+    </style>
+    @endif
+
     @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-100 min-h-screen">

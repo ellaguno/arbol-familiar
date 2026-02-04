@@ -22,6 +22,126 @@
         @endif
 
         <div class="space-y-6">
+            <!-- Colores del sitio -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-lg font-semibold">{{ __('Colores del sitio') }}</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-600 mb-4">{{ __('Personaliza la paleta de colores de todo el sitio. Los cambios se aplican inmediatamente.') }}</p>
+
+                    <form action="{{ route('admin.settings.colors') }}" method="POST" id="colors-form">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @php
+                                $colors = \App\Models\SiteSetting::colors();
+                                $colorLabels = [
+                                    'primary' => __('Primario'),
+                                    'secondary' => __('Secundario'),
+                                    'accent' => __('Acento'),
+                                    'light' => __('Claro'),
+                                    'dark' => __('Oscuro'),
+                                ];
+                                $colorDescriptions = [
+                                    'primary' => __('Botones principales, enlaces, encabezados'),
+                                    'secondary' => __('Bordes activos, enlaces secundarios'),
+                                    'accent' => __('Botones de accion, llamadas a la accion'),
+                                    'light' => __('Fondos suaves, hover de elementos'),
+                                    'dark' => __('Hover de botones, texto oscuro'),
+                                ];
+                            @endphp
+
+                            @foreach($colorLabels as $key => $label)
+                                <div class="space-y-2">
+                                    <label for="color_{{ $key }}" class="form-label">{{ $label }}</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="color"
+                                               name="{{ $key }}"
+                                               id="color_{{ $key }}"
+                                               value="{{ $colors[$key] ?? '#3b82f6' }}"
+                                               class="h-10 w-14 rounded border border-gray-300 cursor-pointer"
+                                               onchange="document.getElementById('hex_{{ $key }}').value = this.value; updatePreview();">
+                                        <input type="text"
+                                               id="hex_{{ $key }}"
+                                               value="{{ $colors[$key] ?? '#3b82f6' }}"
+                                               class="form-input w-28 font-mono text-sm"
+                                               onchange="document.getElementById('color_{{ $key }}').value = this.value; document.getElementById('color_{{ $key }}').name = '{{ $key }}'; updatePreview();"
+                                               pattern="^#[0-9a-fA-F]{6}$">
+                                    </div>
+                                    <p class="text-xs text-gray-400">{{ $colorDescriptions[$key] }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ __('Vista previa') }}</h4>
+                            <div class="flex flex-wrap gap-3" id="color-preview">
+                                <button type="button" id="preview-primary" class="px-4 py-2 text-white rounded-lg text-sm" style="background-color: {{ $colors['primary'] }}">{{ __('Boton primario') }}</button>
+                                <button type="button" id="preview-secondary" class="px-4 py-2 text-white rounded-lg text-sm" style="background-color: {{ $colors['secondary'] }}">{{ __('Boton secundario') }}</button>
+                                <button type="button" id="preview-accent" class="px-4 py-2 text-white rounded-lg text-sm" style="background-color: {{ $colors['accent'] }}">{{ __('Boton acento') }}</button>
+                                <button type="button" id="preview-outline" class="px-4 py-2 rounded-lg text-sm border-2" style="color: {{ $colors['secondary'] }}; border-color: {{ $colors['secondary'] }}">{{ __('Boton outline') }}</button>
+                                <span id="preview-light" class="px-4 py-2 rounded-lg text-sm" style="background-color: {{ $colors['light'] }}; color: {{ $colors['primary'] }}">{{ __('Fondo claro') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex items-center gap-4">
+                            <button type="submit" class="btn-primary">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                {{ __('Guardar colores') }}
+                            </button>
+                            <button type="button" onclick="resetColors()" class="btn-outline text-sm">
+                                {{ __('Restablecer valores por defecto') }}
+                            </button>
+                        </div>
+                    </form>
+
+                    <script>
+                    function updatePreview() {
+                        const p = document.getElementById('color_primary').value;
+                        const s = document.getElementById('color_secondary').value;
+                        const a = document.getElementById('color_accent').value;
+                        const l = document.getElementById('color_light').value;
+                        const d = document.getElementById('color_dark').value;
+
+                        document.getElementById('preview-primary').style.backgroundColor = p;
+                        document.getElementById('preview-secondary').style.backgroundColor = s;
+                        document.getElementById('preview-accent').style.backgroundColor = a;
+                        document.getElementById('preview-outline').style.color = s;
+                        document.getElementById('preview-outline').style.borderColor = s;
+                        document.getElementById('preview-light').style.backgroundColor = l;
+                        document.getElementById('preview-light').style.color = p;
+
+                        // Update CSS variables live
+                        document.documentElement.style.setProperty('--mf-primary', p);
+                        document.documentElement.style.setProperty('--mf-secondary', s);
+                        document.documentElement.style.setProperty('--mf-accent', a);
+                        document.documentElement.style.setProperty('--mf-light', l);
+                        document.documentElement.style.setProperty('--mf-dark', d);
+                    }
+
+                    function resetColors() {
+                        const defaults = {
+                            primary: '#3b82f6',
+                            secondary: '#2563eb',
+                            accent: '#f59e0b',
+                            light: '#dbeafe',
+                            dark: '#1d4ed8'
+                        };
+                        for (const [key, val] of Object.entries(defaults)) {
+                            document.getElementById('color_' + key).value = val;
+                            document.getElementById('hex_' + key).value = val;
+                        }
+                        updatePreview();
+                    }
+                    </script>
+                </div>
+            </div>
+
             <!-- Informacion del sistema -->
             <div class="card">
                 <div class="card-header">

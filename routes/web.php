@@ -352,6 +352,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/settings/optimize', [AdminController::class, 'optimize'])->name('settings.optimize');
         Route::post('/settings/test-mail', [AdminController::class, 'testMail'])->name('settings.test-mail');
         Route::get('/settings/mail-diagnostic', [AdminController::class, 'mailDiagnostic'])->name('settings.mail-diagnostic');
+        Route::put('/settings/colors', [AdminController::class, 'updateColors'])->name('settings.colors');
+
+        // Editor de contenido
+        Route::get('/content', [AdminController::class, 'content'])->name('content');
+        Route::get('/content/{group}', [AdminController::class, 'editContent'])->name('content.edit');
+        Route::put('/content/{group}', [AdminController::class, 'updateContent'])->name('content.update');
+        Route::post('/content/upload-image', [AdminController::class, 'uploadContentImage'])->name('content.upload-image');
 
         // Reportes
         Route::get('/reports', [ReportController::class, 'index'])->name('reports');

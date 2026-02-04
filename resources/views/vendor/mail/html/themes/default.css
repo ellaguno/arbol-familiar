@@ -223,7 +223,7 @@ img {
 
 .button {
     -webkit-text-size-adjust: none;
-    border-radius: 30px;
+    border-radius: 8px;
     color: #fff;
     display: inline-block;
     overflow: hidden;

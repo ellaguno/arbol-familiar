@@ -8,11 +8,13 @@ use App\Models\Family;
 use App\Models\Media;
 use App\Models\Message;
 use App\Models\Person;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -621,6 +623,137 @@ class AdminController extends Controller
         $this->logActivity('mail_diagnostic');
 
         return response()->json($diagnostic);
+    }
+
+    /**
+     * Actualizar colores del sitio.
+     */
+    public function updateColors(Request $request)
+    {
+        $validated = $request->validate([
+            'primary' => 'required|string|regex:/^#[0-9a-fA-F]{6}$/',
+            'secondary' => 'required|string|regex:/^#[0-9a-fA-F]{6}$/',
+            'accent' => 'required|string|regex:/^#[0-9a-fA-F]{6}$/',
+            'light' => 'required|string|regex:/^#[0-9a-fA-F]{6}$/',
+            'dark' => 'required|string|regex:/^#[0-9a-fA-F]{6}$/',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            SiteSetting::set('colors', $key, $value, 'color');
+        }
+
+        $this->logActivity('colors_updated', null, $validated);
+
+        return back()->with('success', __('Colores actualizados correctamente.'));
+    }
+
+    /**
+     * Listado de secciones de contenido editable.
+     */
+    public function content()
+    {
+        $groups = [
+            'welcome' => [
+                'name' => __('Pagina de bienvenida'),
+                'description' => __('Pagina principal con login y registro'),
+                'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+            ],
+            'welcome_first' => [
+                'name' => __('Primera vez'),
+                'description' => __('Pagina de bienvenida para nuevos usuarios'),
+                'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+            ],
+            'login' => [
+                'name' => __('Inicio de sesion'),
+                'description' => __('Pantalla de login'),
+                'icon' => 'M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1',
+            ],
+            'mail' => [
+                'name' => __('Correos electronicos'),
+                'description' => __('Configuracion de correos del sistema'),
+                'icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+            ],
+        ];
+
+        return view('admin.content.index', compact('groups'));
+    }
+
+    /**
+     * Formulario de edicion de contenido.
+     */
+    public function editContent(string $group)
+    {
+        $allowedGroups = ['welcome', 'welcome_first', 'login', 'mail'];
+        if (!in_array($group, $allowedGroups)) {
+            abort(404);
+        }
+
+        $settings = SiteSetting::where('group', $group)->get()->keyBy('key');
+
+        $groupNames = [
+            'welcome' => __('Pagina de bienvenida'),
+            'welcome_first' => __('Primera vez'),
+            'login' => __('Inicio de sesion'),
+            'mail' => __('Correos electronicos'),
+        ];
+
+        return view('admin.content.edit', [
+            'group' => $group,
+            'groupName' => $groupNames[$group] ?? $group,
+            'settings' => $settings,
+        ]);
+    }
+
+    /**
+     * Guardar contenido editado.
+     */
+    public function updateContent(Request $request, string $group)
+    {
+        $allowedGroups = ['welcome', 'welcome_first', 'login', 'mail'];
+        if (!in_array($group, $allowedGroups)) {
+            abort(404);
+        }
+
+        $settings = SiteSetting::where('group', $group)->get();
+
+        foreach ($settings as $setting) {
+            $fieldName = "settings_{$setting->key}";
+
+            if ($setting->type === 'image') {
+                // Handle file upload
+                if ($request->hasFile($fieldName)) {
+                    $file = $request->file($fieldName);
+                    $path = $file->store('content', 'public');
+                    SiteSetting::set($group, $setting->key, 'storage/' . $path, 'image');
+                }
+            } else {
+                if ($request->has($fieldName)) {
+                    SiteSetting::set($group, $setting->key, $request->input($fieldName), $setting->type);
+                }
+            }
+        }
+
+        $this->logActivity('content_updated', null, ['group' => $group]);
+
+        return redirect()->route('admin.content.edit', $group)
+            ->with('success', __('Contenido actualizado correctamente.'));
+    }
+
+    /**
+     * Subir imagen para contenido.
+     */
+    public function uploadContentImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|max:2048',
+        ]);
+
+        $path = $request->file('image')->store('content', 'public');
+
+        return response()->json([
+            'path' => 'storage/' . $path,
+            'url' => Storage::disk('public')->url($path),
+        ]);
     }
 
     /**

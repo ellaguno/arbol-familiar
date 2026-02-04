@@ -80,7 +80,7 @@
         </div>
 
         <!-- Accesos rapidos -->
-        <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="grid md:grid-cols-5 gap-4 mb-8">
             <a href="{{ route('admin.users') }}" class="card hover:shadow-md transition-shadow">
                 <div class="card-body flex items-center gap-4">
                     <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -91,6 +91,20 @@
                     <div>
                         <h3 class="font-semibold text-gray-900">{{ __('Usuarios') }}</h3>
                         <p class="text-sm text-gray-500">{{ __('Gestionar usuarios') }}</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ route('admin.content') }}" class="card hover:shadow-md transition-shadow">
+                <div class="card-body flex items-center gap-4">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">{{ __('Contenido') }}</h3>
+                        <p class="text-sm text-gray-500">{{ __('Textos e imagenes') }}</p>
                     </div>
                 </div>
             </a>
@@ -133,7 +147,7 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-gray-900">{{ __('Configuracion') }}</h3>
-                        <p class="text-sm text-gray-500">{{ __('Sistema') }}</p>
+                        <p class="text-sm text-gray-500">{{ __('Sistema y colores') }}</p>
                     </div>
                 </div>
             </a>

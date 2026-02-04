@@ -24,57 +24,57 @@
 @layer components {
     /* Botones base */
     .btn {
-        @apply inline-flex items-center justify-center px-4 py-1.5 font-medium rounded-full
+        @apply inline-flex items-center justify-center px-4 py-1.5 font-medium rounded-lg
                transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
     }
 
     .btn-primary {
         @apply btn text-white focus:ring-blue-500;
-        background-color: #3b82f6;
+        background-color: var(--mf-primary, #3b82f6);
     }
 
     .btn-primary:hover {
-        background-color: #1d4ed8;
+        background-color: var(--mf-dark, #1d4ed8);
     }
 
     .btn-secondary {
         @apply btn text-white focus:ring-blue-500;
-        background-color: #3b82f6;
+        background-color: var(--mf-secondary, #2563eb);
     }
 
     .btn-secondary:hover {
-        background-color: #1d4ed8;
+        background-color: var(--mf-dark, #1d4ed8);
     }
 
     .btn-accent {
         @apply btn text-white focus:ring-red-500;
-        background-color: #f59e0b;
+        background-color: var(--mf-accent, #f59e0b);
     }
 
     .btn-accent:hover {
-        background-color: #d97706;
+        filter: brightness(0.85);
     }
 
     .btn-outline {
         @apply btn focus:ring-blue-500;
         background-color: transparent;
-        color: #2563eb;
-        border: 2px solid #2563eb;
+        color: var(--mf-secondary, #2563eb);
+        border: 2px solid var(--mf-secondary, #2563eb);
     }
 
     .btn-outline:hover {
-        background-color: #2563eb;
+        background-color: var(--mf-secondary, #2563eb);
         color: #ffffff;
     }
 
     .btn-ghost {
         @apply btn focus:ring-blue-500;
         background-color: transparent;
-        color: #3b82f6;
+        color: var(--mf-primary, #3b82f6);
     }
 
     .btn-ghost:hover {
-        background-color: #dbeafe;
+        background-color: var(--mf-light, #dbeafe);
     }
 
     .btn-sm {

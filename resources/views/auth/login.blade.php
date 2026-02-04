@@ -1,12 +1,16 @@
 <x-guest-layout :hideLogo="true">
     <x-slot name="title">{{ __('Iniciar Sesion') }} - {{ config('app.name') }}</x-slot>
 
+    @php
+        $sc = isset($siteSettings) ? $siteSettings : null;
+    @endphp
+
     <div class="card">
         <div class="card-body">
             <div class="text-center mb-6">
                 <x-application-logo class="h-16 w-auto mx-auto mb-4" />
-                <h1 class="text-2xl font-bold text-gray-900">{{ __('Iniciar Sesion') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Accede a tu arbol genealogico') }}</p>
+                <h1 class="text-2xl font-bold text-gray-900">{{ $sc ? $sc->content('login', 'title', __('Iniciar Sesion')) : __('Iniciar Sesion') }}</h1>
+                <p class="text-gray-600 mt-1">{{ $sc ? $sc->content('login', 'subtitle', __('Accede a tu arbol genealogico')) : __('Accede a tu arbol genealogico') }}</p>
             </div>
 
             @if(session('status'))
@@ -85,9 +89,9 @@
             </form>
 
             <div class="mt-6 pt-6 border-t text-center">
-                <p class="text-gray-600">{{ __('No tienes cuenta?') }}</p>
+                <p class="text-gray-600">{{ $sc ? $sc->content('login', 'register_text', __('No tienes cuenta?')) : __('No tienes cuenta?') }}</p>
                 <a href="{{ route('register') }}" class="btn-outline w-full mt-3">
-                    {{ __('Registrate gratis') }}
+                    {{ $sc ? $sc->content('login', 'register_button', __('Registrate gratis')) : __('Registrate gratis') }}
                 </a>
             </div>
         </div>

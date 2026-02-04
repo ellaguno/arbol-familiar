@@ -17,6 +17,19 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Dynamic colors -->
+    @if(isset($siteColors))
+    <style>
+        :root {
+            --mf-primary: {{ $siteColors['primary'] ?? '#3b82f6' }};
+            --mf-secondary: {{ $siteColors['secondary'] ?? '#2563eb' }};
+            --mf-accent: {{ $siteColors['accent'] ?? '#f59e0b' }};
+            --mf-light: {{ $siteColors['light'] ?? '#dbeafe' }};
+            --mf-dark: {{ $siteColors['dark'] ?? '#1d4ed8' }};
+        }
+    </style>
+    @endif
+
     <style>
         .genealogy-overlay {
             position: absolute;
@@ -38,10 +51,14 @@
 <body class="font-sans antialiased bg-white">
     <x-header :hideLogo="true" />
 
+    @php
+        $sc = isset($siteSettings) ? $siteSettings : null;
+    @endphp
+
     <!-- Hero con imagen -->
     <section class="relative min-h-[300px] md:min-h-[350px] overflow-hidden">
         <!-- Imagen de fondo -->
-        <img src="{{ asset('images/hero-beach.jpg') }}" alt="{{ __('Familia') }}"
+        <img src="{{ asset($sc ? $sc->content('welcome', 'hero_image', 'images/hero-beach.jpg') : 'images/hero-beach.jpg') }}" alt="{{ __('Familia') }}"
              class="absolute inset-0 w-full h-full object-cover">
         <!-- Overlay con gradiente -->
         <div class="absolute inset-0 bg-gradient-to-b from-sky-200/30 "></div>
@@ -59,23 +76,23 @@
                 <div>
                     <!-- Logo -->
                     <div class="mb-6 flex justify-center lg:space-around">
-                        <img src="/images/logo.png" alt="{{ config('app.name') }}" class="h-24 md:h-32 object-contain"
-                             onerror="this.outerHTML='<h1 class=\'text-5xl md:text-6xl font-bold text-[#3b82f6]\'>Mi Familia</h1>'">
+                        <img src="{{ asset($sc ? $sc->content('welcome', 'logo_image', 'images/logo.png') : 'images/logo.png') }}" alt="{{ config('app.name') }}" class="h-24 md:h-32 object-contain"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='<h1 class=&quot;text-5xl md:text-6xl font-bold&quot; style=&quot;color: var(--mf-primary, #3b82f6)&quot;>{{ config("app.name") }}</h1>'">
                     </div>
 
-                    <h2 class="text-2xl md:text-3xl font-bold text-amber-500 mb-2">
-                        {{ __('¡Conecta con tu familia!') }}
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2" style="color: var(--mf-accent, #f59e0b);">
+                        {{ $sc ? $sc->content('welcome', 'hero_title', __('¡Conecta con tu familia!')) : __('¡Conecta con tu familia!') }}
                     </h2>
-                    <p class="text-amber-400 text-lg mb-6">
-                        {{ __('Construye tu árbol genealógico y descubre los momentos más importantes de tu historia.') }}
+                    <p class="text-lg mb-6" style="color: var(--mf-accent, #f59e0b); opacity: 0.8;">
+                        {{ $sc ? $sc->content('welcome', 'hero_subtitle', __('Construye tu árbol genealógico y descubre los momentos más importantes de tu historia.')) : __('Construye tu árbol genealógico y descubre los momentos más importantes de tu historia.') }}
                     </p>
 
                     <div class="text-gray-700 space-y-4 text-sm leading-relaxed">
                         <p>
-                            <strong class="text-[#3b82f6]">{{ config('app.name') }}</strong> {{ __('es un espacio creado para reunir a las familias y sus descendientes. Nuestra intención es preservar la memoria de nuestras familias y fortalecer los lazos con nuestra comunidad y nuestros parientes en todas partes del mundo.') }}
+                            <strong style="color: var(--mf-primary, #3b82f6);">{{ config('app.name') }}</strong> {{ $sc ? $sc->content('welcome', 'description_1', __('es un espacio creado para reunir a las familias y sus descendientes. Nuestra intención es preservar la memoria de nuestras familias y fortalecer los lazos con nuestra comunidad y nuestros parientes en todas partes del mundo.')) : __('es un espacio creado para reunir a las familias y sus descendientes. Nuestra intención es preservar la memoria de nuestras familias y fortalecer los lazos con nuestra comunidad y nuestros parientes en todas partes del mundo.') }}
                         </p>
                         <p>
-                            {{ __('En este sitio podrás registrar tu historia, invitar a tus familiares, encontrar parientes y descubrir relaciones que no conocías y así formar parte de un legado vivo que une pasado, presente y futuro.') }}
+                            {{ $sc ? $sc->content('welcome', 'description_2', __('En este sitio podrás registrar tu historia, invitar a tus familiares, encontrar parientes y descubrir relaciones que no conocías y así formar parte de un legado vivo que une pasado, presente y futuro.')) : __('En este sitio podrás registrar tu historia, invitar a tus familiares, encontrar parientes y descubrir relaciones que no conocías y así formar parte de un legado vivo que une pasado, presente y futuro.') }}
                         </p>
                     </div>
                 </div>
@@ -84,14 +101,14 @@
                 <div class="space-y-4">
                     <!-- Caja de Login -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ __('¡Hola! Inicia tu sesión') }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $sc ? $sc->content('welcome', 'login_title', __('¡Hola! Inicia tu sesión')) : __('¡Hola! Inicia tu sesión') }}</h3>
 
                         <form method="POST" action="{{ route('login') }}" class="space-y-4" id="welcome-login-form">
                             @csrf
 
                             <div>
                                 <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:border-blue-500" style="--tw-ring-color: var(--mf-primary, #3b82f6);"
                                        placeholder="{{ __('Usuario') }}" required autofocus>
                                 @error('email')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -100,7 +117,7 @@
 
                             <div>
                                 <input type="password" name="password" id="password"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:border-blue-500" style="--tw-ring-color: var(--mf-primary, #3b82f6);"
                                        placeholder="{{ __('Contraseña') }}" required>
                                 @error('password')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -108,7 +125,7 @@
                             </div>
 
                             <div class="text-right">
-                                <a href="{{ route('password.request') }}" class="text-sm text-blue-600 hover:underline">
+                                <a href="{{ route('password.request') }}" class="text-sm hover:underline" style="color: var(--mf-primary, #3b82f6);">
                                     {{ __('¿Olvidaste tu usuario o contraseña?') }}
                                 </a>
                             </div>
@@ -139,14 +156,13 @@
                     </div>
 
                     <!-- Caja de Registro -->
-                    <div class="bg-[#3b82f6] rounded-lg p-6 text-center">
-                        <p class="text-white mb-3">{{ __('¿Todavía no estás registrado?') }}</p>
+                    <div class="rounded-lg p-6 text-center" style="background-color: var(--mf-primary, #3b82f6);">
+                        <p class="text-white mb-3">{{ $sc ? $sc->content('welcome', 'register_question', __('¿Todavía no estás registrado?')) : __('¿Todavía no estás registrado?') }}</p>
                         <a href="{{ route('register') }}" class="w-full btn-accent">
-                            {{ __('¡Da click aquí y únete!') }}
+                            {{ $sc ? $sc->content('welcome', 'register_cta', __('¡Da click aquí y únete!')) : __('¡Da click aquí y únete!') }}
                         </a>
                         <p class="text-blue-200 text-sm mt-4">
-                            {{ __('Disfruta tu origen y vive la historia.') }}<br>
-                            {{ __('Compártelo con los miembros de tu familia.') }}
+                            {{ $sc ? $sc->content('welcome', 'register_tagline', __('Disfruta tu origen y vive la historia. Compártelo con los miembros de tu familia.')) : __('Disfruta tu origen y vive la historia.') }}
                         </p>
                     </div>
                 </div>
@@ -164,39 +180,39 @@
                 <!-- Columna 1 -->
                 <div class="text-center">
                     <div class="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 floating-image">
-                        <img src="/images/feature-start.jpg" alt="{{ __('Empezar') }}" class="w-full h-full object-cover"
+                        <img src="{{ asset($sc ? $sc->content('welcome', 'feature_1_image', 'images/feature-start.jpg') : 'images/feature-start.jpg') }}" alt="{{ __('Empezar') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>1</text></svg>'">
                     </div>
                     <div class="floating-text">
-                        <h3 class="text-xl font-bold text-[#3b82f6] mb-3">{{ __('¡Solo necesitas empezar!') }}</h3>
+                        <h3 class="text-xl font-bold mb-3" style="color: var(--mf-primary, #3b82f6);">{{ $sc ? $sc->content('welcome', 'feature_1_title', __('¡Solo necesitas empezar!')) : __('¡Solo necesitas empezar!') }}</h3>
                         <p class="text-gray-600 text-sm leading-relaxed">
-                            {{ __('Es muy sencillo, ingresa primero tus datos y después podrás añadir a tus padres, abuelos, hermanos, hijos y demás familiares. Una vez agregados podrás invitarlos a participar en tu árbol y compartir información, imágenes y documentos de su historia.') }}
+                            {{ $sc ? $sc->content('welcome', 'feature_1_text', __('Es muy sencillo, ingresa primero tus datos y después podrás añadir a tus padres, abuelos, hermanos, hijos y demás familiares. Una vez agregados podrás invitarlos a participar en tu árbol y compartir información, imágenes y documentos de su historia.')) : __('Es muy sencillo, ingresa primero tus datos y después podrás añadir a tus padres, abuelos, hermanos, hijos y demás familiares. Una vez agregados podrás invitarlos a participar en tu árbol y compartir información, imágenes y documentos de su historia.') }}
                         </p>
                     </div>
                 </div>
                 <!-- Columna 2 -->
                 <div class="text-center">
                     <div class="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 floating-image">
-                        <img src="/images/feature-import.jpg" alt="{{ __('Importar') }}" class="w-full h-full object-cover"
+                        <img src="{{ asset($sc ? $sc->content('welcome', 'feature_2_image', 'images/feature-import.jpg') : 'images/feature-import.jpg') }}" alt="{{ __('Importar') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>2</text></svg>'">
                     </div>
                     <div class="floating-text">
-                        <h3 class="text-xl font-bold text-[#3b82f6] mb-3">{{ __('¿Tienes un árbol en otro sitio?') }}</h3>
+                        <h3 class="text-xl font-bold mb-3" style="color: var(--mf-primary, #3b82f6);">{{ $sc ? $sc->content('welcome', 'feature_2_title', __('¿Tienes un árbol en otro sitio?')) : __('¿Tienes un árbol en otro sitio?') }}</h3>
                         <p class="text-gray-600 text-sm leading-relaxed">
-                            {{ __('¡Tráelo para acá! Esta plataforma trabaja con datos de clasificación Gedcom, el estándar compartido de las principales bases de datos genealógicas, así que si tienes registros en otras plataformas, puedes importar su información fácilmente.') }}
+                            {{ $sc ? $sc->content('welcome', 'feature_2_text', __('¡Tráelo para acá! Esta plataforma trabaja con datos de clasificación Gedcom, el estándar compartido de las principales bases de datos genealógicas, así que si tienes registros en otras plataformas, puedes importar su información fácilmente.')) : __('¡Tráelo para acá! Esta plataforma trabaja con datos de clasificación Gedcom, el estándar compartido de las principales bases de datos genealógicas, así que si tienes registros en otras plataformas, puedes importar su información fácilmente.') }}
                         </p>
                     </div>
                 </div>
                 <!-- Columna 3 -->
                 <div class="text-center">
                     <div class="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 floating-image">
-                        <img src="/images/feature-privacy.jpg" alt="{{ __('Privacidad') }}" class="w-full h-full object-cover"
+                        <img src="{{ asset($sc ? $sc->content('welcome', 'feature_3_image', 'images/feature-privacy.jpg') : 'images/feature-privacy.jpg') }}" alt="{{ __('Privacidad') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>3</text></svg>'">
                     </div>
                     <div class="floating-text">
-                        <h3 class="text-xl font-bold text-[#3b82f6] mb-3">{{ __('Tú eliges con quien compartir.') }}</h3>
+                        <h3 class="text-xl font-bold mb-3" style="color: var(--mf-primary, #3b82f6);">{{ $sc ? $sc->content('welcome', 'feature_3_title', __('Tú eliges con quien compartir.')) : __('Tú eliges con quien compartir.') }}</h3>
                         <p class="text-gray-600 text-sm leading-relaxed">
-                            {{ __('Tu información es tuya y no saldrá de este sitio. Podrás elegir compartirlo con tu familia y tu comunidad. Solo podrán consultarla quienes tú autorices.') }}
+                            {{ $sc ? $sc->content('welcome', 'feature_3_text', __('Tu información es tuya y no saldrá de este sitio. Podrás elegir compartirlo con tu familia y tu comunidad. Solo podrán consultarla quienes tú autorices.')) : __('Tu información es tuya y no saldrá de este sitio. Podrás elegir compartirlo con tu familia y tu comunidad. Solo podrán consultarla quienes tú autorices.') }}
                         </p>
                     </div>
                 </div>
@@ -212,12 +228,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-8 items-center">
                 <div>
-                    <h2 class="text-2xl font-bold text-[#3b82f6] mb-4">{{ config('app.name') }} {{ __('es de uso libre.') }}</h2>
+                    <h2 class="text-2xl font-bold mb-4" style="color: var(--mf-primary, #3b82f6);">{{ config('app.name') }} {{ $sc ? $sc->content('welcome', 'free_title', __('es de uso libre.')) : __('es de uso libre.') }}</h2>
                     <p class="text-gray-700 text-sm leading-relaxed mb-4">
-                        {{ __('El ingreso y uso de') }} <strong class="text-[#3b82f6]">{{ config('app.name') }}</strong> {{ __('es gratuito para todos los usuarios y sus familiares.') }}
+                        {{ __('El ingreso y uso de') }} <strong style="color: var(--mf-primary, #3b82f6);">{{ config('app.name') }}</strong> {{ $sc ? $sc->content('welcome', 'free_text_1', __('es gratuito para todos los usuarios y sus familiares.')) : __('es gratuito para todos los usuarios y sus familiares.') }}
                     </p>
                     <p class="text-gray-700 text-sm leading-relaxed">
-                        {{ __('Registra tu historia familiar, conecta con tus parientes y preserva la memoria de tu familia para las generaciones futuras.') }}
+                        {{ $sc ? $sc->content('welcome', 'free_text_2', __('Registra tu historia familiar, conecta con tus parientes y preserva la memoria de tu familia para las generaciones futuras.')) : __('Registra tu historia familiar, conecta con tus parientes y preserva la memoria de tu familia para las generaciones futuras.') }}
                     </p>
                 </div>
                 <div class="flex justify-center lg:justify-end">
