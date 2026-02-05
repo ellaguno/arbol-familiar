@@ -8,6 +8,7 @@ use App\Models\Media;
 use App\Models\Person;
 use App\Observers\CacheInvalidationObserver;
 use App\Services\SiteSettingsService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -43,6 +44,22 @@ class AppServiceProvider extends ServiceProvider
             View::share('heritageRegions', $siteSettings->heritageRegions());
             View::share('heritageDecades', $siteSettings->heritageDecades());
             View::share('heritageLabel', $siteSettings->heritageLabel());
+
+            // Theme
+            View::share('siteBgColor', $siteSettings->bgColor());
+            View::share('siteBgImage', $siteSettings->bgImage());
+
+            // Navigation
+            View::share('navShowResearch', $siteSettings->showResearch());
+            View::share('navShowHelp', $siteSettings->showHelp());
+
+            // Theme class must be computed per-request (depends on auth user)
+            View::composer('*', function ($view) use ($siteSettings) {
+                if (!$view->offsetExists('siteThemeClass')) {
+                    $user = Auth::user();
+                    $view->with('siteThemeClass', $siteSettings->themeClass($user));
+                }
+            });
         }
     }
 }

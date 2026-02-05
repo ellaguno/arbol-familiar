@@ -8,8 +8,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('Arbol Genealogico') }}</h1>
-            <p class="text-gray-600 max-w-xl mx-auto">
+            <h1 class="text-3xl font-bold text-theme mb-2">{{ __('Arbol Genealogico') }}</h1>
+            <p class="text-theme-secondary max-w-xl mx-auto">
                 {{ __('Selecciona una persona para ver su arbol genealogico con ancestros y descendientes.') }}
             </p>
         </div>
@@ -17,7 +17,7 @@
         @if($persons->isEmpty())
             <div class="card">
                 <div class="card-body text-center py-12">
-                    <p class="text-gray-500 mb-4">{{ __('No hay personas registradas.') }}</p>
+                    <p class="text-theme-muted mb-4">{{ __('No hay personas registradas.') }}</p>
                     <a href="{{ route('persons.create') }}" class="btn-primary">{{ __('Crear primera persona') }}</a>
                 </div>
             </div>
@@ -47,8 +47,8 @@
                                     </div>
                                 @endif
                                 <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-gray-900 truncate">{{ $person->full_name }}</p>
-                                    <p class="text-sm text-gray-500">
+                                    <p class="font-medium text-theme truncate">{{ $person->full_name }}</p>
+                                    <p class="text-sm text-theme-muted">
                                         @if($person->birth_date)
                                             {{ $person->birth_date->format('Y') }}
                                         @endif
@@ -57,7 +57,7 @@
                                         @endif
                                     </p>
                                 </div>
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
                             </a>

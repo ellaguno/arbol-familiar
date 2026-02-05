@@ -121,6 +121,56 @@ class SiteSettingsService
     }
 
     /**
+     * Check if research menu item is visible.
+     */
+    public function showResearch(): bool
+    {
+        return (bool) (SiteSetting::get('navigation', 'show_research', '0') ?? '0');
+    }
+
+    /**
+     * Check if help menu item is visible.
+     */
+    public function showHelp(): bool
+    {
+        return (bool) (SiteSetting::get('navigation', 'show_help', '0') ?? '0');
+    }
+
+    /**
+     * Get the global theme mode (light/dark).
+     */
+    public function themeMode(): string
+    {
+        return SiteSetting::get('colors', 'theme_mode', 'dark') ?? 'dark';
+    }
+
+    /**
+     * Get the custom background color.
+     */
+    public function bgColor(): string
+    {
+        return SiteSetting::get('colors', 'bg_color', '') ?? '';
+    }
+
+    /**
+     * Get the custom background image path.
+     */
+    public function bgImage(): string
+    {
+        return SiteSetting::get('colors', 'bg_image', '') ?? '';
+    }
+
+    /**
+     * Get the CSS class for the html element based on theme.
+     */
+    public function themeClass($user = null): string
+    {
+        $preference = $user->theme_preference ?? 'default';
+        $mode = ($preference === 'default') ? $this->themeMode() : $preference;
+        return $mode === 'dark' ? 'dark' : '';
+    }
+
+    /**
      * Generate CSS variables block for injection in <head>.
      */
     public function cssVariables(): string

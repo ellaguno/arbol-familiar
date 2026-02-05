@@ -9,8 +9,8 @@
                 </svg>
             </div>
 
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ __('Verifica tu correo electronico') }}</h1>
-            <p class="text-gray-600 mb-6">
+            <h1 class="text-2xl font-bold text-theme mb-2">{{ __('Verifica tu correo electronico') }}</h1>
+            <p class="text-theme-secondary mb-6">
                 {{ __('Te hemos enviado un enlace de verificacion a') }}
                 <strong>{{ auth()->user()->email }}</strong>
             </p>
@@ -21,8 +21,8 @@
                 </x-alert>
             @endif
 
-            <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                <p class="text-sm text-gray-600 mb-4">
+            <div class="bg-theme-secondary rounded-lg p-6 mb-6">
+                <p class="text-sm text-theme-secondary mb-4">
                     {{ __('Tambien puedes verificar tu cuenta ingresando el codigo de 6 digitos que enviamos a tu correo:') }}
                 </p>
 
@@ -40,7 +40,7 @@
                 </form>
             </div>
 
-            <p class="text-sm text-gray-500 mb-4">
+            <p class="text-sm text-theme-muted mb-4">
                 {{ __('No recibiste el correo? Revisa tu carpeta de spam o') }}
             </p>
 
@@ -54,7 +54,7 @@
             <div class="mt-6 pt-6 border-t">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="text-sm text-gray-500 hover:text-gray-700">
+                    <button type="submit" class="text-sm text-theme-muted hover:text-theme-secondary">
                         {{ __('Cerrar sesion') }}
                     </button>
                 </form>

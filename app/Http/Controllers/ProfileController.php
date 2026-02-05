@@ -187,6 +187,25 @@ class ProfileController extends Controller
     }
 
     /**
+     * Actualiza la preferencia de tema del usuario.
+     */
+    public function updateTheme(Request $request)
+    {
+        $request->validate([
+            'theme_preference' => ['required', 'in:default,light,dark'],
+        ]);
+
+        $user = auth()->user();
+        $user->update([
+            'theme_preference' => $request->input('theme_preference'),
+        ]);
+
+        ActivityLog::log('theme_preference_updated', $user);
+
+        return back()->with('success', __('Preferencia de tema actualizada.'));
+    }
+
+    /**
      * Actualiza la contrasena.
      */
     public function updatePassword(Request $request)

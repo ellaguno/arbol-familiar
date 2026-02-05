@@ -169,6 +169,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/photo', [ProfileController::class, 'updatePhoto'])->name('photo.update');
         Route::delete('/photo', [ProfileController::class, 'deletePhoto'])->name('photo.delete');
 
+        // Tema
+        Route::put('/theme', [ProfileController::class, 'updateTheme'])->name('theme.update');
+
         // Contraseña
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
 
@@ -353,7 +356,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/settings/test-mail', [AdminController::class, 'testMail'])->name('settings.test-mail');
         Route::get('/settings/mail-diagnostic', [AdminController::class, 'mailDiagnostic'])->name('settings.mail-diagnostic');
         Route::put('/settings/colors', [AdminController::class, 'updateColors'])->name('settings.colors');
+        Route::put('/settings/theme', [AdminController::class, 'updateTheme'])->name('settings.theme');
         Route::put('/settings/heritage', [AdminController::class, 'updateHeritage'])->name('settings.heritage');
+        Route::put('/settings/navigation', [AdminController::class, 'updateNavigation'])->name('settings.navigation');
 
         // Editor de contenido
         Route::get('/content', [AdminController::class, 'content'])->name('content');

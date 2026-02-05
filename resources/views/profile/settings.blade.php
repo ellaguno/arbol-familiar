@@ -3,8 +3,8 @@
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Configuracion') }}</h1>
-            <p class="text-gray-600 mt-1">{{ __('Administra tu cuenta y preferencias') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Configuracion') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ __('Administra tu cuenta y preferencias') }}</p>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-8">
@@ -13,7 +13,7 @@
                 <div class="card">
                     <div class="card-body p-0">
                         <nav class="space-y-1">
-                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50">
+                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-theme-secondary hover:bg-theme-secondary">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
@@ -42,7 +42,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="form-label">{{ __('Correo electronico') }}</label>
-                                <p class="text-gray-900">{{ $user->email }}</p>
+                                <p class="text-theme">{{ $user->email }}</p>
                                 <p class="form-help">
                                     @if($user->email_verified_at)
                                         <span class="text-green-600">{{ __('Verificado') }}</span>
@@ -53,11 +53,11 @@
                             </div>
                             <div>
                                 <label class="form-label">{{ __('Miembro desde') }}</label>
-                                <p class="text-gray-900">{{ $user->created_at->format('d/m/Y') }}</p>
+                                <p class="text-theme">{{ $user->created_at->format('d/m/Y') }}</p>
                             </div>
                             <div>
                                 <label class="form-label">{{ __('Ultimo acceso') }}</label>
-                                <p class="text-gray-900">{{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'N/A' }}</p>
+                                <p class="text-theme">{{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
@@ -106,13 +106,58 @@
                 </div>
 
 
+                <!-- Tema -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-lg font-semibold">{{ __('Tema') }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-sm text-theme-secondary mb-4">{{ __('Elige el modo de color que prefieras. Si seleccionas "Default del sitio", se usara la configuracion del administrador.') }}</p>
+                        <form action="{{ route('profile.theme.update') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="flex flex-wrap gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'default' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                    <input type="radio" name="theme_preference" value="default" class="form-radio" {{ ($user->theme_preference ?? 'default') === 'default' ? 'checked' : '' }}>
+                                    <div>
+                                        <span class="font-medium">{{ __('Default del sitio') }}</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'light' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                    <input type="radio" name="theme_preference" value="light" class="form-radio" {{ ($user->theme_preference ?? 'default') === 'light' ? 'checked' : '' }}>
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                        </svg>
+                                        <span class="font-medium">{{ __('Claro') }}</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'dark' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                    <input type="radio" name="theme_preference" value="dark" class="form-radio" {{ ($user->theme_preference ?? 'default') === 'dark' ? 'checked' : '' }}>
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                        </svg>
+                                        <span class="font-medium">{{ __('Oscuro') }}</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn-primary mt-4">
+                                {{ __('Guardar preferencia') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Zona de peligro -->
                 <div class="card border-red-200">
                     <div class="card-header bg-red-50">
                         <h2 class="text-lg font-semibold text-red-800">{{ __('Eliminar perfil ¡Precaución!') }}</h2>
                     </div>
                     <div class="card-body">
-                        <p class="text-gray-600 mb-4">
+                        <p class="text-theme-secondary mb-4">
                             {{ __('Eliminar tu cuenta borrara permanentemente todos tus datos. Esta accion no se puede deshacer.') }}
                         </p>
 
@@ -132,7 +177,7 @@
             <div class="modal-content" @click.away="open = false">
                 <div class="p-6">
                     <h3 class="text-xl font-bold text-red-600 mb-4">{{ __('Eliminar cuenta') }}</h3>
-                    <p class="text-gray-600 mb-6">
+                    <p class="text-theme-secondary mb-6">
                         {{ __('Esta accion eliminara permanentemente tu cuenta y todos tus datos. Para confirmar, ingresa tu contrasena y escribe ELIMINAR.') }}
                     </p>
 

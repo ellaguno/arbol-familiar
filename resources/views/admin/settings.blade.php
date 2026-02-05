@@ -4,8 +4,8 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Configuracion del sistema') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Ajustes generales de la plataforma') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Configuracion del sistema') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Ajustes generales de la plataforma') }}</p>
             </div>
             <a href="{{ route('admin.index') }}" class="btn-outline">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,13 +22,176 @@
         @endif
 
         <div class="space-y-6">
+            <!-- Tema y fondo -->
+            <div class="card">
+                <div class="card-header flex items-center justify-between">
+                    <h2 class="text-lg font-semibold">{{ __('Tema y fondo') }}</h2>
+                    @php
+                        $currentTheme = \App\Models\SiteSetting::get('colors', 'theme_mode', 'dark');
+                        $currentBgColor = \App\Models\SiteSetting::get('colors', 'bg_color', '');
+                        $currentBgImage = \App\Models\SiteSetting::get('colors', 'bg_image', '');
+                    @endphp
+                    <span class="px-2 py-1 text-xs rounded-full {{ $currentTheme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-yellow-100 text-yellow-700' }}">
+                        {{ $currentTheme === 'dark' ? __('Oscuro') : __('Claro') }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="text-sm text-theme-secondary mb-4">{{ __('Configura el modo de color y fondo del sitio. Los usuarios pueden sobreescribir esta preferencia desde su perfil.') }}</p>
+
+                    <form action="{{ route('admin.settings.theme') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <!-- Modo de tema -->
+                        <div class="mb-6">
+                            <label class="form-label">{{ __('Modo de tema por defecto') }}</label>
+                            <div class="flex gap-4 mt-2">
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ $currentTheme === 'light' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                    <input type="radio" name="theme_mode" value="light" class="form-radio" {{ $currentTheme === 'light' ? 'checked' : '' }}>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                            </svg>
+                                            <span class="font-medium">{{ __('Claro') }}</span>
+                                        </div>
+                                        <p class="text-xs text-theme-muted mt-1">{{ __('Fondos blancos, texto oscuro') }}</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ $currentTheme === 'dark' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                    <input type="radio" name="theme_mode" value="dark" class="form-radio" {{ $currentTheme === 'dark' ? 'checked' : '' }}>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                            </svg>
+                                            <span class="font-medium">{{ __('Oscuro') }}</span>
+                                        </div>
+                                        <p class="text-xs text-theme-muted mt-1">{{ __('Fondos oscuros, texto claro') }}</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Color de fondo -->
+                        <div class="mb-6">
+                            <label for="bg_color" class="form-label">{{ __('Color de fondo del contenido') }}</label>
+                            <div class="flex items-center gap-3">
+                                <input type="color"
+                                       name="bg_color"
+                                       id="bg_color"
+                                       value="{{ $currentBgColor ?: '#f3f4f6' }}"
+                                       class="h-10 w-14 rounded border border-theme cursor-pointer">
+                                <input type="text"
+                                       id="bg_color_hex"
+                                       value="{{ $currentBgColor }}"
+                                       class="form-input w-28 font-mono text-sm"
+                                       placeholder="#f3f4f6"
+                                       onchange="document.getElementById('bg_color').value = this.value || '#f3f4f6';">
+                                <button type="button" onclick="document.getElementById('bg_color').value='#f3f4f6'; document.getElementById('bg_color_hex').value='';" class="text-sm text-theme-muted hover:text-theme-secondary">
+                                    {{ __('Limpiar') }}
+                                </button>
+                            </div>
+                            <p class="text-xs text-theme-muted mt-1">{{ __('Deja vacio para usar el color por defecto del tema. Solo aplica al area de contenido.') }}</p>
+                        </div>
+
+                        <!-- Imagen de fondo -->
+                        <div class="mb-6">
+                            <label for="bg_image" class="form-label">{{ __('Imagen de fondo del contenido') }}</label>
+                            @if($currentBgImage)
+                                <div class="mb-3 p-3 bg-theme-secondary rounded-lg">
+                                    <div class="flex items-center gap-4">
+                                        <img src="{{ asset($currentBgImage) }}" alt="Background" class="h-20 w-32 object-cover rounded">
+                                        <div>
+                                            <p class="text-sm text-theme-secondary">{{ __('Imagen actual') }}</p>
+                                            <label class="flex items-center gap-2 mt-2 text-sm text-red-600 cursor-pointer">
+                                                <input type="checkbox" name="remove_bg_image" value="1" class="form-checkbox">
+                                                {{ __('Eliminar imagen') }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            <input type="file"
+                                   name="bg_image"
+                                   id="bg_image"
+                                   accept="image/*"
+                                   class="form-input">
+                            <p class="text-xs text-theme-muted mt-1">{{ __('JPG, PNG o WebP. Max 5MB. Solo aplica al area de contenido, no al header ni footer.') }}</p>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {{ __('Guardar tema') }}
+                        </button>
+                    </form>
+
+                    <script>
+                    document.getElementById('bg_color').addEventListener('change', function() {
+                        document.getElementById('bg_color_hex').value = this.value === '#f3f4f6' ? '' : this.value;
+                    });
+                    </script>
+                </div>
+            </div>
+
+            <!-- Menu de navegacion -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-lg font-semibold">{{ __('Menu de navegacion') }}</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-sm text-theme-secondary mb-4">{{ __('Controla que opciones aparecen en el menu principal. Por defecto estas opciones estan ocultas.') }}</p>
+
+                    <form action="{{ route('admin.settings.navigation') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        @php
+                            $showResearch = \App\Models\SiteSetting::get('navigation', 'show_research', '0');
+                            $showHelp = \App\Models\SiteSetting::get('navigation', 'show_help', '0');
+                        @endphp
+
+                        <div class="space-y-4">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" name="show_research" value="1"
+                                       class="form-checkbox"
+                                       {{ $showResearch ? 'checked' : '' }}>
+                                <div>
+                                    <span class="font-medium">{{ __('Mostrar "Investigacion"') }}</span>
+                                    <p class="text-xs text-theme-muted">{{ __('Muestra la opcion de Investigacion en el menu (actualmente marcada como "Proximamente").') }}</p>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" name="show_help" value="1"
+                                       class="form-checkbox"
+                                       {{ $showHelp ? 'checked' : '' }}>
+                                <div>
+                                    <span class="font-medium">{{ __('Mostrar "Como usar Mi Familia?"') }}</span>
+                                    <p class="text-xs text-theme-muted">{{ __('Muestra el enlace a la pagina de ayuda en el menu principal.') }}</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-primary mt-4">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {{ __('Guardar opciones del menu') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <!-- Tipografia del sitio -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="text-lg font-semibold">{{ __('Tipografia del sitio') }}</h2>
                 </div>
                 <div class="card-body">
-                    <p class="text-sm text-gray-600 mb-4">{{ __('Selecciona la tipografia que se usara en todo el sitio.') }}</p>
+                    <p class="text-sm text-theme-secondary mb-4">{{ __('Selecciona la tipografia que se usara en todo el sitio.') }}</p>
 
                     <form action="{{ route('admin.settings.colors') }}" method="POST">
                         @csrf
@@ -49,12 +212,12 @@
                         </div>
 
                         <!-- Preview -->
-                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ __('Vista previa') }}</h4>
+                        <div class="mt-4 p-4 bg-theme-secondary rounded-lg">
+                            <h4 class="text-sm font-medium text-theme-secondary mb-3">{{ __('Vista previa') }}</h4>
                             <div id="font-preview" style="font-family: '{{ $currentFont }}', sans-serif;">
                                 <p class="text-2xl font-bold mb-1">{{ config('app.name') }}</p>
                                 <p class="text-base mb-1">{{ __('El veloz murcielago hindu comia feliz cardillo y kiwi.') }}</p>
-                                <p class="text-sm text-gray-500">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
+                                <p class="text-sm text-theme-muted">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
                             </div>
                         </div>
 
@@ -99,7 +262,7 @@
                     <h2 class="text-lg font-semibold">{{ __('Colores del sitio') }}</h2>
                 </div>
                 <div class="card-body">
-                    <p class="text-sm text-gray-600 mb-4">{{ __('Personaliza la paleta de colores de todo el sitio. Los cambios se aplican inmediatamente.') }}</p>
+                    <p class="text-sm text-theme-secondary mb-4">{{ __('Personaliza la paleta de colores de todo el sitio. Los cambios se aplican inmediatamente.') }}</p>
 
                     <form action="{{ route('admin.settings.colors') }}" method="POST" id="colors-form">
                         @csrf
@@ -132,7 +295,7 @@
                                                name="{{ $key }}"
                                                id="color_{{ $key }}"
                                                value="{{ $colors[$key] ?? '#3b82f6' }}"
-                                               class="h-10 w-14 rounded border border-gray-300 cursor-pointer"
+                                               class="h-10 w-14 rounded border border-theme cursor-pointer"
                                                onchange="document.getElementById('hex_{{ $key }}').value = this.value; updatePreview();">
                                         <input type="text"
                                                id="hex_{{ $key }}"
@@ -141,14 +304,14 @@
                                                onchange="document.getElementById('color_{{ $key }}').value = this.value; document.getElementById('color_{{ $key }}').name = '{{ $key }}'; updatePreview();"
                                                pattern="^#[0-9a-fA-F]{6}$">
                                     </div>
-                                    <p class="text-xs text-gray-400">{{ $colorDescriptions[$key] }}</p>
+                                    <p class="text-xs text-theme-muted">{{ $colorDescriptions[$key] }}</p>
                                 </div>
                             @endforeach
                         </div>
 
                         <!-- Preview -->
-                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ __('Vista previa') }}</h4>
+                        <div class="mt-6 p-4 bg-theme-secondary rounded-lg">
+                            <h4 class="text-sm font-medium text-theme-secondary mb-3">{{ __('Vista previa') }}</h4>
                             <div class="flex flex-wrap gap-3" id="color-preview">
                                 <button type="button" id="preview-primary" class="px-4 py-2 text-white rounded-lg text-sm" style="background-color: {{ $colors['primary'] }}">{{ __('Boton primario') }}</button>
                                 <button type="button" id="preview-secondary" class="px-4 py-2 text-white rounded-lg text-sm" style="background-color: {{ $colors['secondary'] }}">{{ __('Boton secundario') }}</button>
@@ -220,12 +383,12 @@
                     @php
                         $hEnabled = \App\Models\SiteSetting::get('heritage', 'heritage_enabled', '0');
                     @endphp
-                    <span class="px-2 py-1 text-xs rounded-full {{ $hEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                    <span class="px-2 py-1 text-xs rounded-full {{ $hEnabled ? 'bg-green-100 text-green-700' : 'bg-theme-secondary text-theme-muted' }}">
                         {{ $hEnabled ? __('Habilitado') : __('Deshabilitado') }}
                     </span>
                 </div>
                 <div class="card-body">
-                    <p class="text-sm text-gray-600 mb-4">{{ __('Permite a los usuarios registrar su herencia cultural, region de origen y datos de migracion familiar.') }}</p>
+                    <p class="text-sm text-theme-secondary mb-4">{{ __('Permite a los usuarios registrar su herencia cultural, region de origen y datos de migracion familiar.') }}</p>
 
                     <form action="{{ route('admin.settings.heritage') }}" method="POST">
                         @csrf
@@ -249,7 +412,7 @@
                                        {{ $hEnabled ? 'checked' : '' }}>
                                 <span class="font-medium">{{ __('Habilitar herencia cultural') }}</span>
                             </label>
-                            <p class="text-xs text-gray-400 mt-1">{{ __('Cuando esta deshabilitado, la seccion de herencia no aparece en ningun formulario ni perfil.') }}</p>
+                            <p class="text-xs text-theme-muted mt-1">{{ __('Cuando esta deshabilitado, la seccion de herencia no aparece en ningun formulario ni perfil.') }}</p>
                         </div>
 
                         <!-- Label -->
@@ -259,7 +422,7 @@
                                    value="{{ $hLabel }}"
                                    class="form-input max-w-md"
                                    placeholder="Herencia cultural">
-                            <p class="text-xs text-gray-400 mt-1">{{ __('Este texto se muestra como titulo de la seccion en formularios y perfiles.') }}</p>
+                            <p class="text-xs text-theme-muted mt-1">{{ __('Este texto se muestra como titulo de la seccion en formularios y perfiles.') }}</p>
                         </div>
 
                         <!-- Regions -->
@@ -268,7 +431,7 @@
                             <textarea name="heritage_regions" id="heritage_regions"
                                       rows="6"
                                       class="form-input font-mono text-sm resize-y max-w-lg">{{ $hRegionsText }}</textarea>
-                            <p class="text-xs text-gray-400 mt-1">{{ __('Una region por linea, formato: clave|Nombre. Ejemplo: dalmacia|Dalmacia') }}</p>
+                            <p class="text-xs text-theme-muted mt-1">{{ __('Una region por linea, formato: clave|Nombre. Ejemplo: dalmacia|Dalmacia') }}</p>
                         </div>
 
                         <!-- Decades -->
@@ -277,7 +440,7 @@
                             <textarea name="heritage_decades" id="heritage_decades"
                                       rows="6"
                                       class="form-input font-mono text-sm resize-y max-w-lg">{{ $hDecadesText }}</textarea>
-                            <p class="text-xs text-gray-400 mt-1">{{ __('Una decada por linea, formato: clave|Nombre. Ejemplo: 1900-1910|1900 - 1910') }}</p>
+                            <p class="text-xs text-theme-muted mt-1">{{ __('Una decada por linea, formato: clave|Nombre. Ejemplo: 1900-1910|1900 - 1910') }}</p>
                         </div>
 
                         <button type="submit" class="btn-primary">
@@ -298,19 +461,19 @@
                 <div class="card-body">
                     <dl class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Version de Laravel') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Version de Laravel') }}</dt>
                             <dd class="font-medium">{{ app()->version() }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Version de PHP') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Version de PHP') }}</dt>
                             <dd class="font-medium">{{ PHP_VERSION }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Entorno') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Entorno') }}</dt>
                             <dd class="font-medium">{{ config('app.env') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Modo debug') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Modo debug') }}</dt>
                             <dd>
                                 @if(config('app.debug'))
                                     <span class="text-yellow-600 font-medium">{{ __('Activado') }}</span>
@@ -320,11 +483,11 @@
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Zona horaria') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Zona horaria') }}</dt>
                             <dd class="font-medium">{{ config('app.timezone') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Idioma') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Idioma') }}</dt>
                             <dd class="font-medium">{{ config('app.locale') }}</dd>
                         </div>
                     </dl>
@@ -339,19 +502,19 @@
                 <div class="card-body">
                     <dl class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Driver de archivos') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Driver de archivos') }}</dt>
                             <dd class="font-medium">{{ config('filesystems.default') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Driver de cache') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Driver de cache') }}</dt>
                             <dd class="font-medium">{{ config('cache.default') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Driver de sesion') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Driver de sesion') }}</dt>
                             <dd class="font-medium">{{ config('session.driver') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Driver de cola') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Driver de cola') }}</dt>
                             <dd class="font-medium">{{ config('queue.default') }}</dd>
                         </div>
                     </dl>
@@ -366,11 +529,11 @@
                 <div class="card-body">
                     <dl class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Driver') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Driver') }}</dt>
                             <dd class="font-medium">{{ config('database.default') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Nombre') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Nombre') }}</dt>
                             <dd class="font-medium">{{ config('database.connections.' . config('database.default') . '.database') }}</dd>
                         </div>
                     </dl>
@@ -392,27 +555,27 @@
                 <div class="card-body">
                     <dl class="grid md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Driver') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Driver') }}</dt>
                             <dd class="font-medium">{{ config('mail.default') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Servidor SMTP') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Servidor SMTP') }}</dt>
                             <dd class="font-medium">{{ config('mail.mailers.smtp.host') ?: __('No configurado') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Puerto') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Puerto') }}</dt>
                             <dd class="font-medium">{{ config('mail.mailers.smtp.port') ?: '-' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Encriptacion') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Encriptacion') }}</dt>
                             <dd class="font-medium">{{ config('mail.mailers.smtp.encryption') ?: __('Ninguna') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Usuario') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Usuario') }}</dt>
                             <dd class="font-medium">{{ config('mail.mailers.smtp.username') ?: __('No configurado') }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Remitente') }}</dt>
+                            <dt class="text-sm text-theme-muted">{{ __('Remitente') }}</dt>
                             <dd class="font-medium">{{ config('mail.from.address') }}</dd>
                         </div>
                     </dl>
@@ -433,10 +596,10 @@
                         </div>
                     @endif
 
-                    <div class="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <h4 class="font-medium text-gray-900 mb-2">{{ __('Configuracion SMTP') }}</h4>
-                        <p class="text-sm text-gray-600 mb-3">
-                            {{ __('Para enviar correos reales, edita el archivo') }} <code class="bg-gray-200 px-1 rounded">.env</code> {{ __('con los siguientes parametros:') }}
+                    <div class="mt-4 p-4 bg-theme-secondary rounded-lg">
+                        <h4 class="font-medium text-theme mb-2">{{ __('Configuracion SMTP') }}</h4>
+                        <p class="text-sm text-theme-secondary mb-3">
+                            {{ __('Para enviar correos reales, edita el archivo') }} <code class="bg-theme-secondary px-1 rounded">.env</code> {{ __('con los siguientes parametros:') }}
                         </p>
                         <pre class="text-xs bg-gray-800 text-green-400 p-3 rounded overflow-x-auto">MAIL_MAILER=smtp
 MAIL_HOST=smtp.tuservidor.com
@@ -446,7 +609,7 @@ MAIL_PASSWORD=tu_contraseña
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS="noreply@tudominio.com"
 MAIL_FROM_NAME="${APP_NAME}"</pre>
-                        <p class="text-xs text-gray-500 mt-2">
+                        <p class="text-xs text-theme-muted mt-2">
                             {{ __('Ejemplos de servidores SMTP: Gmail (smtp.gmail.com:587), SendGrid, Mailgun, Amazon SES') }}
                         </p>
                     </div>
@@ -456,7 +619,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                             <form action="{{ route('admin.settings.test-mail') }}" method="POST" class="flex items-end gap-3">
                                 @csrf
                                 <div class="flex-1">
-                                    <label for="test_email" class="block text-sm text-gray-600 mb-1">{{ __('Enviar correo de prueba') }}</label>
+                                    <label for="test_email" class="block text-sm text-theme-secondary mb-1">{{ __('Enviar correo de prueba') }}</label>
                                     <input type="email" name="test_email" id="test_email"
                                            value="{{ auth()->user()->email }}"
                                            class="form-input"
@@ -482,8 +645,8 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                             <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                                 <div class="p-6">
                                     <div class="flex justify-between items-center mb-4">
-                                        <h3 class="text-lg font-semibold text-gray-900">{{ __('Diagnostico de Correo') }}</h3>
-                                        <button onclick="closeDiagnostic()" class="text-gray-400 hover:text-gray-600">
+                                        <h3 class="text-lg font-semibold text-theme">{{ __('Diagnostico de Correo') }}</h3>
+                                        <button onclick="closeDiagnostic()" class="text-theme-muted hover:text-theme-secondary">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
@@ -495,7 +658,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            <span class="ml-3 text-gray-600">{{ __('Ejecutando diagnostico...') }}</span>
+                                            <span class="ml-3 text-theme-secondary">{{ __('Ejecutando diagnostico...') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -661,10 +824,10 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                     <h2 class="text-lg font-semibold">{{ __('Mantenimiento') }}</h2>
                 </div>
                 <div class="card-body space-y-4">
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between p-4 bg-theme-secondary rounded-lg">
                         <div>
-                            <h3 class="font-medium text-gray-900">{{ __('Limpiar cache') }}</h3>
-                            <p class="text-sm text-gray-500">{{ __('Elimina la cache de la aplicacion, vistas, rutas y configuracion') }}</p>
+                            <h3 class="font-medium text-theme">{{ __('Limpiar cache') }}</h3>
+                            <p class="text-sm text-theme-muted">{{ __('Elimina la cache de la aplicacion, vistas, rutas y configuracion') }}</p>
                         </div>
                         <form action="{{ route('admin.settings.clear-cache') }}" method="POST">
                             @csrf
@@ -677,10 +840,10 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                         </form>
                     </div>
 
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center justify-between p-4 bg-theme-secondary rounded-lg">
                         <div>
-                            <h3 class="font-medium text-gray-900">{{ __('Optimizar vistas') }}</h3>
-                            <p class="text-sm text-gray-500">{{ __('Compila y cachea las vistas Blade para mejor rendimiento') }}</p>
+                            <h3 class="font-medium text-theme">{{ __('Optimizar vistas') }}</h3>
+                            <p class="text-sm text-theme-muted">{{ __('Compila y cachea las vistas Blade para mejor rendimiento') }}</p>
                         </div>
                         <form action="{{ route('admin.settings.optimize') }}" method="POST">
                             @csrf
@@ -708,13 +871,13 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                         @endphp
                         <div>
                             <div class="flex justify-between text-sm mb-1">
-                                <span class="text-gray-600">{{ __('Archivos multimedia') }}</span>
-                                <span class="text-gray-900 font-medium">
+                                <span class="text-theme-secondary">{{ __('Archivos multimedia') }}</span>
+                                <span class="text-theme font-medium">
                                     {{ number_format($mediaSize / 1024 / 1024, 2) }} MB
                                     ({{ number_format($mediaCount) }} {{ __('archivos') }})
                                 </span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="w-full bg-theme-secondary rounded-full h-2">
                                 @php
                                     $maxSize = 1024 * 1024 * 1024; // 1GB
                                     $percentage = min(($mediaSize / $maxSize) * 100, 100);

@@ -4,8 +4,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Registro de actividad') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Historial de acciones del sistema') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Registro de actividad') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Historial de acciones del sistema') }}</p>
             </div>
             <div class="flex gap-2">
                 <!-- Boton limpiar registros -->
@@ -30,25 +30,25 @@
                                         </svg>
                                     </div>
                                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">{{ __('Limpiar registros de actividad') }}</h3>
+                                        <h3 class="text-lg leading-6 font-medium text-theme" id="modal-title">{{ __('Limpiar registros de actividad') }}</h3>
                                         <div class="mt-2">
-                                            <p class="text-sm text-gray-500">{{ __('Esta accion eliminara los registros de actividad. Selecciona una opcion:') }}</p>
+                                            <p class="text-sm text-theme-muted">{{ __('Esta accion eliminara los registros de actividad. Selecciona una opcion:') }}</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-5 space-y-3">
-                                    <form action="{{ route('admin.activity.clear') }}" method="POST" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <form action="{{ route('admin.activity.clear') }}" method="POST" class="flex items-center justify-between p-3 bg-theme-secondary rounded-lg">
                                         @csrf
                                         @method('DELETE')
                                         <input type="hidden" name="days" value="30">
-                                        <span class="text-sm text-gray-700">{{ __('Eliminar registros con mas de 30 dias') }}</span>
+                                        <span class="text-sm text-theme-secondary">{{ __('Eliminar registros con mas de 30 dias') }}</span>
                                         <button type="submit" class="btn-outline text-sm py-1 px-3">{{ __('Eliminar') }}</button>
                                     </form>
-                                    <form action="{{ route('admin.activity.clear') }}" method="POST" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <form action="{{ route('admin.activity.clear') }}" method="POST" class="flex items-center justify-between p-3 bg-theme-secondary rounded-lg">
                                         @csrf
                                         @method('DELETE')
                                         <input type="hidden" name="days" value="90">
-                                        <span class="text-sm text-gray-700">{{ __('Eliminar registros con mas de 90 dias') }}</span>
+                                        <span class="text-sm text-theme-secondary">{{ __('Eliminar registros con mas de 90 dias') }}</span>
                                         <button type="submit" class="btn-outline text-sm py-1 px-3">{{ __('Eliminar') }}</button>
                                     </form>
                                     <form action="{{ route('admin.activity.clear') }}" method="POST" class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
@@ -60,7 +60,7 @@
                                     </form>
                                 </div>
                                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                                    <button type="button" @click="showModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">
+                                    <button type="button" @click="showModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-theme shadow-sm px-4 py-2 bg-white text-base font-medium text-theme-secondary hover:bg-theme-secondary sm:mt-0 sm:w-auto sm:text-sm">
                                         {{ __('Cancelar') }}
                                     </button>
                                 </div>
@@ -124,9 +124,9 @@
 
         <!-- Lista de actividad -->
         <div class="card">
-            <div class="divide-y divide-gray-100">
+            <div class="divide-y divide-theme-light">
                 @forelse($activities as $activity)
-                    <div class="p-4 hover:bg-gray-50">
+                    <div class="p-4 hover:bg-theme-secondary">
                         <div class="flex items-start gap-4">
                             <div class="flex-shrink-0">
                                 @switch($activity->type ?? 'default')
@@ -159,8 +159,8 @@
                                         </div>
                                         @break
                                     @default
-                                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="w-10 h-10 bg-theme-secondary rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-theme-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                             </svg>
                                         </div>
@@ -168,16 +168,16 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <span class="font-medium text-gray-900">
+                                    <span class="font-medium text-theme">
                                         {{ $activity->user?->email ?? __('Sistema') }}
                                     </span>
                                     @if($activity->user?->is_admin)
                                         <span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700">Admin</span>
                                     @endif
                                 </div>
-                                <p class="text-gray-600 mt-1">{{ $activity->action }}</p>
+                                <p class="text-theme-secondary mt-1">{{ $activity->action }}</p>
                                 @if($activity->ip_address)
-                                    <p class="text-xs text-gray-400 mt-1">
+                                    <p class="text-xs text-theme-muted mt-1">
                                         IP: {{ $activity->ip_address }}
                                         @if($activity->user_agent)
                                             | {{ Str::limit($activity->user_agent, 50) }}
@@ -186,14 +186,14 @@
                                 @endif
                             </div>
                             <div class="text-right flex-shrink-0">
-                                <p class="text-sm text-gray-500">{{ $activity->created_at->format('d/m/Y') }}</p>
-                                <p class="text-xs text-gray-400">{{ $activity->created_at->format('H:i:s') }}</p>
+                                <p class="text-sm text-theme-muted">{{ $activity->created_at->format('d/m/Y') }}</p>
+                                <p class="text-xs text-theme-muted">{{ $activity->created_at->format('H:i:s') }}</p>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="p-8 text-center text-gray-500">
-                        <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="p-8 text-center text-theme-muted">
+                        <svg class="w-12 h-12 mx-auto text-theme-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                         {{ __('No hay actividad registrada') }}

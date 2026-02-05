@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $siteThemeClass ?? '' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,7 +32,7 @@
 
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-gray-100 min-h-screen">
+<body class="font-sans antialiased min-h-screen" style="background-color: var(--mf-bg);">
     {{-- Toast Notifications --}}
     <x-toast-notifications />
 
@@ -40,7 +40,12 @@
         <x-header />
 
         <!-- Contenido Principal -->
-        <main class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <main class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+              @if($siteBgImage ?? '')
+              style="background-image: url('{{ asset($siteBgImage) }}'); background-size: cover; background-position: center; background-attachment: fixed;"
+              @elseif($siteBgColor ?? '')
+              style="background-color: {{ $siteBgColor }};"
+              @endif>
             <div class="w-full max-w-md">
                 {{ $slot }}
             </div>

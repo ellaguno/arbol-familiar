@@ -4,8 +4,8 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Mensajes') }}</h1>
-                <p class="text-gray-600 mt-1">
+                <h1 class="text-3xl font-bold text-theme">{{ __('Mensajes') }}</h1>
+                <p class="text-theme-secondary mt-1">
                     @if($unreadCount > 0)
                         {{ __(':count sin leer', ['count' => $unreadCount]) }}
                     @else
@@ -22,7 +22,7 @@
         </div>
 
         <!-- Tabs -->
-        <div class="border-b border-gray-200 mb-6">
+        <div class="border-b border-theme mb-6">
             <nav class="-mb-px flex space-x-8">
                 <a href="{{ route('messages.inbox') }}"
                    class="border-b-2 border-mf-primary text-mf-primary py-4 px-1 text-sm font-medium">
@@ -32,7 +32,7 @@
                     @endif
                 </a>
                 <a href="{{ route('messages.sent') }}"
-                   class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium">
+                   class="border-b-2 border-transparent text-theme-muted hover:text-theme-secondary hover:border-theme py-4 px-1 text-sm font-medium">
                     {{ __('Enviados') }}
                 </a>
             </nav>
@@ -65,7 +65,7 @@
                     </label>
 
                     <button type="submit" class="btn-outline text-sm">{{ __('Filtrar') }}</button>
-                    <a href="{{ route('messages.inbox') }}" class="text-sm text-gray-500 hover:text-gray-700">{{ __('Limpiar') }}</a>
+                    <a href="{{ route('messages.inbox') }}" class="text-sm text-theme-muted hover:text-theme-secondary">{{ __('Limpiar') }}</a>
                 </form>
             </div>
         </div>
@@ -84,11 +84,11 @@
         @if($messages->isEmpty())
             <div class="card">
                 <div class="card-body text-center py-12">
-                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-16 h-16 text-theme-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('Bandeja vacia') }}</h3>
-                    <p class="text-gray-500">{{ __('No tienes mensajes en tu bandeja de entrada.') }}</p>
+                    <h3 class="text-lg font-medium text-theme mb-2">{{ __('Bandeja vacia') }}</h3>
+                    <p class="text-theme-muted">{{ __('No tienes mensajes en tu bandeja de entrada.') }}</p>
                 </div>
             </div>
         @else
@@ -101,16 +101,16 @@
                 </form>
             </div>
 
-            <div class="card divide-y divide-gray-100">
+            <div class="card divide-y divide-theme">
                 @foreach($messages as $message)
                     <a href="{{ route('messages.show', $message) }}"
-                       class="block p-4 hover:bg-gray-50 transition-colors {{ !$message->isRead() ? 'bg-blue-50' : '' }}">
+                       class="block p-4 hover:bg-theme-secondary transition-colors {{ !$message->isRead() ? 'bg-blue-50' : '' }}">
                         <div class="flex items-start gap-4">
                             <!-- Avatar -->
                             <div class="flex-shrink-0">
                                 @if($message->isSystemMessage())
-                                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-10 h-10 rounded-full bg-theme-secondary flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                         </svg>
                                     </div>
@@ -129,7 +129,7 @@
                                     @if(!$message->isRead())
                                         <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
                                     @endif
-                                    <span class="font-medium text-gray-900 {{ !$message->isRead() ? 'font-semibold' : '' }}">
+                                    <span class="font-medium text-theme {{ !$message->isRead() ? 'font-semibold' : '' }}">
                                         {{ $message->sender ? $message->sender->name : __('Sistema') }}
                                     </span>
 
@@ -159,16 +159,16 @@
                                     @endif
                                 </div>
 
-                                <h3 class="text-gray-900 truncate {{ !$message->isRead() ? 'font-semibold' : '' }}">
+                                <h3 class="text-theme truncate {{ !$message->isRead() ? 'font-semibold' : '' }}">
                                     {{ $message->subject }}
                                 </h3>
 
-                                <p class="text-sm text-gray-500 truncate mt-1">
+                                <p class="text-sm text-theme-muted truncate mt-1">
                                     {{ Str::limit(strip_tags($message->body), 100) }}
                                 </p>
 
                                 @if($message->relatedPerson)
-                                    <p class="text-xs text-gray-400 mt-1">
+                                    <p class="text-xs text-theme-muted mt-1">
                                         <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                         </svg>
@@ -179,7 +179,7 @@
 
                             <!-- Fecha -->
                             <div class="flex-shrink-0 text-right">
-                                <span class="text-sm text-gray-500">
+                                <span class="text-sm text-theme-muted">
                                     {{ $message->created_at->diffForHumans() }}
                                 </span>
                             </div>

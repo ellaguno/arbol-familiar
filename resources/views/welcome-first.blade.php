@@ -6,7 +6,7 @@
     @endphp
 
     <!-- Seccion Superior - Fondo gris -->
-    <section class="bg-gray-100 py-12">
+    <section class="bg-theme py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-8 items-start">
                 <!-- Columna izquierda - Texto -->
@@ -19,7 +19,7 @@
                         {{ $sc ? $sc->content('welcome_first', 'greeting_text', __('Estas a un paso de comenzar a construir tu arbol genealogico y conectar con tu historia familiar.')) : __('Estas a un paso de comenzar a construir tu arbol genealogico y conectar con tu historia familiar.') }}
                     </h2>
 
-                    <div class="text-gray-600 space-y-4">
+                    <div class="text-theme-secondary space-y-4">
                         <p>
                             {{ $sc ? $sc->content('welcome_first', 'description_1', __('Nos alegra que formes parte de esta comunidad dedicada a entender nuestras raices y fortalecer los lazos familiares.')) : __('Nos alegra que formes parte de esta comunidad dedicada a entender nuestras raices y fortalecer los lazos familiares.') }}
                         </p>
@@ -77,7 +77,7 @@
     </section>
 
     <!-- Seccion Inferior - Como empezar -->
-    <section class="py-8 bg-white">
+    <section class="py-8 bg-theme-card">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Contenedor con fondo beige y margen blanco -->
             <div class="bg-[#eae8e4] rounded-xl p-8 md:p-12">
@@ -95,7 +95,7 @@
                             {{ $sc ? $sc->content('welcome_first', 'instructions_title', __('Para iniciar, alimenta tu perfil con más información, esta servirá como punto de partida. A partir de ahí podrás agregar más familiares desde tu árbol.')) : __('Para iniciar, alimenta tu perfil con más información, esta servirá como punto de partida. A partir de ahí podrás agregar más familiares desde tu árbol.') }}
                         </h3>
 
-                        <div class="text-gray-600 space-y-4">
+                        <div class="text-theme-secondary space-y-4">
                             <p>
                                 {{ $sc ? $sc->content('welcome_first', 'instructions_1', __('En el árbol verás un recuadro con tus datos. Da click sobre él y se desplegará una sección en el lado derecho, desde ahí podrás acceder a tu perfil o agregar familiares inmediatos: padres, cónyuge, hijos y hermanos.')) : __('En el árbol verás un recuadro con tus datos. Da click sobre él y se desplegará una sección en el lado derecho, desde ahí podrás acceder a tu perfil o agregar familiares inmediatos: padres, cónyuge, hijos y hermanos.') }}
                             </p>

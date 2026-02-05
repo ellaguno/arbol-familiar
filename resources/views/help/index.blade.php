@@ -1,21 +1,21 @@
 <x-app-layout>
     <x-slot name="title">{{ __('Como usar') }} {{ config('app.name') }} - {{ config('app.name') }}</x-slot>
 
-    <div class="bg-gray-100 py-8">
+    <div class="bg-theme py-8">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Encabezado -->
             <div class="text-center mb-12">
                 <h1 class="text-3xl md:text-4xl font-bold text-mf-primary mb-4">
                     {{ __('Como usar') }} {{ config('app.name') }}?
                 </h1>
-                <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                <p class="text-theme-secondary text-lg max-w-2xl mx-auto">
                     {{ __('Guia rapida para comenzar a construir tu arbol genealogico y conectar con tu familia.') }}
                 </p>
             </div>
 
             <!-- Indice -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <h2 class="font-semibold text-gray-900 mb-4">{{ __('Contenido') }}</h2>
+            <div class="bg-theme-card rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="font-semibold text-theme mb-4">{{ __('Contenido') }}</h2>
                 <nav class="grid md:grid-cols-2 gap-2">
                     <a href="#primeros-pasos" class="text-mf-primary hover:underline">1. {{ __('Primeros pasos') }}</a>
                     <a href="#tu-perfil" class="text-mf-primary hover:underline">2. {{ __('Tu perfil') }}</a>
@@ -31,15 +31,15 @@
             <!-- Secciones de ayuda -->
             <div class="space-y-8">
                 <!-- 1. Primeros pasos -->
-                <section id="primeros-pasos" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="primeros-pasos" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">1</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Primeros pasos') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('Primeros pasos') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('Despues de crear tu cuenta y verificar tu correo electronico, seras recibido con una pantalla de bienvenida que te explica los conceptos basicos de la plataforma.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Que puedes hacer:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Que puedes hacer:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li>{{ __('Crear y visualizar tu arbol genealogico familiar') }}</li>
                             <li>{{ __('Registrar informacion de tus ancestros y descendientes') }}</li>
@@ -57,15 +57,15 @@
                 </section>
 
                 <!-- 2. Tu perfil -->
-                <section id="tu-perfil" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="tu-perfil" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">2</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Tu perfil') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('Tu perfil') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('Tu perfil es el punto de partida de tu arbol genealogico. Aqui defines tu informacion personal que sera el centro de tu arbol.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Informacion que puedes agregar:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Informacion que puedes agregar:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Datos basicos:') }}</strong> {{ __('Nombre, apellidos, fecha y lugar de nacimiento') }}</li>
                             <li><strong>{{ __('Foto de perfil:') }}</strong> {{ __('Sube una imagen que te identifique') }}</li>
@@ -87,15 +87,15 @@
                 </section>
 
                 <!-- 3. El arbol genealogico -->
-                <section id="arbol-genealogico" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="arbol-genealogico" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">3</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('El arbol genealogico') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('El arbol genealogico') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('El arbol genealogico es una representacion visual de tu familia. Tu apareces en el centro, con tus ancestros hacia arriba y tus descendientes hacia abajo.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Como navegar el arbol:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Como navegar el arbol:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Hacer clic en una persona:') }}</strong> {{ __('Centra el arbol en esa persona') }}</li>
                             <li><strong>{{ __('Boton + (mas):') }}</strong> {{ __('Agrega un nuevo familiar en esa posicion') }}</li>
@@ -103,7 +103,7 @@
                             <li><strong>{{ __('Zoom:') }}</strong> {{ __('Usa la rueda del raton o los controles para acercar/alejar') }}</li>
                         </ul>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Vistas disponibles:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Vistas disponibles:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Vista de arbol:') }}</strong> {{ __('Formato clasico con lineas de conexion') }}</li>
                             <li><strong>{{ __('Vista de abanico:') }}</strong> {{ __('Formato semicircular centrado en una persona') }}</li>
@@ -118,15 +118,15 @@
                 </section>
 
                 <!-- 4. Agregar familiares -->
-                <section id="agregar-familiares" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="agregar-familiares" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">4</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Agregar familiares') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('Agregar familiares') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('Puedes agregar familiares de dos formas: desde el arbol visual o desde el formulario de personas.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Desde el arbol:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Desde el arbol:') }}</h3>
                         <ol class="list-decimal pl-6 space-y-2">
                             <li>{{ __('Haz clic en el boton + en la posicion deseada (padre, madre, hijo, etc.)') }}</li>
                             <li>{{ __('Completa el formulario con los datos del familiar') }}</li>
@@ -134,7 +134,7 @@
                             <li>{{ __('Guarda los cambios') }}</li>
                         </ol>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Tipos de relaciones:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Tipos de relaciones:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Padres:') }}</strong> {{ __('Padre y madre biologicos o adoptivos') }}</li>
                             <li><strong>{{ __('Conyuges:') }}</strong> {{ __('Esposo/a o pareja') }}</li>
@@ -155,15 +155,15 @@
                 </section>
 
                 <!-- 5. Privacidad y consentimiento -->
-                <section id="privacidad" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="privacidad" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">5</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Privacidad y consentimiento') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('Privacidad y consentimiento') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('Esta plataforma respeta la privacidad de todos. Por eso, antes de compartir informacion de personas vivas, se requiere su consentimiento.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Niveles de privacidad:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Niveles de privacidad:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Familia directa:') }}</strong> {{ __('Solo padres, hijos y conyuges pueden ver tu informacion') }}</li>
                             <li><strong>{{ __('Familia extendida:') }}</strong> {{ __('Incluye abuelos, tios, primos, etc.') }}</li>
@@ -171,7 +171,7 @@
                             <li><strong>{{ __('Comunidad:') }}</strong> {{ __('Todos los miembros verificados de la plataforma') }}</li>
                         </ul>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Como funciona el consentimiento:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Como funciona el consentimiento:') }}</h3>
                         <ol class="list-decimal pl-6 space-y-2">
                             <li>{{ __('Agregas a una persona viva con su correo electronico') }}</li>
                             <li>{{ __('El sistema le envia un correo solicitando autorizacion') }}</li>
@@ -182,15 +182,15 @@
                 </section>
 
                 <!-- 6. Sistema de mensajes -->
-                <section id="mensajes" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="mensajes" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">6</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Sistema de mensajes') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('Sistema de mensajes') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('Puedes comunicarte con otros miembros de la comunidad a traves del sistema de mensajes interno.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Tipos de mensajes:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Tipos de mensajes:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Mensajes directos:') }}</strong> {{ __('Conversaciones privadas con otros usuarios') }}</li>
                             <li><strong>{{ __('Invitaciones:') }}</strong> {{ __('Invita a familiares a unirse a tu arbol') }}</li>
@@ -208,15 +208,15 @@
                 </section>
 
                 <!-- 7. Importar y exportar -->
-                <section id="gedcom" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="gedcom" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">7</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Importar y exportar datos') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('Importar y exportar datos') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('La plataforma soporta el formato GEDCOM, el estandar internacional para intercambio de datos genealogicos.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Importar datos:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Importar datos:') }}</h3>
                         <ol class="list-decimal pl-6 space-y-2">
                             <li>{{ __('Ve a la seccion de importacion GEDCOM') }}</li>
                             <li>{{ __('Selecciona tu archivo .ged') }}</li>
@@ -224,7 +224,7 @@
                             <li>{{ __('Confirma la importacion') }}</li>
                         </ol>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Exportar datos:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Exportar datos:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Exportacion completa:') }}</strong> {{ __('Todos los datos de tu arbol') }}</li>
                             <li><strong>{{ __('Exportacion parcial:') }}</strong> {{ __('Solo una rama especifica') }}</li>
@@ -240,21 +240,21 @@
                 </section>
 
                 <!-- 8. Busqueda -->
-                <section id="busqueda" class="bg-white rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
+                <section id="busqueda" class="bg-theme-card rounded-xl shadow-sm p-6 md:p-8 scroll-mt-20">
                     <div class="flex items-center gap-3 mb-4">
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">8</span>
-                        <h2 class="text-2xl font-bold text-gray-900">{{ __('Buscar en la comunidad') }}</h2>
+                        <h2 class="text-2xl font-bold text-theme">{{ __('Buscar en la comunidad') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-gray-600">
+                    <div class="prose max-w-none text-theme-secondary">
                         <p>{{ __('La funcion de busqueda te permite encontrar personas y posibles conexiones familiares dentro de la comunidad.') }}</p>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Tipos de busqueda:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Tipos de busqueda:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Busqueda rapida:') }}</strong> {{ __('Busca por nombre desde cualquier pagina') }}</li>
                             <li><strong>{{ __('Busqueda avanzada:') }}</strong> {{ __('Filtra por apellido, lugar, fechas, etc.') }}</li>
                         </ul>
 
-                        <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-2">{{ __('Que puedes encontrar:') }}</h3>
+                        <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Que puedes encontrar:') }}</h3>
                         <ul class="list-disc pl-6 space-y-2">
                             <li>{{ __('Personas con apellidos similares a los de tu familia') }}</li>
                             <li>{{ __('Familiares que otros usuarios han registrado') }}</li>
@@ -276,7 +276,7 @@
                         {{ __('Si necesitas ayuda adicional, no dudes en contactarnos.') }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ route('messages.compose') }}" class="inline-flex items-center justify-center px-6 py-3 bg-white text-mf-primary font-semibold rounded-full hover:bg-gray-100 transition-colors">
+                        <a href="{{ route('messages.compose') }}" class="inline-flex items-center justify-center px-6 py-3 bg-white text-mf-primary font-semibold rounded-full hover:bg-theme transition-colors">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>

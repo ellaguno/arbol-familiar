@@ -7,7 +7,7 @@
                 <div class="mb-6">
                     <h1 class="text-2xl font-bold text-amber-500 text-center">{{ __('¡Bienvenido a Mi Familia!') }}</h1>
                     <p class="text-amber-500 mt-1 text-center">{{ __('Por favor ingresa la siguiente información para configurar tu perfil.') }}</p>
-                    <p class="text-gray-700 mt-3 text-sm leading-relaxed text-left"><strong class="text-amber-500">{{ config('app.name') }}</strong> {{ __('es una plataforma genealógica desarrollada para ayudarte a explorar el alcance de tus raíces familiares y conectar con tu comunidad.') }}</p>
+                    <p class="text-theme-secondary mt-3 text-sm leading-relaxed text-left"><strong class="text-amber-500">{{ config('app.name') }}</strong> {{ __('es una plataforma genealógica desarrollada para ayudarte a explorar el alcance de tus raíces familiares y conectar con tu comunidad.') }}</p>
                 </div>
 
                 <form method="POST" action="{{ route('register') }}" class="space-y-6" id="register-form"
@@ -18,7 +18,7 @@
 
                     <!-- Datos de la cuenta -->
                     <div class="border-b pb-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Datos de la cuenta') }}</h2>
+                        <h2 class="text-lg font-semibold text-theme mb-4">{{ __('Datos de la cuenta') }}</h2>
 
                         <div class="grid md:grid-cols-2 gap-4">
                             <x-input
@@ -56,7 +56,7 @@
 
                     <!-- Datos personales -->
                     <div class="border-b pb-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Datos personales') }}</h2>
+                        <h2 class="text-lg font-semibold text-theme mb-4">{{ __('Datos personales') }}</h2>
 
                         <div class="grid md:grid-cols-2 gap-4">
                             <x-input
@@ -112,7 +112,7 @@
                     <!-- Herencia cultural -->
                     @if($heritageEnabled ?? false)
                     <div class="border-b pb-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ $heritageLabel ?? __('Herencia cultural') }}</h2>
+                        <h2 class="text-lg font-semibold text-theme mb-4">{{ $heritageLabel ?? __('Herencia cultural') }}</h2>
 
                         <div class="mb-4">
                             <label class="form-label">{{ __('¿Tienes una herencia cultural que deseas registrar?') }}</label>
@@ -137,7 +137,7 @@
 
                         <div x-show="hasHeritage === '1'" x-transition class="space-y-4">
                             <div class="bg-mf-light p-4 rounded-lg">
-                                <h3 class="font-medium text-gray-900 mb-3">{{ __('Datos de herencia') }}</h3>
+                                <h3 class="font-medium text-theme mb-3">{{ __('Datos de herencia') }}</h3>
 
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <x-select
@@ -169,7 +169,7 @@
                                    oninvalid="this.setCustomValidity('{{ __('Debes aceptar los terminos y condiciones para continuar') }}')"
                                    onchange="this.setCustomValidity('')">
                             <div>
-                                <span class="text-gray-700">
+                                <span class="text-theme-secondary">
                                     {{ __('He leido y acepto la') }}
                                     <a href="{{ route('privacy') }}" target="_blank" class="text-mf-primary hover:underline">{{ __('politica de privacidad') }}</a>
                                     {{ __('y los') }}
@@ -188,7 +188,7 @@
                         @error('g-recaptcha-response')
                             <p class="form-error text-center">{{ $message }}</p>
                         @enderror
-                        <p class="text-xs text-gray-500 text-center">
+                        <p class="text-xs text-theme-muted text-center">
                             {{ __('Protegido por reCAPTCHA') }} -
                             <a href="https://policies.google.com/privacy" target="_blank" class="underline">{{ __('Privacidad') }}</a> y
                             <a href="https://policies.google.com/terms" target="_blank" class="underline">{{ __('Terminos') }}</a>
@@ -201,7 +201,7 @@
                 </form>
 
                 <div class="mt-6 pt-6 border-t text-center">
-                    <p class="text-gray-600">
+                    <p class="text-theme-secondary">
                         {{ __('Ya tienes cuenta?') }}
                         <a href="{{ route('login') }}" class="text-mf-primary hover:underline font-medium">
                             {{ __('Inicia sesion') }}

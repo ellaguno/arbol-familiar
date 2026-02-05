@@ -78,6 +78,9 @@ class SiteSettingsSeeder extends Seeder
             ['group' => 'colors', 'key' => 'accent', 'value' => '#f59e0b', 'type' => 'color'],
             ['group' => 'colors', 'key' => 'light', 'value' => '#dbeafe', 'type' => 'color'],
             ['group' => 'colors', 'key' => 'dark', 'value' => '#1d4ed8', 'type' => 'color'],
+            ['group' => 'colors', 'key' => 'theme_mode', 'value' => 'dark', 'type' => 'text'],
+            ['group' => 'colors', 'key' => 'bg_color', 'value' => '', 'type' => 'text'],
+            ['group' => 'colors', 'key' => 'bg_image', 'value' => '', 'type' => 'text'],
 
             // =============================================
             // Footer
@@ -88,6 +91,12 @@ class SiteSettingsSeeder extends Seeder
 <a href="/privacy" class="block text-gray-600 hover:text-[#3b82f6]">Privacidad</a>
 <a href="/terms" class="block text-gray-600 hover:text-[#3b82f6]">Términos y condiciones</a>', 'type' => 'html'],
             ['group' => 'footer', 'key' => 'footer_col_3', 'value' => '', 'type' => 'html'],
+
+            // =============================================
+            // Navigation
+            // =============================================
+            ['group' => 'navigation', 'key' => 'show_research', 'value' => '0', 'type' => 'text'],
+            ['group' => 'navigation', 'key' => 'show_help', 'value' => '0', 'type' => 'text'],
 
             // =============================================
             // Heritage (herencia cultural)

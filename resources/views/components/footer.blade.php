@@ -5,7 +5,7 @@
 @endphp
 
 <!-- Footer -->
-<footer class="py-8" style="background-color: #e5e5e5;">
+<footer class="py-8" style="background-color: var(--mf-footer-bg);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid md:grid-cols-3 gap-8 items-start">
             <!-- Columna 1 -->
@@ -43,7 +43,7 @@
 </footer>
 
 <!-- Barra de copyright -->
-<div class="py-3 px-4" style="background-color: #b6b8e2;">
+<div class="py-3 px-4" style="background-color: var(--mf-copyright-bg);">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
         <p class="text-white text-xs">
             v{{ config('mi-familia.version') }}

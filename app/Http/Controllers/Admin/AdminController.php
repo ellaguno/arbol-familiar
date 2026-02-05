@@ -663,6 +663,65 @@ class AdminController extends Controller
     }
 
     /**
+     * Actualizar tema y fondo del sitio.
+     */
+    public function updateTheme(Request $request)
+    {
+        $request->validate([
+            'theme_mode' => 'required|in:light,dark',
+            'bg_color' => 'nullable|string|max:7',
+            'bg_image' => 'nullable|image|max:5120',
+        ]);
+
+        SiteSetting::set('colors', 'theme_mode', $request->input('theme_mode', 'dark'), 'text');
+
+        // Color de fondo (puede ser vacío para usar default)
+        if ($request->has('bg_color')) {
+            SiteSetting::set('colors', 'bg_color', $request->input('bg_color', ''), 'text');
+        }
+
+        // Imagen de fondo
+        if ($request->hasFile('bg_image')) {
+            // Eliminar imagen anterior si existe
+            $oldImage = SiteSetting::get('colors', 'bg_image', '');
+            if ($oldImage && str_starts_with($oldImage, 'storage/')) {
+                $oldPath = str_replace('storage/', '', $oldImage);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $path = $request->file('bg_image')->store('content', 'public');
+            SiteSetting::set('colors', 'bg_image', 'storage/' . $path, 'text');
+        }
+
+        if ($request->boolean('remove_bg_image')) {
+            $oldImage = SiteSetting::get('colors', 'bg_image', '');
+            if ($oldImage && str_starts_with($oldImage, 'storage/')) {
+                $oldPath = str_replace('storage/', '', $oldImage);
+                Storage::disk('public')->delete($oldPath);
+            }
+            SiteSetting::set('colors', 'bg_image', '', 'text');
+        }
+
+        $this->logActivity('theme_updated', null, [
+            'theme_mode' => $request->input('theme_mode'),
+        ]);
+
+        return back()->with('success', __('Tema actualizado correctamente.'));
+    }
+
+    /**
+     * Actualizar visibilidad de opciones del menu.
+     */
+    public function updateNavigation(Request $request)
+    {
+        SiteSetting::set('navigation', 'show_research', $request->has('show_research') ? '1' : '0', 'text');
+        SiteSetting::set('navigation', 'show_help', $request->has('show_help') ? '1' : '0', 'text');
+
+        $this->logActivity('navigation_settings_updated');
+
+        return back()->with('success', __('Opciones del menu actualizadas correctamente.'));
+    }
+
+    /**
      * Actualizar configuracion de herencia cultural.
      */
     public function updateHeritage(Request $request)

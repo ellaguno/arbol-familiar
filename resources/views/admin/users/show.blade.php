@@ -4,18 +4,18 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
-                <li class="flex items-center"><a href="{{ route('admin.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Admin') }}</a></li>
+                <li class="flex items-center"><a href="{{ route('admin.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Admin') }}</a></li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <a href="{{ route('admin.users') }}" class="text-gray-500 hover:text-gray-700 ml-1 md:ml-2">{{ __('Usuarios') }}</a>
+                    <a href="{{ route('admin.users') }}" class="text-theme-muted hover:text-theme-secondary ml-1 md:ml-2">{{ __('Usuarios') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ $user->email }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ $user->email }}</span>
                 </li>
             </ol>
         </nav>
@@ -31,15 +31,15 @@
                     <div class="card-body">
                         <dl class="grid grid-cols-2 gap-4">
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Email') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Email') }}</dt>
                                 <dd class="font-medium">{{ $user->email }}</dd>
                             </div>
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Nombre') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Nombre') }}</dt>
                                 <dd class="font-medium">{{ $user->full_name }}</dd>
                             </div>
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Estado email') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Estado email') }}</dt>
                                 <dd>
                                     @if($user->hasVerifiedEmail())
                                         <span class="text-green-600">{{ __('Verificado') }}</span>
@@ -49,7 +49,7 @@
                                 </dd>
                             </div>
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Estado cuenta') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Estado cuenta') }}</dt>
                                 <dd>
                                     @if($user->isLocked())
                                         <span class="text-red-600">{{ __('Bloqueado hasta :date', ['date' => $user->locked_until->format('d/m/Y H:i')]) }}</span>
@@ -59,15 +59,15 @@
                                 </dd>
                             </div>
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Privacidad') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Privacidad') }}</dt>
                                 <dd>{{ $user->privacy_level }}</dd>
                             </div>
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Registrado') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Registrado') }}</dt>
                                 <dd>{{ $user->created_at->format('d/m/Y H:i') }}</dd>
                             </div>
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Ultimo acceso') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Ultimo acceso') }}</dt>
                                 <dd>{{ $user->last_login_at ? $user->last_login_at->format('d/m/Y H:i') : __('Nunca') }}</dd>
                             </div>
                         </dl>
@@ -81,17 +81,17 @@
                     </div>
                     <div class="card-body">
                         <div class="grid grid-cols-3 gap-4">
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <div class="text-2xl font-bold text-gray-900">{{ $stats['persons_created'] }}</div>
-                                <div class="text-sm text-gray-500">{{ __('Personas creadas') }}</div>
+                            <div class="text-center p-4 bg-theme-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-theme">{{ $stats['persons_created'] }}</div>
+                                <div class="text-sm text-theme-muted">{{ __('Personas creadas') }}</div>
                             </div>
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <div class="text-2xl font-bold text-gray-900">{{ $stats['families_created'] }}</div>
-                                <div class="text-sm text-gray-500">{{ __('Familias creadas') }}</div>
+                            <div class="text-center p-4 bg-theme-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-theme">{{ $stats['families_created'] }}</div>
+                                <div class="text-sm text-theme-muted">{{ __('Familias creadas') }}</div>
                             </div>
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <div class="text-2xl font-bold text-gray-900">{{ $stats['media_created'] }}</div>
-                                <div class="text-sm text-gray-500">{{ __('Archivos subidos') }}</div>
+                            <div class="text-center p-4 bg-theme-secondary rounded-lg">
+                                <div class="text-2xl font-bold text-theme">{{ $stats['media_created'] }}</div>
+                                <div class="text-sm text-theme-muted">{{ __('Archivos subidos') }}</div>
                             </div>
                         </div>
                     </div>
@@ -103,11 +103,11 @@
                         <div class="card-header">
                             <h2 class="text-lg font-semibold">{{ __('Historial reciente') }}</h2>
                         </div>
-                        <div class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                        <div class="divide-y divide-theme-light max-h-64 overflow-y-auto">
                             @foreach($user->activityLog as $log)
                                 <div class="p-4 text-sm">
-                                    <span class="text-gray-600">{{ $log->action }}</span>
-                                    <span class="text-gray-400 text-xs ml-2">{{ $log->created_at->diffForHumans() }}</span>
+                                    <span class="text-theme-secondary">{{ $log->action }}</span>
+                                    <span class="text-theme-muted text-xs ml-2">{{ $log->created_at->diffForHumans() }}</span>
                                 </div>
                             @endforeach
                         </div>

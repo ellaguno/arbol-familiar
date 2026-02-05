@@ -50,13 +50,13 @@
     </style>
     @endpush
 
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-theme">
         <!-- Header -->
-        <div class="bg-white border-b sticky top-0 z-30">
+        <div class="bg-theme-card border-b border-theme sticky top-0 z-30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('tree.index') }}" class="text-gray-500 hover:text-gray-700">
+                        <a href="{{ route('tree.index') }}" class="text-theme-muted hover:text-theme-secondary">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                             </svg>
@@ -70,8 +70,8 @@
                                 </div>
                             @endif
                             <div>
-                                <h1 class="text-lg font-bold text-gray-900">{{ $person->full_name }}</h1>
-                                <p class="text-sm text-gray-500">
+                                <h1 class="text-lg font-bold text-theme">{{ $person->full_name }}</h1>
+                                <p class="text-sm text-theme-muted">
                                     @if($person->birth_date)
                                         {{ $person->birth_date->format('Y') }}
                                         @if(!$person->is_living && $person->death_date)
@@ -85,7 +85,7 @@
 
                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-2 mr-4">
-                            <label class="text-sm text-gray-500">{{ __('Generaciones') }}:</label>
+                            <label class="text-sm text-theme-muted">{{ __('Generaciones') }}:</label>
                             <select id="generations" class="form-input py-1 px-2 text-sm w-16">
                                 <option value="2">2</option>
                                 <option value="3" selected>3</option>
@@ -94,24 +94,24 @@
                             </select>
                         </div>
 
-                        <button id="btn-zoom-in" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="{{ __('Acercar') }}">
+                        <button id="btn-zoom-in" class="p-2 text-theme-muted hover:text-theme-secondary hover:bg-theme-secondary rounded" title="{{ __('Acercar') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
                             </svg>
                         </button>
-                        <button id="btn-zoom-out" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="{{ __('Alejar') }}">
+                        <button id="btn-zoom-out" class="p-2 text-theme-muted hover:text-theme-secondary hover:bg-theme-secondary rounded" title="{{ __('Alejar') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
                             </svg>
                         </button>
-                        <button id="btn-reset" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" title="{{ __('Centrar') }}">
+                        <button id="btn-reset" class="p-2 text-theme-muted hover:text-theme-secondary hover:bg-theme-secondary rounded" title="{{ __('Centrar') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
                         </button>
                         <a href="{{ route('gedcom.tree', ['person' => $person]) }}"
                            id="btn-export"
-                           class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                           class="p-2 text-theme-muted hover:text-theme-secondary hover:bg-theme-secondary rounded"
                            title="{{ __('Exportar GEDCOM') }}"
                            data-base-url="{{ route('gedcom.tree', ['person' => $person]) }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,10 +129,10 @@
         </div>
 
         <!-- Info Panel (sidebar) -->
-        <div id="info-panel" class="fixed right-0 top-20 w-80 bg-white shadow-xl border-l transform translate-x-full transition-transform duration-300 z-40" style="height: calc(100vh - 80px); overflow-y: auto;">
-            <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white">
-                <h3 class="font-semibold text-gray-900">{{ __('Detalles') }}</h3>
-                <button id="close-panel" class="text-gray-400 hover:text-gray-600">
+        <div id="info-panel" class="fixed right-0 top-20 w-80 bg-theme-card shadow-xl border-l border-theme transform translate-x-full transition-transform duration-300 z-40" style="height: calc(100vh - 80px); overflow-y: auto;">
+            <div class="p-4 border-b border-theme flex justify-between items-center sticky top-0 bg-theme-card">
+                <h3 class="font-semibold text-theme">{{ __('Detalles') }}</h3>
+                <button id="close-panel" class="text-theme-muted hover:text-theme-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -144,7 +144,7 @@
         </div>
 
         <!-- Legend -->
-        <div class="fixed bottom-4 left-4 bg-white rounded-lg shadow-lg p-3 z-20 text-xs">
+        <div class="fixed bottom-4 left-4 bg-theme-card rounded-lg shadow-lg p-3 z-20 text-xs text-theme">
             <h4 class="font-semibold mb-2">{{ __('Leyenda') }}</h4>
             <div class="space-y-1">
                 <div class="flex items-center gap-2">
@@ -1275,9 +1275,9 @@
                             <input type="file" class="hidden" accept="image/*" onchange="uploadPhoto(${person.id}, this)">
                         </label>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">{{ __('Clic para cambiar foto') }}</p>
-                    <h3 class="font-bold text-xl text-gray-900 mt-2">${person.name}</h3>
-                    ${person.birthDate ? `<p class="text-sm text-gray-500 mt-1">${person.birthDate}${!person.isLiving && person.deathDate ? ' - ' + person.deathDate : ''}</p>` : ''}
+                    <p class="text-xs text-theme-muted mt-2">{{ __('Clic para cambiar foto') }}</p>
+                    <h3 class="font-bold text-xl text-theme mt-2">${person.name}</h3>
+                    ${person.birthDate ? `<p class="text-sm text-theme-muted mt-1">${person.birthDate}${!person.isLiving && person.deathDate ? ' - ' + person.deathDate : ''}</p>` : ''}
                 </div>
 
                 <div class="space-y-3 mb-6">
@@ -1288,7 +1288,7 @@
                     ` : ''}
 
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">{{ __('Estado') }}:</span>
+                        <span class="text-theme-muted">{{ __('Estado') }}:</span>
                         <span class="font-medium">${person.isLiving ? '{{ __("Vivo/a") }}' : '{{ __("Fallecido/a") }}'}</span>
                     </div>
 
@@ -1328,11 +1328,11 @@
                     </a>
                 </div>
 
-                <div class="mt-6 pt-4 border-t">
-                    <h4 class="font-semibold text-gray-900 mb-3">{{ __('Agregar familiar') }}</h4>
+                <div class="mt-6 pt-4 border-t border-theme">
+                    <h4 class="font-semibold text-theme mb-3">{{ __('Agregar familiar') }}</h4>
                     <div class="grid grid-cols-2 gap-2">
                         ${person.hasFather
-                            ? `<span class="py-2 px-3 text-xs text-center border border-gray-200 text-gray-400 rounded cursor-not-allowed" title="{{ __('Ya tiene padre registrado') }}">
+                            ? `<span class="py-2 px-3 text-xs text-center border border-theme text-theme-muted rounded cursor-not-allowed" title="{{ __('Ya tiene padre registrado') }}">
                                 {{ __('Padre') }}
                                </span>`
                             : `<a href="${addPersonUrl}?relation=father&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 rounded hover:bg-blue-50">
@@ -1340,7 +1340,7 @@
                                </a>`
                         }
                         ${person.hasMother
-                            ? `<span class="py-2 px-3 text-xs text-center border border-gray-200 text-gray-400 rounded cursor-not-allowed" title="{{ __('Ya tiene madre registrada') }}">
+                            ? `<span class="py-2 px-3 text-xs text-center border border-theme text-theme-muted rounded cursor-not-allowed" title="{{ __('Ya tiene madre registrada') }}">
                                 {{ __('Madre') }}
                                </span>`
                             : `<a href="${addPersonUrl}?relation=mother&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 rounded hover:bg-blue-50">

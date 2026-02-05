@@ -4,8 +4,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Usuarios') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Gestionar usuarios del sistema') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Usuarios') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Gestionar usuarios del sistema') }}</p>
             </div>
             <a href="{{ route('admin.index') }}" class="btn-outline">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,27 +42,27 @@
         <!-- Lista de usuarios -->
         <div class="card">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-theme">
+                    <thead class="bg-theme-secondary">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Usuario') }}</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Estado') }}</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Roles') }}</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Ultimo acceso') }}</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('Acciones') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Usuario') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Estado') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Roles') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Ultimo acceso') }}</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-theme-muted uppercase">{{ __('Acciones') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-theme">
                         @forelse($users as $user)
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-theme-secondary">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                            <span class="text-gray-600 font-medium">{{ strtoupper(substr($user->email, 0, 1)) }}</span>
+                                        <div class="w-10 h-10 rounded-full bg-theme-secondary flex items-center justify-center">
+                                            <span class="text-theme-secondary font-medium">{{ strtoupper(substr($user->email, 0, 1)) }}</span>
                                         </div>
                                         <div>
-                                            <p class="font-medium text-gray-900">{{ $user->full_name }}</p>
-                                            <p class="text-sm text-gray-500">{{ $user->email }}</p>
+                                            <p class="font-medium text-theme">{{ $user->full_name }}</p>
+                                            <p class="text-sm text-theme-muted">{{ $user->email }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -82,7 +82,7 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">
+                                <td class="px-6 py-4 text-sm text-theme-muted">
                                     {{ $user->last_login_at ? $user->last_login_at->diffForHumans() : __('Nunca') }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -93,7 +93,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                             </svg>
                                         </a>
-                                        <a href="{{ route('admin.users.edit', $user) }}" class="text-gray-600 hover:text-gray-800">
+                                        <a href="{{ route('admin.users.edit', $user) }}" class="text-theme-secondary hover:text-theme">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
@@ -103,7 +103,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                <td colspan="5" class="px-6 py-12 text-center text-theme-muted">
                                     {{ __('No se encontraron usuarios') }}
                                 </td>
                             </tr>

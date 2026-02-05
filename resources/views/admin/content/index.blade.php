@@ -4,8 +4,8 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Contenido del sitio') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Edita los textos e imagenes de las pantallas principales') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Contenido del sitio') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Edita los textos e imagenes de las pantallas principales') }}</p>
             </div>
             <a href="{{ route('admin.index') }}" class="btn-outline">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,12 +25,12 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <h3 class="text-lg font-semibold text-theme group-hover:text-blue-600 transition-colors">
                                 {{ $group['name'] }}
                             </h3>
-                            <p class="text-sm text-gray-500 mt-1">{{ $group['description'] }}</p>
+                            <p class="text-sm text-theme-muted mt-1">{{ $group['description'] }}</p>
                         </div>
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-theme-muted group-hover:text-blue-500 transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </div>

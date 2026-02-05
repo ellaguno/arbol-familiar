@@ -3,8 +3,8 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Panel de Administracion') }}</h1>
-            <p class="text-gray-600 mt-1">{{ __('Gestion del sistema y estadisticas') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Panel de Administracion') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ __('Gestion del sistema y estadisticas') }}</p>
         </div>
 
         <!-- Estadisticas rapidas -->
@@ -89,8 +89,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">{{ __('Usuarios') }}</h3>
-                        <p class="text-sm text-gray-500">{{ __('Gestionar usuarios') }}</p>
+                        <h3 class="font-semibold text-theme">{{ __('Usuarios') }}</h3>
+                        <p class="text-sm text-theme-muted">{{ __('Gestionar usuarios') }}</p>
                     </div>
                 </div>
             </a>
@@ -103,8 +103,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">{{ __('Contenido') }}</h3>
-                        <p class="text-sm text-gray-500">{{ __('Textos e imagenes') }}</p>
+                        <h3 class="font-semibold text-theme">{{ __('Contenido') }}</h3>
+                        <p class="text-sm text-theme-muted">{{ __('Textos e imagenes') }}</p>
                     </div>
                 </div>
             </a>
@@ -117,8 +117,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">{{ __('Reportes') }}</h3>
-                        <p class="text-sm text-gray-500">{{ __('Estadisticas') }}</p>
+                        <h3 class="font-semibold text-theme">{{ __('Reportes') }}</h3>
+                        <p class="text-sm text-theme-muted">{{ __('Estadisticas') }}</p>
                     </div>
                 </div>
             </a>
@@ -131,23 +131,23 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">{{ __('Actividad') }}</h3>
-                        <p class="text-sm text-gray-500">{{ __('Registro de acciones') }}</p>
+                        <h3 class="font-semibold text-theme">{{ __('Actividad') }}</h3>
+                        <p class="text-sm text-theme-muted">{{ __('Registro de acciones') }}</p>
                     </div>
                 </div>
             </a>
 
             <a href="{{ route('admin.settings') }}" class="card hover:shadow-md transition-shadow">
                 <div class="card-body flex items-center gap-4">
-                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-10 h-10 bg-theme-secondary rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-theme-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">{{ __('Configuracion') }}</h3>
-                        <p class="text-sm text-gray-500">{{ __('Sistema y colores') }}</p>
+                        <h3 class="font-semibold text-theme">{{ __('Configuracion') }}</h3>
+                        <p class="text-sm text-theme-muted">{{ __('Sistema y colores') }}</p>
                     </div>
                 </div>
             </a>
@@ -160,19 +160,19 @@
                     <h2 class="text-lg font-semibold">{{ __('Usuarios recientes') }}</h2>
                     <a href="{{ route('admin.users') }}" class="text-sm text-mf-primary hover:underline">{{ __('Ver todos') }}</a>
                 </div>
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-theme-light">
                     @forelse($recentUsers as $user)
-                        <a href="{{ route('admin.users.show', $user) }}" class="block p-4 hover:bg-gray-50 transition-colors">
+                        <a href="{{ route('admin.users.show', $user) }}" class="block p-4 hover:bg-theme-secondary transition-colors">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                    <span class="text-gray-600 font-medium">{{ substr($user->email, 0, 1) }}</span>
+                                <div class="w-10 h-10 rounded-full bg-theme-secondary flex items-center justify-center">
+                                    <span class="text-theme-secondary font-medium">{{ substr($user->email, 0, 1) }}</span>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-gray-900 truncate">{{ $user->full_name }}</p>
-                                    <p class="text-sm text-gray-500 truncate">{{ $user->email }}</p>
+                                    <p class="font-medium text-theme truncate">{{ $user->full_name }}</p>
+                                    <p class="text-sm text-theme-muted truncate">{{ $user->email }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-xs text-gray-400">{{ $user->created_at->diffForHumans() }}</p>
+                                    <p class="text-xs text-theme-muted">{{ $user->created_at->diffForHumans() }}</p>
                                     @if($user->is_admin)
                                         <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Admin</span>
                                     @endif
@@ -180,7 +180,7 @@
                             </div>
                         </a>
                     @empty
-                        <div class="p-4 text-center text-gray-500">{{ __('No hay usuarios recientes') }}</div>
+                        <div class="p-4 text-center text-theme-muted">{{ __('No hay usuarios recientes') }}</div>
                     @endforelse
                 </div>
             </div>
@@ -191,26 +191,26 @@
                     <h2 class="text-lg font-semibold">{{ __('Actividad reciente') }}</h2>
                     <a href="{{ route('admin.activity') }}" class="text-sm text-mf-primary hover:underline">{{ __('Ver todo') }}</a>
                 </div>
-                <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                <div class="divide-y divide-theme-light max-h-96 overflow-y-auto">
                     @forelse($recentActivity as $log)
                         <div class="p-4">
                             <div class="flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-8 h-8 rounded-full bg-theme-secondary flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm text-gray-900">
+                                    <p class="text-sm text-theme">
                                         <span class="font-medium">{{ $log->user?->email ?? 'Sistema' }}</span>
-                                        <span class="text-gray-500">{{ $log->action }}</span>
+                                        <span class="text-theme-muted">{{ $log->action }}</span>
                                     </p>
-                                    <p class="text-xs text-gray-400">{{ $log->created_at->diffForHumans() }}</p>
+                                    <p class="text-xs text-theme-muted">{{ $log->created_at->diffForHumans() }}</p>
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <div class="p-4 text-center text-gray-500">{{ __('No hay actividad reciente') }}</div>
+                        <div class="p-4 text-center text-theme-muted">{{ __('No hay actividad reciente') }}</div>
                     @endforelse
                 </div>
             </div>

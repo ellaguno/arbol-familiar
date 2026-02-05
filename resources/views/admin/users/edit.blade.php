@@ -4,18 +4,18 @@
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
-                <li class="flex items-center"><a href="{{ route('admin.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Admin') }}</a></li>
+                <li class="flex items-center"><a href="{{ route('admin.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Admin') }}</a></li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <a href="{{ route('admin.users') }}" class="text-gray-500 hover:text-gray-700 ml-1 md:ml-2">{{ __('Usuarios') }}</a>
+                    <a href="{{ route('admin.users') }}" class="text-theme-muted hover:text-theme-secondary ml-1 md:ml-2">{{ __('Usuarios') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Editar') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Editar') }}</span>
                 </li>
             </ol>
         </nav>
@@ -79,20 +79,20 @@
 
                         <div>
                             <label for="privacy_level_note" class="form-label">{{ __('Nota') }}</label>
-                            <p class="text-sm text-gray-500">{{ __('El nivel de privacidad controla quien puede ver la informacion del usuario.') }}</p>
+                            <p class="text-sm text-theme-muted">{{ __('El nivel de privacidad controla quien puede ver la informacion del usuario.') }}</p>
                         </div>
                     </div>
 
                     <div class="border-t pt-6 space-y-4">
-                        <h3 class="font-semibold text-gray-900">{{ __('Permisos y estado') }}</h3>
+                        <h3 class="font-semibold text-theme">{{ __('Permisos y estado') }}</h3>
 
                         <div class="flex items-center gap-6">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" name="is_admin" value="1"
                                        {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}
                                        {{ $user->id === auth()->id() ? 'disabled' : '' }}
-                                       class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500">
-                                <span class="text-sm text-gray-700">{{ __('Administrador') }}</span>
+                                       class="w-4 h-4 text-red-600 rounded border-theme focus:ring-red-500">
+                                <span class="text-sm text-theme-secondary">{{ __('Administrador') }}</span>
                             </label>
                         </div>
 
@@ -124,8 +124,8 @@
                 <div class="card-body">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="font-medium text-gray-900">{{ __('Eliminar usuario') }}</h3>
-                            <p class="text-sm text-gray-500">{{ __('Esta accion no se puede deshacer. Se eliminaran todos los datos del usuario.') }}</p>
+                            <h3 class="font-medium text-theme">{{ __('Eliminar usuario') }}</h3>
+                            <p class="text-sm text-theme-muted">{{ __('Esta accion no se puede deshacer. Se eliminaran todos los datos del usuario.') }}</p>
                         </div>
                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
                               onsubmit="return confirm('{{ __('Esta seguro de eliminar este usuario? Esta accion no se puede deshacer.') }}')">

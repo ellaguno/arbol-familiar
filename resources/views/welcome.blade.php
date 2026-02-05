@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $siteThemeClass ?? '' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -48,7 +48,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-white">
+<body class="font-sans antialiased" style="background-color: var(--mf-bg-card);">
     <x-header :hideLogo="true" />
 
     @php
@@ -69,7 +69,7 @@
     </section>
 
     <!-- Contenido principal -->
-    <section class="bg-gradient-to-b from-gray-100 to-white py-12">
+    <section class="bg-gradient-to-b from-theme to-theme-card py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-start">
                 <!-- Lado izquierdo - Contenido -->
@@ -87,7 +87,7 @@
                         {{ $sc ? $sc->content('welcome', 'hero_subtitle', __('Construye tu árbol genealógico y descubre los momentos más importantes de tu historia.')) : __('Construye tu árbol genealógico y descubre los momentos más importantes de tu historia.') }}
                     </p>
 
-                    <div class="text-gray-700 space-y-4 text-sm leading-relaxed">
+                    <div class="text-theme-secondary space-y-4 text-sm leading-relaxed">
                         <p>
                             <strong style="color: var(--mf-primary, #3b82f6);">{{ config('app.name') }}</strong> {{ $sc ? $sc->content('welcome', 'description_1', __('es un espacio creado para reunir a las familias y sus descendientes. Nuestra intención es preservar la memoria de nuestras familias y fortalecer los lazos con nuestra comunidad y nuestros parientes en todas partes del mundo.')) : __('es un espacio creado para reunir a las familias y sus descendientes. Nuestra intención es preservar la memoria de nuestras familias y fortalecer los lazos con nuestra comunidad y nuestros parientes en todas partes del mundo.') }}
                         </p>
@@ -100,15 +100,15 @@
                 <!-- Lado derecho - Login y Registro -->
                 <div class="space-y-4">
                     <!-- Caja de Login -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ $sc ? $sc->content('welcome', 'login_title', __('¡Hola! Inicia tu sesión')) : __('¡Hola! Inicia tu sesión') }}</h3>
+                    <div class="bg-theme-card rounded-lg shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-theme mb-4">{{ $sc ? $sc->content('welcome', 'login_title', __('¡Hola! Inicia tu sesión')) : __('¡Hola! Inicia tu sesión') }}</h3>
 
                         <form method="POST" action="{{ route('login') }}" class="space-y-4" id="welcome-login-form">
                             @csrf
 
                             <div>
                                 <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:border-blue-500" style="--tw-ring-color: var(--mf-primary, #3b82f6);"
+                                       class="w-full px-4 py-2 border border-theme rounded focus:ring-2 focus:border-blue-500" style="--tw-ring-color: var(--mf-primary, #3b82f6);"
                                        placeholder="{{ __('Usuario') }}" required autofocus>
                                 @error('email')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -117,7 +117,7 @@
 
                             <div>
                                 <input type="password" name="password" id="password"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:border-blue-500" style="--tw-ring-color: var(--mf-primary, #3b82f6);"
+                                       class="w-full px-4 py-2 border border-theme rounded focus:ring-2 focus:border-blue-500" style="--tw-ring-color: var(--mf-primary, #3b82f6);"
                                        placeholder="{{ __('Contraseña') }}" required>
                                 @error('password')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -136,7 +136,7 @@
                                 @error('g-recaptcha-response')
                                     <p class="text-red-500 text-sm">{{ $message }}</p>
                                 @enderror
-                                <p class="text-xs text-gray-500 text-center">
+                                <p class="text-xs text-theme-muted text-center">
                                     {{ __('Protegido por reCAPTCHA') }} -
                                     <a href="https://policies.google.com/privacy" target="_blank" class="underline">{{ __('Privacidad') }}</a> y
                                     <a href="https://policies.google.com/terms" target="_blank" class="underline">{{ __('Términos') }}</a>
@@ -171,51 +171,51 @@
     </section>
 
     <!-- Espaciador para las imagenes que salen (solo desktop) -->
-    <div class="hidden md:block h-20 bg-white"></div>
+    <div class="hidden md:block h-20 bg-theme-card"></div>
 
     <!-- Seccion de tres columnas -->
     @php
         $featureShape = $sc ? $sc->content('welcome', 'feature_images_shape', 'round') : 'round';
         $featureRounded = $featureShape === 'round' ? 'rounded-full' : 'rounded-xl';
     @endphp
-    <section class="py-16 md:pb-16 md:pt-0" style="margin-top: 50px; background-color:#eae8e4;">
+    <section class="py-16 md:pb-16 md:pt-0 bg-theme-secondary" style="margin-top: 50px;">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-12">
                 <!-- Columna 1 -->
                 <div class="text-center">
-                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-gray-200 floating-image">
+                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-theme-secondary floating-image">
                         <img src="{{ asset($sc ? $sc->content('welcome', 'feature_1_image', 'images/feature-start.jpg') : 'images/feature-start.jpg') }}" alt="{{ __('Empezar') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>1</text></svg>'">
                     </div>
                     <div class="floating-text">
                         <h3 class="text-xl font-bold mb-3" style="color: var(--mf-primary, #3b82f6);">{{ $sc ? $sc->content('welcome', 'feature_1_title', __('¡Solo necesitas empezar!')) : __('¡Solo necesitas empezar!') }}</h3>
-                        <p class="text-gray-600 text-sm leading-relaxed">
+                        <p class="text-theme-secondary text-sm leading-relaxed">
                             {{ $sc ? $sc->content('welcome', 'feature_1_text', __('Es muy sencillo, ingresa primero tus datos y después podrás añadir a tus padres, abuelos, hermanos, hijos y demás familiares. Una vez agregados podrás invitarlos a participar en tu árbol y compartir información, imágenes y documentos de su historia.')) : __('Es muy sencillo, ingresa primero tus datos y después podrás añadir a tus padres, abuelos, hermanos, hijos y demás familiares. Una vez agregados podrás invitarlos a participar en tu árbol y compartir información, imágenes y documentos de su historia.') }}
                         </p>
                     </div>
                 </div>
                 <!-- Columna 2 -->
                 <div class="text-center">
-                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-gray-200 floating-image">
+                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-theme-secondary floating-image">
                         <img src="{{ asset($sc ? $sc->content('welcome', 'feature_2_image', 'images/feature-import.jpg') : 'images/feature-import.jpg') }}" alt="{{ __('Importar') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>2</text></svg>'">
                     </div>
                     <div class="floating-text">
                         <h3 class="text-xl font-bold mb-3" style="color: var(--mf-primary, #3b82f6);">{{ $sc ? $sc->content('welcome', 'feature_2_title', __('¿Tienes un árbol en otro sitio?')) : __('¿Tienes un árbol en otro sitio?') }}</h3>
-                        <p class="text-gray-600 text-sm leading-relaxed">
+                        <p class="text-theme-secondary text-sm leading-relaxed">
                             {{ $sc ? $sc->content('welcome', 'feature_2_text', __('¡Tráelo para acá! Esta plataforma trabaja con datos de clasificación Gedcom, el estándar compartido de las principales bases de datos genealógicas, así que si tienes registros en otras plataformas, puedes importar su información fácilmente.')) : __('¡Tráelo para acá! Esta plataforma trabaja con datos de clasificación Gedcom, el estándar compartido de las principales bases de datos genealógicas, así que si tienes registros en otras plataformas, puedes importar su información fácilmente.') }}
                         </p>
                     </div>
                 </div>
                 <!-- Columna 3 -->
                 <div class="text-center">
-                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-gray-200 floating-image">
+                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-theme-secondary floating-image">
                         <img src="{{ asset($sc ? $sc->content('welcome', 'feature_3_image', 'images/feature-privacy.jpg') : 'images/feature-privacy.jpg') }}" alt="{{ __('Privacidad') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>3</text></svg>'">
                     </div>
                     <div class="floating-text">
                         <h3 class="text-xl font-bold mb-3" style="color: var(--mf-primary, #3b82f6);">{{ $sc ? $sc->content('welcome', 'feature_3_title', __('Tú eliges con quien compartir.')) : __('Tú eliges con quien compartir.') }}</h3>
-                        <p class="text-gray-600 text-sm leading-relaxed">
+                        <p class="text-theme-secondary text-sm leading-relaxed">
                             {{ $sc ? $sc->content('welcome', 'feature_3_text', __('Tu información es tuya y no saldrá de este sitio. Podrás elegir compartirlo con tu familia y tu comunidad. Solo podrán consultarla quienes tú autorices.')) : __('Tu información es tuya y no saldrá de este sitio. Podrás elegir compartirlo con tu familia y tu comunidad. Solo podrán consultarla quienes tú autorices.') }}
                         </p>
                     </div>
@@ -225,23 +225,23 @@
     </section>
 
     <!-- Espaciador inferior (solo desktop) -->
-    <div class="hidden md:block h-20" style="background-color:#eae8e4;"></div>
+    <div class="hidden md:block h-20 bg-theme-secondary"></div>
 
     <!-- Seccion: Uso libre -->
-    <section class="py-12 border-b-4 border-white" style="background-color: #cfcfcf;">
+    <section class="py-12 border-b-4 border-theme bg-theme">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-8 items-center">
                 <div>
                     <h2 class="text-2xl font-bold mb-4" style="color: var(--mf-primary, #3b82f6);">{{ config('app.name') }} {{ $sc ? $sc->content('welcome', 'free_title', __('es de uso libre.')) : __('es de uso libre.') }}</h2>
-                    <p class="text-gray-700 text-sm leading-relaxed mb-4">
+                    <p class="text-theme-secondary text-sm leading-relaxed mb-4">
                         {{ __('El ingreso y uso de') }} <strong style="color: var(--mf-primary, #3b82f6);">{{ config('app.name') }}</strong> {{ $sc ? $sc->content('welcome', 'free_text_1', __('es gratuito para todos los usuarios y sus familiares.')) : __('es gratuito para todos los usuarios y sus familiares.') }}
                     </p>
-                    <p class="text-gray-700 text-sm leading-relaxed">
+                    <p class="text-theme-secondary text-sm leading-relaxed">
                         {{ $sc ? $sc->content('welcome', 'free_text_2', __('Registra tu historia familiar, conecta con tus parientes y preserva la memoria de tu familia para las generaciones futuras.')) : __('Registra tu historia familiar, conecta con tus parientes y preserva la memoria de tu familia para las generaciones futuras.') }}
                     </p>
                 </div>
                 <div class="flex justify-center lg:justify-end">
-                    <div class="w-110 h-64 rounded-lg overflow-hidden bg-gray-300">
+                    <div class="w-110 h-64 rounded-lg overflow-hidden bg-theme-secondary">
                         <img src="/images/feature-privacy.jpg" alt="{{ __('Familia') }}" class="w-full h-full object-cover"
                              onerror="this.style.display='none'">
                     </div>

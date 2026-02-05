@@ -5,8 +5,8 @@
         <!-- Encabezado -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Personas') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Administra las personas en tu arbol genealogico') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Personas') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Administra las personas en tu arbol genealogico') }}</p>
             </div>
             <a href="{{ route('persons.create') }}" class="btn-primary">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +29,7 @@
                                        value="{{ request('search') }}"
                                        placeholder="{{ __('Nombre, apellido, apodo...') }}"
                                        class="form-input pl-10">
-                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </div>
@@ -126,8 +126,8 @@
                     <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('No hay personas') }}</h3>
-                    <p class="text-gray-500 mb-4">{{ __('Comienza agregando personas a tu arbol genealogico.') }}</p>
+                    <h3 class="text-lg font-medium text-theme mb-2">{{ __('No hay personas') }}</h3>
+                    <p class="text-theme-muted mb-4">{{ __('Comienza agregando personas a tu arbol genealogico.') }}</p>
                     <a href="{{ route('persons.create') }}" class="btn-primary">
                         {{ __('Agregar primera persona') }}
                     </a>
@@ -146,8 +146,8 @@
                                              alt="{{ $person->full_name }}"
                                              class="w-16 h-16 rounded-full object-cover">
                                     @else
-                                        <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="w-16 h-16 rounded-full bg-theme-secondary flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                             </svg>
                                         </div>
@@ -157,12 +157,12 @@
                                 <!-- Info -->
                                 <div class="flex-1 min-w-0">
                                     <a href="{{ route('persons.show', $person) }}" class="block">
-                                        <h3 class="text-lg font-semibold text-gray-900 truncate hover:text-mf-primary">
+                                        <h3 class="text-lg font-semibold text-theme truncate hover:text-mf-primary">
                                             {{ $person->full_name }}
                                         </h3>
                                     </a>
                                     @if($person->nickname)
-                                        <p class="text-sm text-gray-500">"{{ $person->nickname }}"</p>
+                                        <p class="text-sm text-theme-muted">"{{ $person->nickname }}"</p>
                                     @endif
                                     <div class="mt-2 flex flex-wrap gap-2">
                                         @if($person->gender)
@@ -182,7 +182,7 @@
                                         @endif
                                     </div>
                                     @if($person->birth_date || $person->residence_place)
-                                        <p class="text-sm text-gray-500 mt-2">
+                                        <p class="text-sm text-theme-muted mt-2">
                                             @if($person->birth_date)
                                                 {{ $person->birth_date->format('d/m/Y') }}
                                                 @if($person->age)
@@ -203,12 +203,12 @@
                                     {{ __('Ver detalle') }}
                                 </a>
                                 <div class="flex gap-2">
-                                    <a href="{{ route('persons.edit', $person) }}" class="text-gray-500 hover:text-gray-700">
+                                    <a href="{{ route('persons.edit', $person) }}" class="text-theme-muted hover:text-theme-secondary">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
                                     </a>
-                                    <a href="{{ route('persons.relationships', $person) }}" class="text-gray-500 hover:text-gray-700">
+                                    <a href="{{ route('persons.relationships', $person) }}" class="text-theme-muted hover:text-theme-secondary">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                         </svg>

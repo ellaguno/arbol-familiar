@@ -5,13 +5,13 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('messages.inbox') }}" class="text-gray-500 hover:text-gray-700">{{ __('Mensajes') }}</a>
+                    <a href="{{ route('messages.inbox') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Mensajes') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium truncate max-w-xs ml-1 md:ml-2">{{ Str::limit($message->subject, 30) }}</span>
+                    <span class="text-theme-secondary font-medium truncate max-w-xs ml-1 md:ml-2">{{ Str::limit($message->subject, 30) }}</span>
                 </li>
             </ol>
         </nav>
@@ -22,8 +22,8 @@
                 <div class="flex items-start justify-between">
                     <div class="flex items-start gap-4">
                         @if($message->isSystemMessage())
-                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-12 h-12 rounded-full bg-theme-secondary flex items-center justify-center">
+                                <svg class="w-6 h-6 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                 </svg>
                             </div>
@@ -36,14 +36,14 @@
                         @endif
 
                         <div>
-                            <h1 class="text-xl font-bold text-gray-900">{{ $message->subject }}</h1>
-                            <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                            <h1 class="text-xl font-bold text-theme">{{ $message->subject }}</h1>
+                            <div class="flex items-center gap-2 mt-1 text-sm text-theme-muted">
                                 @if($message->sender_id === Auth::id())
                                     <span>{{ __('Para:') }} <strong>{{ $message->recipient?->name ?? __('Usuario eliminado') }}</strong></span>
                                 @else
                                     <span>{{ __('De:') }} <strong>{{ $message->sender?->name ?? __('Sistema') }}</strong></span>
                                 @endif
-                                <span class="text-gray-300">|</span>
+                                <span class="text-theme-muted">|</span>
                                 <span>{{ $message->created_at->format('d/m/Y H:i') }}</span>
                             </div>
                         </div>
@@ -74,11 +74,11 @@
 
             <!-- Persona relacionada -->
             @if($message->relatedPerson)
-                <div class="px-6 py-3 bg-gray-50 border-b flex items-center gap-2">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="px-6 py-3 bg-theme-secondary border-b flex items-center gap-2">
+                    <svg class="w-4 h-4 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
-                    <span class="text-sm text-gray-600">{{ __('Relacionado con:') }}</span>
+                    <span class="text-sm text-theme-secondary">{{ __('Relacionado con:') }}</span>
                     <a href="{{ route('persons.show', $message->relatedPerson) }}" class="text-sm text-mf-primary hover:underline font-medium">
                         {{ $message->relatedPerson->full_name }}
                     </a>
