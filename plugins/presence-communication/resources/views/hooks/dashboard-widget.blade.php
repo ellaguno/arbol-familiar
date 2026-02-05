@@ -1,5 +1,5 @@
 {{-- Widget "Quien esta en linea" para el dashboard --}}
-<div class="card mt-6" x-data="presenceWidget()" x-init="init()">
+<div class="card" x-data="presenceWidget()" x-init="init()">
     <div class="card-body">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-theme flex items-center gap-2">
@@ -163,9 +163,7 @@ function presenceWidget() {
         },
 
         openChat(userId, userName, userPhoto) {
-            window.dispatchEvent(new CustomEvent('open-chat', {
-                detail: { userId, userName, userPhoto }
-            }));
+            window.location.href = '{{ route("chat.index") }}?open_chat=' + userId;
         }
     };
 }

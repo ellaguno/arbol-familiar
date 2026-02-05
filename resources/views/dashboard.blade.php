@@ -164,6 +164,9 @@
                         </div>
                     </div>
                 @endif
+
+                {{-- Widgets de plugins (ej. Usuarios en linea) --}}
+                {!! $hooks->render('dashboard.widgets', ['user' => auth()->user()]) !!}
             </div>
 
             <!-- Columna lateral -->
@@ -265,6 +268,5 @@
 
             </div>
         </div>
-        {!! $hooks->render('dashboard.widgets', ['user' => auth()->user()]) !!}
     </div>
 </x-app-layout>

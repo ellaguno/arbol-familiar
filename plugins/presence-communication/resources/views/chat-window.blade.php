@@ -416,9 +416,8 @@
             signalPollInterval: null,
             _ringtoneOscillators: [],
 
-            init() {
-                this.fetchOnline();
-                this.fetchConversations();
+            async init() {
+                await Promise.all([this.fetchOnline(), this.fetchConversations()]);
 
                 // Poll para usuarios en linea cada 30s
                 this.pollInterval = setInterval(() => this.fetchOnline(), 30000);
@@ -435,11 +434,28 @@
                     this.selectUser(e.detail.userId, e.detail.userName, e.detail.userPhoto || null);
                 });
 
-                // Check URL para llamada entrante redirect
+                // Check URL para abrir chat con usuario especifico o llamada entrante
                 const params = new URLSearchParams(window.location.search);
+                const openChatWith = params.get('open_chat');
+                if (openChatWith) {
+                    const allUsers = [...this.familyUsers, ...this.communityUsers, ...this.publicUsers];
+                    const targetUser = allUsers.find(u => u.id == openChatWith);
+                    if (targetUser) {
+                        this.selectUser(targetUser.id, targetUser.name, targetUser.photo || null);
+                    } else {
+                        // Buscar en conversaciones existentes
+                        const targetConv = this.conversations.find(c => c.user_id == openChatWith);
+                        if (targetConv) {
+                            this.selectUser(targetConv.user_id, targetConv.name, targetConv.photo || null);
+                        } else {
+                            this.selectUser(parseInt(openChatWith), '', null);
+                        }
+                    }
+                    window.history.replaceState({}, '', window.location.pathname);
+                }
+
                 const incomingCall = params.get('incoming_call');
                 if (incomingCall) {
-                    // Limpiar URL
                     window.history.replaceState({}, '', window.location.pathname);
                 }
 
