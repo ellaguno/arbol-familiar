@@ -30,28 +30,133 @@ class GedcomController extends Controller
     }
 
     /**
-     * Procesar archivo GEDCOM y mostrar preview.
+     * Procesar archivo GEDCOM o GEDZIP y mostrar preview.
      */
     public function preview(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:ged,txt|max:10240', // 10MB max
+            'file' => 'required|file|max:51200', // 50MB max para GEDZIP
         ]);
 
         $file = $request->file('file');
-        $content = file_get_contents($file->getRealPath());
+        $extension = strtolower($file->getClientOriginalExtension());
 
-        // Guardar archivo temporalmente
+        // Validar extensión manualmente (Laravel no reconoce .gdz)
+        $allowedExtensions = ['ged', 'txt', 'zip', 'gdz'];
+        if (!in_array($extension, $allowedExtensions)) {
+            return back()->withErrors(['file' => __('Formato no válido. Use .ged, .txt, .zip o .gdz')]);
+        }
+
+        // Determinar si es GEDZIP
+        $isGedzip = in_array($extension, ['zip', 'gdz']);
+        $content = '';
+        $mediaFiles = [];
+        $tempMediaPath = null;
+
+        if ($isGedzip) {
+            try {
+                $extracted = $this->extractGedzip($file);
+                $content = $extracted['gedcom_content'];
+                $mediaFiles = $extracted['media_files'];
+                $tempMediaPath = $extracted['temp_path'];
+            } catch (\Exception $e) {
+                return back()->withErrors(['file' => $e->getMessage()]);
+            }
+        } else {
+            $content = file_get_contents($file->getRealPath());
+        }
+
+        // Guardar GEDCOM temporalmente
         $tempPath = 'temp/gedcom_' . Auth::id() . '_' . time() . '.ged';
         Storage::put($tempPath, $content);
 
         $preview = $this->parser->getPreview($content);
 
+        // Agregar info de medios físicos del ZIP al preview
+        $preview['media_files'] = $mediaFiles;
+        $preview['media_count'] = count($mediaFiles);
+
         return view('gedcom.preview', [
             'preview' => $preview,
             'tempPath' => $tempPath,
+            'tempMediaPath' => $tempMediaPath,
             'fileName' => $file->getClientOriginalName(),
+            'isGedzip' => $isGedzip,
         ]);
+    }
+
+    /**
+     * Extraer contenido de archivo GEDZIP.
+     */
+    protected function extractGedzip($file): array
+    {
+        $zip = new \ZipArchive();
+        $tempDir = storage_path('app/temp/gedzip_' . Auth::id() . '_' . time());
+
+        if ($zip->open($file->getRealPath()) !== true) {
+            throw new \Exception(__('No se pudo abrir el archivo ZIP.'));
+        }
+
+        // Crear directorio temporal
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $zip->extractTo($tempDir);
+        $zip->close();
+
+        // Buscar archivo .ged y archivos multimedia
+        $gedcomContent = '';
+        $mediaFiles = [];
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($tempDir, \RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $fileInfo) {
+            $relativePath = str_replace($tempDir . '/', '', $fileInfo->getPathname());
+            $ext = strtolower($fileInfo->getExtension());
+
+            if ($ext === 'ged') {
+                $gedcomContent = file_get_contents($fileInfo->getPathname());
+            } elseif ($this->isMediaFile($ext)) {
+                $mediaFiles[] = [
+                    'path' => $fileInfo->getPathname(),
+                    'relative_path' => $relativePath,
+                    'name' => $fileInfo->getFilename(),
+                    'size' => $fileInfo->getSize(),
+                    'extension' => $ext,
+                ];
+            }
+        }
+
+        if (empty($gedcomContent)) {
+            // Limpiar directorio temporal
+            $this->deleteDirectory($tempDir);
+            throw new \Exception(__('No se encontró archivo GEDCOM en el ZIP.'));
+        }
+
+        return [
+            'gedcom_content' => $gedcomContent,
+            'media_files' => $mediaFiles,
+            'temp_path' => $tempDir,
+        ];
+    }
+
+    /**
+     * Verificar si la extensión es un archivo multimedia válido.
+     */
+    protected function isMediaFile(string $ext): bool
+    {
+        $mediaExtensions = [
+            // Imágenes
+            'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tif', 'tiff',
+            // Documentos
+            'pdf', 'doc', 'docx', 'txt',
+            // Audio (futuro soporte)
+            'wav', 'mp3',
+        ];
+        return in_array(strtolower($ext), $mediaExtensions);
     }
 
     /**
@@ -61,14 +166,21 @@ class GedcomController extends Controller
     {
         $request->validate([
             'temp_path' => 'required|string',
+            'temp_media_path' => 'nullable|string',
             'privacy_level' => 'required|in:private,family,community,public',
             'check_duplicates' => 'boolean',
             'update_existing' => 'boolean',
+            'import_media' => 'boolean',
         ]);
 
         $tempPath = $request->input('temp_path');
+        $tempMediaPath = $request->input('temp_media_path');
 
         if (!Storage::exists($tempPath)) {
+            // Limpiar directorio de medios si existe
+            if ($tempMediaPath && is_dir($tempMediaPath)) {
+                $this->deleteDirectory($tempMediaPath);
+            }
             return redirect()->route('gedcom.import')
                 ->with('error', __('El archivo temporal ha expirado. Por favor, sube el archivo nuevamente.'));
         }
@@ -79,12 +191,17 @@ class GedcomController extends Controller
             'privacy_level' => $request->input('privacy_level', 'family'),
             'check_duplicates' => $request->boolean('check_duplicates'),
             'update_existing' => $request->boolean('update_existing'),
+            'import_media' => $request->boolean('import_media'),
+            'temp_media_path' => $tempMediaPath,
         ];
 
         $result = $this->parser->import($content, $options);
 
-        // Eliminar archivo temporal
+        // Eliminar archivos temporales
         Storage::delete($tempPath);
+        if ($tempMediaPath && is_dir($tempMediaPath)) {
+            $this->deleteDirectory($tempMediaPath);
+        }
 
         if ($result['success']) {
             return redirect()->route('gedcom.result')
@@ -93,6 +210,25 @@ class GedcomController extends Controller
 
         return redirect()->route('gedcom.import')
             ->with('error', __('Error al importar: ') . implode(', ', $result['errors']));
+    }
+
+    /**
+     * Eliminar directorio recursivamente.
+     */
+    protected function deleteDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) return;
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $fileinfo) {
+            $fileinfo->isDir() ? rmdir($fileinfo->getRealPath()) : unlink($fileinfo->getRealPath());
+        }
+
+        rmdir($dir);
     }
 
     /**

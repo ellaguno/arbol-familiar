@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Family;
+use App\Models\Media;
 use App\Models\Person;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class GedcomParser
@@ -16,7 +18,9 @@ class GedcomParser
     protected int $currentLine = 0;
     protected array $individuals = [];
     protected array $families = [];
+    protected array $mediaObjects = []; // GEDCOM OBJE records (@O001@ => data)
     protected array $idMapping = []; // GEDCOM ID -> Database ID
+    protected array $mediaMapping = []; // GEDCOM media ID -> Database Media ID
     protected array $errors = [];
     protected array $warnings = [];
     protected array $stats = [
@@ -26,6 +30,9 @@ class GedcomParser
         'events_created' => 0,
         'families_skipped' => 0,
         'children_skipped' => 0,
+        'media_imported' => 0,
+        'media_linked' => 0,
+        'media_skipped' => 0,
     ];
 
     /**
@@ -37,6 +44,7 @@ class GedcomParser
         $this->currentLine = 0;
         $this->individuals = [];
         $this->families = [];
+        $this->mediaObjects = [];
         $this->errors = [];
         $this->warnings = [];
 
@@ -47,6 +55,8 @@ class GedcomParser
                     $this->individuals[$record['id']] = $record;
                 } elseif ($record['type'] === 'FAM') {
                     $this->families[$record['id']] = $record;
+                } elseif ($record['type'] === 'OBJE') {
+                    $this->mediaObjects[$record['id']] = $record;
                 }
             }
         }
@@ -57,6 +67,7 @@ class GedcomParser
         return [
             'individuals' => $this->individuals,
             'families' => $this->families,
+            'media_objects' => $this->mediaObjects,
             'errors' => $this->errors,
             'warnings' => $this->warnings,
         ];
@@ -203,8 +214,10 @@ class GedcomParser
         $preview = [
             'total_individuals' => count($data['individuals']),
             'total_families' => count($data['families']),
+            'total_media_objects' => count($data['media_objects']),
             'individuals' => [],
             'families' => [],
+            'media_objects' => [],
             'errors' => $data['errors'],
             'warnings' => $data['warnings'],
         ];
@@ -245,6 +258,20 @@ class GedcomParser
             $count++;
         }
 
+        // Mostrar primeros 10 objetos multimedia
+        $count = 0;
+        foreach ($data['media_objects'] as $id => $media) {
+            if ($count >= 10) break;
+            $filePath = $media['file'] ?? null;
+            $preview['media_objects'][] = [
+                'gedcom_id' => $id,
+                'file' => $filePath,
+                'title' => $media['title'] ?? basename($filePath ?? ''),
+                'form' => $media['form'] ?? null,
+            ];
+            $count++;
+        }
+
         return $preview;
     }
 
@@ -271,9 +298,19 @@ class GedcomParser
                 $this->importIndividual($gedcomId, $indi, $options);
             }
 
+            // Importar objetos multimedia si está habilitado
+            if ($options['import_media'] ?? false) {
+                $this->importMediaObjects($data['media_objects'], $options);
+            }
+
             // Luego crear las familias y relaciones
             foreach ($data['families'] as $gedcomId => $fam) {
                 $this->importFamily($gedcomId, $fam, $options);
+            }
+
+            // Vincular medios a personas
+            if ($options['import_media'] ?? false) {
+                $this->linkMediaToPersons($data['individuals'], $options);
             }
 
             // Actualizar relaciones padre/madre en personas
@@ -653,7 +690,81 @@ class GedcomParser
             case 'FAMS':
                 $record['family_spouse'][] = trim($value, '@');
                 break;
+
+            case 'OBJE':
+                // Puede ser referencia (@O001@) o inline
+                if (str_starts_with($value, '@') && str_ends_with($value, '@')) {
+                    // Referencia a objeto multimedia
+                    $record['media_refs'][] = trim($value, '@');
+                } else {
+                    // OBJE inline - parsear sub-registros
+                    $record['media_inline'][] = $this->parseMediaSubRecords();
+                }
+                break;
+
+            case 'FILE':
+                // FILE puede aparecer directamente bajo OBJE nivel 0
+                $record['file'] = $value;
+                // Buscar FORM subordinado
+                if ($this->currentLine + 1 < count($this->lines)) {
+                    $formLine = $this->parseLine($this->lines[$this->currentLine + 1]);
+                    if ($formLine['tag'] === 'FORM') {
+                        $record['form'] = $formLine['value'];
+                        $this->currentLine++;
+                    }
+                }
+                break;
+
+            case 'TITL':
+                // TITL puede aparecer bajo OBJE
+                if (!isset($record['name'])) { // No sobrescribir NAME de INDI
+                    $record['title'] = $value;
+                }
+                break;
         }
+    }
+
+    /**
+     * Parsear sub-registros de objeto multimedia (OBJE inline).
+     */
+    protected function parseMediaSubRecords(): array
+    {
+        $media = [];
+        $startLine = $this->currentLine;
+        $startLevel = $this->parseLine($this->lines[$startLine])['level'];
+
+        while ($this->currentLine + 1 < count($this->lines)) {
+            $nextLine = $this->lines[$this->currentLine + 1];
+            $nextParsed = $this->parseLine($nextLine);
+
+            if ($nextParsed['level'] <= $startLevel) {
+                break;
+            }
+
+            $this->currentLine++;
+
+            switch ($nextParsed['tag']) {
+                case 'FILE':
+                    $media['file'] = $nextParsed['value'];
+                    // Parsear FORM subordinado
+                    if ($this->currentLine + 1 < count($this->lines)) {
+                        $formLine = $this->parseLine($this->lines[$this->currentLine + 1]);
+                        if ($formLine['tag'] === 'FORM' && $formLine['level'] > $nextParsed['level']) {
+                            $media['form'] = $formLine['value'];
+                            $this->currentLine++;
+                        }
+                    }
+                    break;
+                case 'TITL':
+                    $media['title'] = $nextParsed['value'];
+                    break;
+                case 'NOTE':
+                    $media['note'] = $this->parseContinuedText($nextParsed['value']);
+                    break;
+            }
+        }
+
+        return $media;
     }
 
     /**
@@ -718,6 +829,12 @@ class GedcomParser
 
     /**
      * Parsear nombre GEDCOM.
+     *
+     * Formatos soportados:
+     * - "FirstName /LastName/" - Estándar GEDCOM
+     * - "FirstName /Paterno/ /Materno/" - Webtrees con dos apellidos
+     * - "FirstName /Paterno/ /Materno/ //" - Webtrees con marcador vacío
+     * - "FirstName /Paterno/ Materno //" - Variante sin segunda barra inicial
      */
     protected function parseGedcomName(?string $name): array
     {
@@ -729,20 +846,37 @@ class GedcomParser
             ];
         }
 
-        // Formato: "FirstName /LastName/"
         $firstName = '';
         $lastName = '';
         $maidenName = null;
 
-        if (preg_match('/^([^\/]*)\s*\/([^\/]*)\/$/', $name, $matches)) {
+        // Formato Webtrees: "FirstName /Paterno/ /Materno/ //" o "FirstName /Paterno/ /Materno/"
+        // Captura: nombre, apellido paterno entre //, apellido materno entre //
+        if (preg_match('/^([^\/]*)\s*\/([^\/]*)\/\s*\/([^\/]*)\//', $name, $matches)) {
             $firstName = trim($matches[1]);
             $lastName = trim($matches[2]);
-        } elseif (preg_match('/^([^\/]*)\s*\/([^\/]*)\/\s*(.*)$/', $name, $matches)) {
+            $maidenName = trim($matches[3]) ?: null;
+        }
+        // Formato Webtrees variante: "FirstName /Paterno/ Materno //"
+        elseif (preg_match('/^([^\/]*)\s*\/([^\/]*)\/\s+([^\/]+)\s*\/\//', $name, $matches)) {
             $firstName = trim($matches[1]);
             $lastName = trim($matches[2]);
-            // Suffix or maiden name after second /
-        } else {
-            $firstName = $name;
+            $maidenName = trim($matches[3]) ?: null;
+        }
+        // Formato estándar: "FirstName /LastName/"
+        elseif (preg_match('/^([^\/]*)\s*\/([^\/]*)\/$/', $name, $matches)) {
+            $firstName = trim($matches[1]);
+            $lastName = trim($matches[2]);
+        }
+        // Formato con algo después: "FirstName /LastName/ suffix"
+        elseif (preg_match('/^([^\/]*)\s*\/([^\/]*)\/\s*(.*)$/', $name, $matches)) {
+            $firstName = trim($matches[1]);
+            $lastName = trim($matches[2]);
+            // El tercer grupo podría ser suffix, lo ignoramos
+        }
+        // Sin barras, todo es nombre
+        else {
+            $firstName = trim($name);
         }
 
         return [
@@ -802,22 +936,243 @@ class GedcomParser
 
     /**
      * Buscar persona duplicada.
+     *
+     * Criterios de duplicado (todos deben coincidir):
+     * - Mismo nombre
+     * - Mismo apellido paterno
+     * - Mismo apellido materno (si ambos lo tienen)
+     * - Misma fecha de nacimiento (si ambos la tienen)
+     *
+     * Si no hay suficiente información para distinguir, NO se considera duplicado
+     * para evitar falsos positivos como padre/hijo con mismo nombre.
      */
     protected function findDuplicatePerson(array $data): ?Person
     {
-        $query = Person::query();
+        // Requerir al menos nombre y apellido paterno
+        if (!$data['first_name'] || !$data['patronymic']) {
+            return null;
+        }
 
-        if ($data['first_name'] && $data['patronymic']) {
-            $query->where('first_name', $data['first_name'])
-                  ->where('patronymic', $data['patronymic']);
+        $query = Person::query()
+            ->where('first_name', $data['first_name'])
+            ->where('patronymic', $data['patronymic']);
 
-            if ($data['birth_date']) {
-                $query->where('birth_date', $data['birth_date']);
+        // Si el nuevo registro tiene apellido materno, buscarlo también
+        if (!empty($data['matronymic'])) {
+            $query->where('matronymic', $data['matronymic']);
+        } else {
+            // Sin apellido materno, requerir fecha de nacimiento para evitar
+            // confundir padre e hijo con el mismo nombre
+            if (!$data['birth_date']) {
+                return null; // No hay suficiente información para detectar duplicado
+            }
+        }
+
+        // Si hay fecha de nacimiento, incluirla en la búsqueda
+        if ($data['birth_date']) {
+            $query->where('birth_date', $data['birth_date']);
+        }
+
+        return $query->first();
+    }
+
+    /**
+     * Importar objetos multimedia desde GEDCOM.
+     */
+    protected function importMediaObjects(array $mediaObjects, array $options): void
+    {
+        $tempMediaPath = $options['temp_media_path'] ?? null;
+
+        foreach ($mediaObjects as $gedcomId => $mediaData) {
+            $filePath = $mediaData['file'] ?? null;
+            if (!$filePath) {
+                $this->stats['media_skipped']++;
+                continue;
             }
 
-            return $query->first();
+            // Buscar archivo en directorio temporal
+            $sourcePath = $this->findMediaFile($filePath, $tempMediaPath);
+
+            if (!$sourcePath) {
+                $this->warnings[] = __('Archivo multimedia no encontrado: :file', ['file' => $filePath]);
+                $this->stats['media_skipped']++;
+                continue;
+            }
+
+            // Determinar tipo de medio
+            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tif', 'tiff']);
+            $type = $isImage ? 'image' : 'document';
+            $subdir = $isImage ? 'images' : 'documents';
+
+            // Generar nombre único y copiar archivo a storage
+            $newFileName = Str::random(40) . '.' . $ext;
+            $destPath = 'media/' . $subdir . '/' . $newFileName;
+
+            Storage::disk('public')->put($destPath, file_get_contents($sourcePath));
+
+            // Crear registro Media
+            $media = Media::create([
+                'type' => $type,
+                'title' => $mediaData['title'] ?? basename($filePath),
+                'description' => $mediaData['note'] ?? null,
+                'file_path' => $destPath,
+                'file_name' => basename($filePath),
+                'file_size' => filesize($sourcePath),
+                'mime_type' => mime_content_type($sourcePath),
+                'created_by' => Auth::id(),
+            ]);
+
+            $this->mediaMapping[$gedcomId] = $media->id;
+            $this->stats['media_imported']++;
+        }
+    }
+
+    /**
+     * Buscar archivo multimedia en directorio temporal.
+     */
+    protected function findMediaFile(string $filePath, ?string $tempMediaPath): ?string
+    {
+        if (!$tempMediaPath || !is_dir($tempMediaPath)) {
+            return null;
+        }
+
+        // Normalizar separadores de ruta
+        $filePath = str_replace('\\', '/', $filePath);
+
+        // Intentar varias ubicaciones posibles
+        $searchPaths = [
+            $tempMediaPath . '/' . $filePath,
+            $tempMediaPath . '/media/' . $filePath,
+            $tempMediaPath . '/' . basename($filePath),
+            $tempMediaPath . '/media/' . basename($filePath),
+        ];
+
+        // Si la ruta empieza con media/, también buscar sin ese prefijo
+        if (str_starts_with($filePath, 'media/')) {
+            $withoutPrefix = substr($filePath, 6);
+            $searchPaths[] = $tempMediaPath . '/' . $withoutPrefix;
+        }
+
+        foreach ($searchPaths as $path) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        // Búsqueda recursiva por nombre de archivo
+        $filename = basename($filePath);
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($tempMediaPath, \RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->getFilename() === $filename) {
+                return $file->getPathname();
+            }
         }
 
         return null;
+    }
+
+    /**
+     * Vincular medios importados a personas.
+     */
+    protected function linkMediaToPersons(array $individuals, array $options): void
+    {
+        foreach ($individuals as $gedcomId => $indi) {
+            $personId = $this->idMapping['INDI'][$gedcomId] ?? null;
+            if (!$personId) continue;
+
+            $firstImagePath = null;
+
+            // Vincular referencias por pointer (@O001@)
+            foreach ($indi['media_refs'] ?? [] as $mediaRef) {
+                $mediaId = $this->mediaMapping[$mediaRef] ?? null;
+                if ($mediaId) {
+                    $media = Media::find($mediaId);
+                    if ($media) {
+                        $media->update([
+                            'mediable_type' => 'App\\Models\\Person',
+                            'mediable_id' => $personId,
+                        ]);
+                        $this->stats['media_linked']++;
+
+                        // Guardar primera imagen para foto de perfil
+                        if (!$firstImagePath && $media->type === 'image') {
+                            $firstImagePath = $media->file_path;
+                        }
+                    }
+                }
+            }
+
+            // Procesar medios inline
+            foreach ($indi['media_inline'] ?? [] as $inlineMedia) {
+                $inlineImagePath = $this->importInlineMedia($inlineMedia, $personId, $options);
+                if (!$firstImagePath && $inlineImagePath) {
+                    $firstImagePath = $inlineImagePath;
+                }
+            }
+
+            // Asignar primera imagen como foto de perfil si la persona no tiene una
+            if ($firstImagePath) {
+                $person = Person::find($personId);
+                if ($person && !$person->photo_path) {
+                    $person->update(['photo_path' => $firstImagePath]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Importar un medio inline (definido directamente en INDI).
+     *
+     * @return string|null Ruta del archivo si es imagen, null si no
+     */
+    protected function importInlineMedia(array $mediaData, int $personId, array $options): ?string
+    {
+        $filePath = $mediaData['file'] ?? null;
+        if (!$filePath) return null;
+
+        $tempMediaPath = $options['temp_media_path'] ?? null;
+        $sourcePath = $this->findMediaFile($filePath, $tempMediaPath);
+
+        if (!$sourcePath) {
+            $this->warnings[] = __('Archivo multimedia inline no encontrado: :file', ['file' => $filePath]);
+            $this->stats['media_skipped']++;
+            return null;
+        }
+
+        // Determinar tipo
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tif', 'tiff']);
+        $type = $isImage ? 'image' : 'document';
+        $subdir = $isImage ? 'images' : 'documents';
+
+        // Copiar archivo
+        $newFileName = Str::random(40) . '.' . $ext;
+        $destPath = 'media/' . $subdir . '/' . $newFileName;
+
+        Storage::disk('public')->put($destPath, file_get_contents($sourcePath));
+
+        // Crear registro vinculado directamente a la persona
+        Media::create([
+            'mediable_type' => 'App\\Models\\Person',
+            'mediable_id' => $personId,
+            'type' => $type,
+            'title' => $mediaData['title'] ?? basename($filePath),
+            'description' => $mediaData['note'] ?? null,
+            'file_path' => $destPath,
+            'file_name' => basename($filePath),
+            'file_size' => filesize($sourcePath),
+            'mime_type' => mime_content_type($sourcePath),
+            'created_by' => Auth::id(),
+        ]);
+
+        $this->stats['media_imported']++;
+        $this->stats['media_linked']++;
+
+        // Retornar ruta si es imagen (para asignar como foto de perfil)
+        return $isImage ? $destPath : null;
     }
 }

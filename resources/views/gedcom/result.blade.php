@@ -40,6 +40,31 @@
             </div>
         </div>
 
+        @if(($result['stats']['media_imported'] ?? 0) > 0 || ($result['stats']['media_linked'] ?? 0) > 0)
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <div class="card bg-green-50 border-green-200">
+                    <div class="card-body text-center">
+                        <div class="text-3xl font-bold text-green-600">{{ $result['stats']['media_imported'] ?? 0 }}</div>
+                        <div class="text-green-800 text-sm">{{ __('Medios importados') }}</div>
+                    </div>
+                </div>
+                <div class="card bg-blue-50 border-blue-200">
+                    <div class="card-body text-center">
+                        <div class="text-3xl font-bold text-blue-600">{{ $result['stats']['media_linked'] ?? 0 }}</div>
+                        <div class="text-blue-800 text-sm">{{ __('Medios vinculados') }}</div>
+                    </div>
+                </div>
+                @if(($result['stats']['media_skipped'] ?? 0) > 0)
+                    <div class="card bg-yellow-50 border-yellow-200">
+                        <div class="card-body text-center">
+                            <div class="text-3xl font-bold text-yellow-600">{{ $result['stats']['media_skipped'] }}</div>
+                            <div class="text-yellow-800 text-sm">{{ __('Medios omitidos') }}</div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         <!-- Advertencias -->
         @if(!empty($result['warnings']))
             <div class="card mb-8 bg-yellow-50 border-yellow-200">
@@ -73,8 +98,12 @@
                     <li class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-mf-primary text-white flex items-center justify-center text-sm font-bold">2</div>
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ __('Agrega fotos') }}</h4>
-                            <p class="text-gray-600 text-sm">{{ __('Los archivos GEDCOM no incluyen fotos, puedes agregarlas manualmente.') }}</p>
+                            <h4 class="font-medium text-gray-900">{{ __('Revisa fotos y documentos') }}</h4>
+                            @if(($result['stats']['media_imported'] ?? 0) > 0)
+                                <p class="text-gray-600 text-sm">{{ __('Se importaron :count medios. Verifica que esten correctamente vinculados.', ['count' => $result['stats']['media_imported']]) }}</p>
+                            @else
+                                <p class="text-gray-600 text-sm">{{ __('Puedes agregar fotos y documentos manualmente, o importar un archivo GEDZIP.') }}</p>
+                            @endif
                         </div>
                     </li>
                     <li class="flex items-start gap-3">

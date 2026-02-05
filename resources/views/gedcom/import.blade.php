@@ -48,15 +48,15 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
 
-                        <p class="text-gray-600 mb-2">{{ __('Arrastra tu archivo GEDCOM aqui o') }}</p>
+                        <p class="text-gray-600 mb-2">{{ __('Arrastra tu archivo GEDCOM o GEDZIP aqui o') }}</p>
                         <label class="btn-outline cursor-pointer inline-block">
                             <input type="file" name="file" x-ref="fileInput" class="hidden"
-                                   accept=".ged,.GED,.txt"
+                                   accept=".ged,.GED,.txt,.zip,.gdz"
                                    @change="fileName = $event.target.files[0]?.name || ''">
                             {{ __('Seleccionar archivo') }}
                         </label>
 
-                        <p class="text-sm text-gray-500 mt-4">{{ __('Archivos .ged o .txt (max 10MB)') }}</p>
+                        <p class="text-sm text-gray-500 mt-4">{{ __('Archivos .ged, .txt, .zip o .gdz (max 50MB)') }}</p>
 
                         <template x-if="fileName">
                             <div class="mt-4 p-3 bg-green-50 rounded-lg inline-flex items-center gap-2">
@@ -117,10 +117,10 @@
                         {{ __('Los archivos muy grandes pueden tardar varios minutos en procesarse.') }}
                     </li>
                     <li class="flex items-start gap-2">
-                        <svg class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        {{ __('Las fotos y documentos no se importan automaticamente, solo los datos.') }}
+                        {{ __('Los archivos GEDZIP (.gdz, .zip) incluyen fotos y documentos que se importan automaticamente.') }}
                     </li>
                 </ul>
             </div>

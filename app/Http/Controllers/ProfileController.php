@@ -88,6 +88,17 @@ class ProfileController extends Controller
                 'updated_by' => $user->id,
             ], $heritageData));
         } else {
+            // Mapear privacy_level de usuario a persona
+            // Usuario: direct_family, extended_family, selected_users, community
+            // Persona: private, family, community, public
+            $personPrivacyLevel = match($validated['privacy_level']) {
+                'direct_family' => 'private',
+                'extended_family' => 'family',
+                'selected_users' => 'family',
+                'community' => 'community',
+                default => 'family',
+            };
+
             $person = Person::create(array_merge([
                 'first_name' => $validated['first_name'],
                 'patronymic' => $validated['patronymic'],
@@ -104,7 +115,7 @@ class ProfileController extends Controller
                 'phone' => $validated['phone'] ?? null,
                 'email' => $user->email,
                 'is_living' => true,
-                'privacy_level' => $validated['privacy_level'],
+                'privacy_level' => $personPrivacyLevel,
                 'created_by' => $user->id,
             ], $heritageData));
 

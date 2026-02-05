@@ -22,7 +22,7 @@
         </div>
 
         <!-- Resumen -->
-        <div class="grid md:grid-cols-3 gap-4 mb-8">
+        <div class="grid md:grid-cols-4 gap-4 mb-8">
             <div class="card bg-blue-50 border-blue-200">
                 <div class="card-body text-center">
                     <div class="text-3xl font-bold text-blue-600">{{ $preview['total_individuals'] }}</div>
@@ -33,6 +33,12 @@
                 <div class="card-body text-center">
                     <div class="text-3xl font-bold text-purple-600">{{ $preview['total_families'] }}</div>
                     <div class="text-purple-800">{{ __('Familias') }}</div>
+                </div>
+            </div>
+            <div class="card bg-green-50 border-green-200">
+                <div class="card-body text-center">
+                    <div class="text-3xl font-bold text-green-600">{{ $preview['media_count'] ?? ($preview['total_media_objects'] ?? 0) }}</div>
+                    <div class="text-green-800">{{ __('Medios') }}</div>
                 </div>
             </div>
             <div class="card bg-gray-50">
@@ -148,11 +154,91 @@
             </div>
         @endif
 
+        <!-- Preview de medios (si es GEDZIP) -->
+        @if(($isGedzip ?? false) && !empty($preview['media_files']))
+            <div class="card mb-8">
+                <div class="card-header bg-green-50">
+                    <h2 class="text-lg font-semibold text-green-800">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        {{ __('Archivos Multimedia') }} ({{ count($preview['media_files']) }})
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        @foreach(array_slice($preview['media_files'], 0, 12) as $media)
+                            <div class="text-center">
+                                @if(in_array($media['extension'], ['jpg','jpeg','png','gif','webp','bmp']))
+                                    <div class="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @elseif($media['extension'] === 'pdf')
+                                    <div class="w-16 h-16 mx-auto bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                @else
+                                    <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </div>
+                                @endif
+                                <p class="text-xs text-theme-muted mt-1 truncate" title="{{ $media['name'] }}">{{ $media['name'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @if(count($preview['media_files']) > 12)
+                        <p class="text-sm text-theme-muted mt-4 text-center">
+                            {{ __('...y :count archivos mas', ['count' => count($preview['media_files']) - 12]) }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+        @endif
+
+        <!-- Preview de objetos multimedia del GEDCOM -->
+        @if(!empty($preview['media_objects']))
+            <div class="card mb-8">
+                <div class="card-header">
+                    <h2 class="text-lg font-semibold">{{ __('Referencias multimedia en GEDCOM') }} ({{ __('mostrando :count de :total', ['count' => count($preview['media_objects']), 'total' => $preview['total_media_objects']]) }})</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('ID') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Archivo') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Titulo') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Formato') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach($preview['media_objects'] as $media)
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $media['gedcom_id'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate max-w-xs" title="{{ $media['file'] }}">{{ $media['file'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $media['title'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ strtoupper($media['form'] ?? '-') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
         <!-- Formulario de confirmacion -->
         @if(empty($preview['errors']))
             <form action="{{ route('gedcom.confirm') }}" method="POST" class="space-y-6">
                 @csrf
                 <input type="hidden" name="temp_path" value="{{ $tempPath }}">
+                <input type="hidden" name="temp_media_path" value="{{ $tempMediaPath ?? '' }}">
 
                 <div class="card">
                     <div class="card-header">
@@ -185,6 +271,21 @@
                             </label>
                             <p class="form-help ml-6">{{ __('Si se encuentra un duplicado, actualiza los datos con la informacion del GEDCOM.') }}</p>
                         </div>
+
+                        @if(($isGedzip ?? false) && ($preview['media_count'] ?? 0) > 0)
+                            <div class="space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="import_media" value="1" class="form-checkbox" checked>
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        {{ __('Importar archivos multimedia') }}
+                                    </span>
+                                </label>
+                                <p class="form-help ml-6">{{ __('Importa :count fotos y documentos incluidos en el archivo GEDZIP y los vincula a las personas correspondientes.', ['count' => $preview['media_count']]) }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
