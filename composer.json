@@ -42,6 +42,7 @@
             "Plugin\\ReportsFanchart\\": "plugins/reports-fanchart/src/",
             "Plugin\\ReportsPedigree\\": "plugins/reports-pedigree/src/",
             "Plugin\\PresenceCommunication\\": "plugins/presence-communication/src/",
+            "Plugin\\ResearchAssistant\\": "plugins/research-assistant/src/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
