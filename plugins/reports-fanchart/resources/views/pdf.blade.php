@@ -93,8 +93,18 @@
 
     {{-- Grafico SVG del abanico --}}
     @if(!empty($svgDataUri))
+    @php
+        // SVG del abanico es 800x450 (semicirculo)
+        $svgWidth = 800;
+        $svgHeight = 450;
+        // Escalar para que quepa en pagina landscape (max ~700px ancho)
+        $maxWidth = 700;
+        $scale = $maxWidth / $svgWidth;
+        $displayWidth = $svgWidth * $scale;
+        $displayHeight = $svgHeight * $scale;
+    @endphp
     <div class="chart-container">
-        <img src="{{ $svgDataUri }}" style="width: 700px; height: auto;">
+        <img src="{{ $svgDataUri }}" style="width: {{ $displayWidth }}px; height: {{ $displayHeight }}px;">
     </div>
     @endif
 
