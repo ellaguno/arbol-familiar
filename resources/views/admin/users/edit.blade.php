@@ -83,7 +83,7 @@
                         </div>
                     </div>
 
-                    <div class="border-t pt-6 space-y-4">
+                    <div class="border-t border-theme pt-6 space-y-4">
                         <h3 class="font-semibold text-theme">{{ __('Permisos y estado') }}</h3>
 
                         <div class="flex items-center gap-6">
@@ -103,7 +103,7 @@
                         @endif
                     </div>
 
-                    <div class="flex justify-between items-center pt-6 border-t">
+                    <div class="flex justify-between items-center pt-6 border-t border-theme">
                         <a href="{{ route('admin.users.show', $user) }}" class="btn-outline">
                             {{ __('Cancelar') }}
                         </a>
@@ -117,9 +117,9 @@
 
         <!-- Zona peligrosa -->
         @if($user->id !== auth()->id())
-            <div class="card mt-8 border-red-200">
-                <div class="card-header bg-red-50">
-                    <h2 class="text-lg font-semibold text-red-700">{{ __('Zona peligrosa') }}</h2>
+            <div class="card mt-8 border-red-200 dark:border-red-800">
+                <div class="card-header bg-red-50 dark:bg-red-900/30">
+                    <h2 class="text-lg font-semibold text-red-700 dark:text-red-300">{{ __('Zona peligrosa') }}</h2>
                 </div>
                 <div class="card-body">
                     <div class="flex items-center justify-between">

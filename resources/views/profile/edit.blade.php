@@ -41,7 +41,7 @@
                             <form action="{{ route('profile.photo.delete') }}" method="POST" class="mt-2">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-sm text-red-600 hover:underline">
+                                <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">
                                     {{ __('Eliminar foto') }}
                                 </button>
                             </form>
@@ -229,7 +229,7 @@
                                 <span class="font-medium">{{ __('Tengo herencia cultural') }}</span>
                             </label>
 
-                            <div x-show="hasHeritage" x-transition class="space-y-4 pt-4 border-t">
+                            <div x-show="hasHeritage" x-transition class="space-y-4 pt-4 border-t border-theme">
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="heritage_region" class="form-label">{{ __('Region de origen') }}</label>

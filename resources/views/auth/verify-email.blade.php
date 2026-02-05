@@ -51,7 +51,7 @@
                 </x-button>
             </form>
 
-            <div class="mt-6 pt-6 border-t">
+            <div class="mt-6 pt-6 border-t border-theme">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="text-sm text-theme-muted hover:text-theme-secondary">

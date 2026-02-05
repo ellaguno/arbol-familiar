@@ -4,8 +4,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Estructura familiar') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Analisis de las relaciones familiares') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Estructura familiar') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Analisis de las relaciones familiares') }}</p>
             </div>
             <a href="{{ route('admin.reports') }}" class="btn-outline">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,26 +19,26 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="card">
                 <div class="card-body text-center">
-                    <div class="text-3xl font-bold text-gray-900">{{ number_format($stats['total_families']) }}</div>
-                    <div class="text-sm text-gray-500">{{ __('Total familias') }}</div>
+                    <div class="text-3xl font-bold text-theme">{{ number_format($stats['total_families']) }}</div>
+                    <div class="text-sm text-theme-muted">{{ __('Total familias') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
-                    <div class="text-3xl font-bold text-gray-900">{{ number_format($stats['with_children'], 1) }}%</div>
-                    <div class="text-sm text-gray-500">{{ __('Con hijos') }}</div>
+                    <div class="text-3xl font-bold text-theme">{{ number_format($stats['with_children'], 1) }}%</div>
+                    <div class="text-sm text-theme-muted">{{ __('Con hijos') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
-                    <div class="text-3xl font-bold text-gray-900">{{ number_format($stats['average_children'], 1) }}</div>
-                    <div class="text-sm text-gray-500">{{ __('Hijos promedio') }}</div>
+                    <div class="text-3xl font-bold text-theme">{{ number_format($stats['average_children'], 1) }}</div>
+                    <div class="text-sm text-theme-muted">{{ __('Hijos promedio') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
-                    <div class="text-3xl font-bold text-gray-900">{{ number_format($stats['married']) }}</div>
-                    <div class="text-sm text-gray-500">{{ __('Matrimonios') }}</div>
+                    <div class="text-3xl font-bold text-theme">{{ number_format($stats['married']) }}</div>
+                    <div class="text-sm text-theme-muted">{{ __('Matrimonios') }}</div>
                 </div>
             </div>
         </div>
@@ -58,7 +58,7 @@
                             @endphp
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-900">
+                                    <span class="font-medium text-theme">
                                         @if($children == 0)
                                             {{ __('Sin hijos') }}
                                         @elseif($children == 1)
@@ -69,9 +69,9 @@
                                             {{ $children }} {{ __('hijos') }}
                                         @endif
                                     </span>
-                                    <span class="text-gray-500">{{ number_format($count) }}</span>
+                                    <span class="text-theme-muted">{{ number_format($count) }}</span>
                                 </div>
-                                <div class="w-full bg-gray-100 rounded-full h-3">
+                                <div class="w-full bg-theme-secondary rounded-full h-3">
                                     <div class="bg-yellow-500 h-3 rounded-full" style="width: {{ $percentage }}%"></div>
                                 </div>
                             </div>
@@ -89,17 +89,17 @@
                     @if(count($largestFamilies) > 0)
                         <div class="space-y-4">
                             @foreach($largestFamilies as $family)
-                                <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <div class="flex items-center gap-4 p-3 bg-theme-secondary rounded-lg">
+                                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
                                         <span class="text-lg font-bold text-purple-600">{{ $family->children_count }}</span>
                                     </div>
                                     <div class="flex-1">
-                                        <div class="font-medium text-gray-900">
+                                        <div class="font-medium text-theme">
                                             {{ $family->husband?->full_name ?? __('Desconocido') }}
                                             &
                                             {{ $family->wife?->full_name ?? __('Desconocida') }}
                                         </div>
-                                        <div class="text-sm text-gray-500">
+                                        <div class="text-sm text-theme-muted">
                                             {{ $family->children_count }} {{ __('hijos') }}
                                             @if($family->marriage_date)
                                                 | {{ __('Casados') }}: {{ $family->marriage_date->format('Y') }}
@@ -113,7 +113,7 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="text-center text-gray-500 py-8">{{ __('No hay datos disponibles') }}</p>
+                        <p class="text-center text-theme-muted py-8">{{ __('No hay datos disponibles') }}</p>
                     @endif
                 </div>
             </div>
@@ -131,11 +131,11 @@
                                 $percentage = $maxCount > 0 ? ($count / $maxCount) * 100 : 0;
                             @endphp
                             <div class="flex items-center gap-3">
-                                <span class="w-16 text-sm text-gray-500">{{ $decade }}</span>
-                                <div class="flex-1 bg-gray-100 rounded-full h-4">
+                                <span class="w-16 text-sm text-theme-muted">{{ $decade }}</span>
+                                <div class="flex-1 bg-theme-secondary rounded-full h-4">
                                     <div class="bg-pink-500 h-4 rounded-full" style="width: {{ $percentage }}%"></div>
                                 </div>
-                                <span class="w-10 text-sm text-gray-700 text-right">{{ $count }}</span>
+                                <span class="w-10 text-sm text-theme-secondary text-right">{{ $count }}</span>
                             </div>
                         @endforeach
                     </div>
@@ -149,25 +149,25 @@
                 </div>
                 <div class="card-body">
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="text-center p-4 bg-blue-50 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-700">{{ $familyStatus['complete'] ?? 0 }}</div>
-                            <div class="text-sm text-blue-600">{{ __('Completas') }}</div>
-                            <div class="text-xs text-blue-500">{{ __('Ambos padres') }}</div>
+                        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ $familyStatus['complete'] ?? 0 }}</div>
+                            <div class="text-sm text-blue-600 dark:text-blue-400">{{ __('Completas') }}</div>
+                            <div class="text-xs text-blue-500 dark:text-blue-400">{{ __('Ambos padres') }}</div>
                         </div>
-                        <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                            <div class="text-2xl font-bold text-yellow-700">{{ $familyStatus['single_parent'] ?? 0 }}</div>
-                            <div class="text-sm text-yellow-600">{{ __('Un padre') }}</div>
-                            <div class="text-xs text-yellow-500">{{ __('Monoparental') }}</div>
+                        <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{{ $familyStatus['single_parent'] ?? 0 }}</div>
+                            <div class="text-sm text-yellow-600 dark:text-yellow-400">{{ __('Un padre') }}</div>
+                            <div class="text-xs text-yellow-500 dark:text-yellow-400">{{ __('Monoparental') }}</div>
                         </div>
-                        <div class="text-center p-4 bg-blue-50 rounded-lg">
-                            <div class="text-2xl font-bold text-blue-700">{{ $familyStatus['with_marriage'] ?? 0 }}</div>
-                            <div class="text-sm text-blue-600">{{ __('Con matrimonio') }}</div>
-                            <div class="text-xs text-blue-500">{{ __('Fecha registrada') }}</div>
+                        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ $familyStatus['with_marriage'] ?? 0 }}</div>
+                            <div class="text-sm text-blue-600 dark:text-blue-400">{{ __('Con matrimonio') }}</div>
+                            <div class="text-xs text-blue-500 dark:text-blue-400">{{ __('Fecha registrada') }}</div>
                         </div>
-                        <div class="text-center p-4 bg-purple-50 rounded-lg">
-                            <div class="text-2xl font-bold text-purple-700">{{ $familyStatus['with_children'] ?? 0 }}</div>
-                            <div class="text-sm text-purple-600">{{ __('Con hijos') }}</div>
-                            <div class="text-xs text-purple-500">{{ __('Al menos uno') }}</div>
+                        <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-700 dark:text-purple-300">{{ $familyStatus['with_children'] ?? 0 }}</div>
+                            <div class="text-sm text-purple-600 dark:text-purple-400">{{ __('Con hijos') }}</div>
+                            <div class="text-xs text-purple-500 dark:text-purple-400">{{ __('Al menos uno') }}</div>
                         </div>
                     </div>
                 </div>

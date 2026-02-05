@@ -16,6 +16,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\GedcomController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\PluginController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\InvitationController;
 
@@ -171,6 +172,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Tema
         Route::put('/theme', [ProfileController::class, 'updateTheme'])->name('theme.update');
+
+        // Estado en linea
+        Route::put('/online-status', [ProfileController::class, 'updateOnlineStatus'])->name('online-status.update');
 
         // Contraseña
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
@@ -365,6 +369,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/content/{group}', [AdminController::class, 'editContent'])->name('content.edit');
         Route::put('/content/{group}', [AdminController::class, 'updateContent'])->name('content.update');
         Route::post('/content/upload-image', [AdminController::class, 'uploadContentImage'])->name('content.upload-image');
+
+        // Plugins
+        Route::get('/plugins', [PluginController::class, 'index'])->name('plugins');
+        Route::get('/plugins/manual', [PluginController::class, 'manual'])->name('plugins.manual');
+        Route::post('/plugins/upload', [PluginController::class, 'upload'])->name('plugins.upload');
+        Route::post('/plugins/{slug}/install', [PluginController::class, 'install'])->name('plugins.install');
+        Route::post('/plugins/{slug}/uninstall', [PluginController::class, 'uninstall'])->name('plugins.uninstall');
+        Route::post('/plugins/{slug}/toggle', [PluginController::class, 'toggle'])->name('plugins.toggle');
+        Route::delete('/plugins/{slug}', [PluginController::class, 'delete'])->name('plugins.delete');
 
         // Reportes
         Route::get('/reports', [ReportController::class, 'index'])->name('reports');

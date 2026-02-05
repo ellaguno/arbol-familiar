@@ -16,8 +16,8 @@
         </div>
 
         @if(session('success'))
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p class="text-green-700">{{ session('success') }}</p>
+            <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <p class="text-green-700 dark:text-green-300">{{ session('success') }}</p>
             </div>
         @endif
 
@@ -77,7 +77,7 @@
                                            name="settings_{{ $key }}"
                                            id="settings_{{ $key }}"
                                            accept="image/*"
-                                           class="block w-full text-sm text-theme-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                           class="block w-full text-sm text-theme-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 dark:hover:file:bg-blue-900/50">
                                     <p class="text-xs text-theme-muted">{{ __('Deja vacio para mantener la imagen actual. Max 2MB.') }}</p>
                                 </div>
 

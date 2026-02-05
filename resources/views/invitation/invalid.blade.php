@@ -21,7 +21,7 @@
         body { font-family: var(--mf-font) !important; }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-theme">
     <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <!-- Logo -->
@@ -31,56 +31,56 @@
         </div>
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
+            <div class="bg-theme-card py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
                 @switch($reason)
                     @case('expired')
-                        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ __('Invitacion expirada') }}</h2>
-                        <p class="text-gray-600 mb-6">{{ $message }}</p>
-                        <p class="text-sm text-gray-500">
+                        <h2 class="text-xl font-bold text-theme mb-2">{{ __('Invitacion expirada') }}</h2>
+                        <p class="text-theme-secondary mb-6">{{ $message }}</p>
+                        <p class="text-sm text-theme-muted">
                             {{ __('Contacta a la persona que te invito para que te envie una nueva invitacion.') }}
                         </p>
                         @break
 
                     @case('already_accepted')
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ __('Invitacion ya aceptada') }}</h2>
-                        <p class="text-gray-600 mb-6">{{ $message }}</p>
+                        <h2 class="text-xl font-bold text-theme mb-2">{{ __('Invitacion ya aceptada') }}</h2>
+                        <p class="text-theme-secondary mb-6">{{ $message }}</p>
                         <a href="{{ route('login') }}" class="btn-primary inline-block">
                             {{ __('Iniciar sesion') }}
                         </a>
                         @break
 
                     @case('declined')
-                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ __('Invitacion rechazada') }}</h2>
-                        <p class="text-gray-600 mb-6">{{ $message }}</p>
+                        <h2 class="text-xl font-bold text-theme mb-2">{{ __('Invitacion rechazada') }}</h2>
+                        <p class="text-theme-secondary mb-6">{{ $message }}</p>
                         @break
 
                     @default
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-16 h-16 bg-theme-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-theme-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ __('Invitacion no encontrada') }}</h2>
-                        <p class="text-gray-600 mb-6">{{ $message }}</p>
+                        <h2 class="text-xl font-bold text-theme mb-2">{{ __('Invitacion no encontrada') }}</h2>
+                        <p class="text-theme-secondary mb-6">{{ $message }}</p>
                 @endswitch
 
-                <div class="mt-6 pt-4 border-t border-gray-200">
-                    <a href="{{ route('home') }}" class="text-blue-600 hover:underline text-sm">
+                <div class="mt-6 pt-4 border-t border-theme">
+                    <a href="{{ route('home') }}" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
                         {{ __('Ir a la pagina principal') }}
                     </a>
                 </div>

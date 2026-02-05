@@ -6,19 +6,19 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('persons.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Personas') }}</a>
+                    <a href="{{ route('persons.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Personas') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <a href="{{ route('persons.show', $person) }}" class="text-gray-500 hover:text-gray-700 ml-1 md:ml-2">{{ $person->full_name }}</a>
+                    <a href="{{ route('persons.show', $person) }}" class="text-theme-muted hover:text-theme-secondary ml-1 md:ml-2">{{ $person->full_name }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Relaciones') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Relaciones') }}</span>
                 </li>
             </ol>
         </nav>
@@ -29,15 +29,15 @@
                      alt="{{ $person->full_name }}"
                      class="w-16 h-16 rounded-full object-cover">
             @else
-                <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-16 h-16 rounded-full bg-theme-secondary flex items-center justify-center">
+                    <svg class="w-8 h-8 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
                 </div>
             @endif
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Relaciones familiares') }}</h1>
-                <p class="text-gray-600">{{ $person->full_name }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Relaciones familiares') }}</h1>
+                <p class="text-theme-secondary">{{ $person->full_name }}</p>
             </div>
         </div>
 
@@ -53,14 +53,14 @@
                         @if($person->father || $person->mother)
                             <ul class="space-y-3">
                                 @if($person->father)
-                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-theme-hover">
                                         <a href="{{ route('persons.show', $person->father) }}" class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <span class="text-blue-600 font-medium">{{ substr($person->father->first_name, 0, 1) }}</span>
+                                            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                                <span class="text-blue-600 dark:text-blue-400 font-medium">{{ substr($person->father->first_name, 0, 1) }}</span>
                                             </div>
                                             <div>
                                                 <p class="font-medium">{{ $person->father->full_name }}</p>
-                                                <p class="text-sm text-gray-500">{{ __('Padre') }}</p>
+                                                <p class="text-sm text-theme-muted">{{ __('Padre') }}</p>
                                             </div>
                                         </a>
                                         <form action="{{ route('persons.relationships.destroy', [$person, 'parent', $person->father]) }}" method="POST">
@@ -75,14 +75,14 @@
                                     </li>
                                 @endif
                                 @if($person->mother)
-                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-theme-hover">
                                         <a href="{{ route('persons.show', $person->mother) }}" class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                                <span class="text-pink-600 font-medium">{{ substr($person->mother->first_name, 0, 1) }}</span>
+                                            <div class="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                                <span class="text-pink-600 dark:text-pink-400 font-medium">{{ substr($person->mother->first_name, 0, 1) }}</span>
                                             </div>
                                             <div>
                                                 <p class="font-medium">{{ $person->mother->full_name }}</p>
-                                                <p class="text-sm text-gray-500">{{ __('Madre') }}</p>
+                                                <p class="text-sm text-theme-muted">{{ __('Madre') }}</p>
                                             </div>
                                         </a>
                                         <form action="{{ route('persons.relationships.destroy', [$person, 'parent', $person->mother]) }}" method="POST">
@@ -98,7 +98,7 @@
                                 @endif
                             </ul>
                         @else
-                            <p class="text-gray-500 text-center py-4">{{ __('Sin padres registrados') }}</p>
+                            <p class="text-theme-muted text-center py-4">{{ __('Sin padres registrados') }}</p>
                         @endif
                     </div>
                 </div>
@@ -121,14 +121,14 @@
                         @if($spouses->isNotEmpty())
                             <ul class="space-y-3">
                                 @foreach($spouses as $spouse)
-                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-theme-hover">
                                         <a href="{{ route('persons.show', $spouse['person']) }}" class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-{{ $spouse['person']->gender === 'M' ? 'blue' : 'pink' }}-100 flex items-center justify-center">
-                                                <span class="text-{{ $spouse['person']->gender === 'M' ? 'blue' : 'pink' }}-600 font-medium">{{ substr($spouse['person']->first_name, 0, 1) }}</span>
+                                            <div class="w-10 h-10 rounded-full bg-{{ $spouse['person']->gender === 'M' ? 'blue' : 'pink' }}-100 {{ $spouse['person']->gender === 'M' ? 'dark:bg-blue-900/30' : 'dark:bg-pink-900/30' }} flex items-center justify-center">
+                                                <span class="text-{{ $spouse['person']->gender === 'M' ? 'blue' : 'pink' }}-600 {{ $spouse['person']->gender === 'M' ? 'dark:text-blue-400' : 'dark:text-pink-400' }} font-medium">{{ substr($spouse['person']->first_name, 0, 1) }}</span>
                                             </div>
                                             <div>
                                                 <p class="font-medium">{{ $spouse['person']->full_name }}</p>
-                                                <p class="text-sm text-gray-500">
+                                                <p class="text-sm text-theme-muted">
                                                     @switch($spouse['status'])
                                                         @case('married') {{ __('Casados') }} @break
                                                         @case('divorced') {{ __('Divorciados') }} @break
@@ -153,7 +153,7 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-gray-500 text-center py-4">{{ __('Sin conyuge registrado') }}</p>
+                            <p class="text-theme-muted text-center py-4">{{ __('Sin conyuge registrado') }}</p>
                         @endif
                     </div>
                 </div>
@@ -167,14 +167,14 @@
                         @if($person->children->isNotEmpty())
                             <ul class="space-y-3">
                                 @foreach($person->children as $child)
-                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-theme-hover">
                                         <a href="{{ route('persons.show', $child) }}" class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <span class="text-gray-600 font-medium">{{ substr($child->first_name, 0, 1) }}</span>
+                                            <div class="w-10 h-10 rounded-full bg-theme-secondary flex items-center justify-center">
+                                                <span class="text-theme-secondary font-medium">{{ substr($child->first_name, 0, 1) }}</span>
                                             </div>
                                             <div>
                                                 <p class="font-medium">{{ $child->full_name }}</p>
-                                                <p class="text-sm text-gray-500">{{ $child->gender === 'M' ? __('Hijo') : __('Hija') }}</p>
+                                                <p class="text-sm text-theme-muted">{{ $child->gender === 'M' ? __('Hijo') : __('Hija') }}</p>
                                             </div>
                                         </a>
                                         <form action="{{ route('persons.relationships.destroy', [$person, 'child', $child]) }}" method="POST">
@@ -190,7 +190,7 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-gray-500 text-center py-4">{{ __('Sin hijos registrados') }}</p>
+                            <p class="text-theme-muted text-center py-4">{{ __('Sin hijos registrados') }}</p>
                         @endif
                     </div>
                 </div>
@@ -204,21 +204,21 @@
                         @if($person->siblings->isNotEmpty())
                             <ul class="space-y-3">
                                 @foreach($person->siblings as $sibling)
-                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                                    <li class="flex items-center justify-between p-2 rounded-lg hover:bg-theme-hover">
                                         <a href="{{ route('persons.show', $sibling) }}" class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <span class="text-gray-600 font-medium">{{ substr($sibling->first_name, 0, 1) }}</span>
+                                            <div class="w-10 h-10 rounded-full bg-theme-secondary flex items-center justify-center">
+                                                <span class="text-theme-secondary font-medium">{{ substr($sibling->first_name, 0, 1) }}</span>
                                             </div>
                                             <div>
                                                 <p class="font-medium">{{ $sibling->full_name }}</p>
-                                                <p class="text-sm text-gray-500">{{ $sibling->gender === 'M' ? __('Hermano') : __('Hermana') }}</p>
+                                                <p class="text-sm text-theme-muted">{{ $sibling->gender === 'M' ? __('Hermano') : __('Hermana') }}</p>
                                             </div>
                                         </a>
                                     </li>
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-gray-500 text-center py-4">{{ __('Sin hermanos registrados') }}</p>
+                            <p class="text-theme-muted text-center py-4">{{ __('Sin hermanos registrados') }}</p>
                         @endif
                     </div>
                 </div>
@@ -261,10 +261,10 @@
                                            placeholder="{{ __('Escribe nombre o apellido...') }}"
                                            autocomplete="off">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                        <svg x-show="!loading" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg x-show="!loading" class="w-5 h-5 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
-                                        <svg x-show="loading" class="w-5 h-5 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <svg x-show="loading" class="w-5 h-5 text-theme-muted animate-spin" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
@@ -275,28 +275,28 @@
                                 <!-- Resultados de búsqueda -->
                                 <div x-show="showResults && searchResults.length > 0"
                                      x-transition
-                                     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                                     class="absolute z-50 w-full mt-1 bg-theme-card border border-theme rounded-lg shadow-lg max-h-64 overflow-y-auto">
                                     <template x-for="person in searchResults" :key="person.id">
                                         <button type="button"
                                                 @click="selectPerson(person)"
-                                                class="w-full flex items-center gap-3 p-3 hover:bg-gray-50 text-left border-b last:border-b-0">
+                                                class="w-full flex items-center gap-3 p-3 hover:bg-theme-hover text-left border-b last:border-b-0">
                                             <template x-if="person.photo">
                                                 <img :src="person.photo" class="w-10 h-10 rounded-full object-cover">
                                             </template>
                                             <template x-if="!person.photo">
-                                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                                    <span class="text-gray-600 font-medium" x-text="person.name.charAt(0)"></span>
+                                                <div class="w-10 h-10 rounded-full bg-theme-secondary flex items-center justify-center">
+                                                    <span class="text-theme-secondary font-medium" x-text="person.name.charAt(0)"></span>
                                                 </div>
                                             </template>
                                             <div class="flex-1 min-w-0">
-                                                <p class="font-medium text-gray-900 truncate" x-text="person.name"></p>
-                                                <p class="text-sm text-gray-500">
+                                                <p class="font-medium text-theme truncate" x-text="person.name"></p>
+                                                <p class="text-sm text-theme-muted">
                                                     <span x-show="person.birth_year" x-text="'*' + person.birth_year"></span>
-                                                    <span x-show="!person.is_living" class="text-gray-400">{{ __('(fallecido)') }}</span>
+                                                    <span x-show="!person.is_living" class="text-theme-muted">{{ __('(fallecido)') }}</span>
                                                 </p>
                                             </div>
                                             <template x-if="person.requires_authorization">
-                                                <span class="flex-shrink-0 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                                <span class="flex-shrink-0 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
                                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                                     </svg>
@@ -312,31 +312,31 @@
 
                                 <!-- Sin resultados -->
                                 <div x-show="showResults && searchQuery.length >= 2 && searchResults.length === 0 && !loading"
-                                     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
+                                     class="absolute z-50 w-full mt-1 bg-theme-card border border-theme rounded-lg shadow-lg p-4 text-center text-theme-muted">
                                     {{ __('No se encontraron personas') }}
                                 </div>
                             </div>
 
                             <!-- Persona seleccionada -->
-                            <div x-show="selectedPerson" class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div x-show="selectedPerson" class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <template x-if="selectedPerson?.photo">
                                             <img :src="selectedPerson.photo" class="w-10 h-10 rounded-full object-cover">
                                         </template>
                                         <template x-if="!selectedPerson?.photo">
-                                            <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
-                                                <span class="text-blue-600 font-medium" x-text="selectedPerson?.name?.charAt(0)"></span>
+                                            <div class="w-10 h-10 rounded-full bg-blue-200 dark:bg-blue-900/40 flex items-center justify-center">
+                                                <span class="text-blue-600 dark:text-blue-400 font-medium" x-text="selectedPerson?.name?.charAt(0)"></span>
                                             </div>
                                         </template>
                                         <div>
-                                            <p class="font-medium text-gray-900" x-text="selectedPerson?.name"></p>
-                                            <p class="text-sm text-blue-600" x-show="selectedPerson?.requires_authorization">
+                                            <p class="font-medium text-theme" x-text="selectedPerson?.name"></p>
+                                            <p class="text-sm text-blue-600 dark:text-blue-400" x-show="selectedPerson?.requires_authorization">
                                                 {{ __('Se solicitará autorización al creador') }}
                                             </p>
                                         </div>
                                     </div>
-                                    <button type="button" @click="clearSelection" class="text-gray-400 hover:text-gray-600">
+                                    <button type="button" @click="clearSelection" class="text-theme-muted hover:text-theme-secondary">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                         </svg>
@@ -345,13 +345,13 @@
                             </div>
 
                             <!-- Aviso de autorización -->
-                            <div x-show="selectedPerson?.requires_authorization" class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <div x-show="selectedPerson?.requires_authorization" class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                                 <div class="flex gap-3">
                                     <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                     </svg>
                                     <div>
-                                        <p class="text-sm text-amber-800">
+                                        <p class="text-sm text-amber-800 dark:text-amber-300">
                                             {{ __('Esta persona fue creada por otro usuario. Se enviará una solicitud de autorización para establecer la relación.') }}
                                         </p>
                                         <input type="hidden" name="request_authorization" value="1">
@@ -389,8 +389,8 @@
                             </button>
                         </form>
 
-                        <div class="mt-6 pt-6 border-t">
-                            <p class="text-sm text-gray-500 mb-4">{{ __('No encuentras la persona?') }}</p>
+                        <div class="mt-6 pt-6 border-t border-theme">
+                            <p class="text-sm text-theme-muted mb-4">{{ __('No encuentras la persona?') }}</p>
                             <a href="{{ route('persons.create') }}" class="btn-outline w-full">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>

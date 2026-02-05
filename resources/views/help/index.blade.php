@@ -73,8 +73,8 @@
                             <li><strong>{{ __('Configuracion de privacidad:') }}</strong> {{ __('Define quien puede ver tu informacion') }}</li>
                         </ul>
 
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                            <p class="text-blue-800 text-sm">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+                            <p class="text-blue-800 dark:text-blue-300 text-sm">
                                 <strong>{{ __('Consejo:') }}</strong> {{ __('Completa tu perfil lo mas posible para que otros familiares puedan reconocerte cuando busquen conexiones.') }}
                             </p>
                         </div>
@@ -141,8 +141,8 @@
                             <li><strong>{{ __('Hijos:') }}</strong> {{ __('Hijos biologicos o adoptados') }}</li>
                         </ul>
 
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
-                            <p class="text-yellow-800 text-sm">
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mt-4">
+                            <p class="text-yellow-800 dark:text-yellow-300 text-sm">
                                 <strong>{{ __('Importante:') }}</strong> {{ __('Para personas vivas, el sistema solicitara automaticamente su consentimiento antes de mostrar su informacion a otros usuarios.') }}
                             </p>
                         </div>
@@ -231,8 +231,8 @@
                             <li><strong>{{ __('Opciones de privacidad:') }}</strong> {{ __('Excluir informacion de personas vivas') }}</li>
                         </ul>
 
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                            <p class="text-blue-800 text-sm">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+                            <p class="text-blue-800 dark:text-blue-300 text-sm">
                                 <strong>{{ __('Consejo:') }}</strong> {{ __('Exporta regularmente tu arbol como respaldo. Puedes importarlo en otros programas genealogicos como FamilySearch, Ancestry, o MyHeritage.') }}
                             </p>
                         </div>
@@ -261,8 +261,8 @@
                             <li>{{ __('Posibles conexiones con tu arbol') }}</li>
                         </ul>
 
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                            <p class="text-blue-800 text-sm">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+                            <p class="text-blue-800 dark:text-blue-300 text-sm">
                                 <strong>{{ __('Nota:') }}</strong> {{ __('Solo podras ver la informacion de personas segun su configuracion de privacidad y el consentimiento otorgado.') }}
                             </p>
                         </div>
@@ -276,7 +276,7 @@
                         {{ __('Si necesitas ayuda adicional, no dudes en contactarnos.') }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ route('messages.compose') }}" class="inline-flex items-center justify-center px-6 py-3 bg-white text-mf-primary font-semibold rounded-full hover:bg-theme transition-colors">
+                        <a href="{{ route('messages.compose') }}" class="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-gray-800 text-mf-primary font-semibold rounded-full hover:bg-theme transition-colors">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>

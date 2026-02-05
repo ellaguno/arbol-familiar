@@ -10,7 +10,7 @@
                     </svg>
                 </div>
                 <h1 class="text-2xl font-bold text-theme">{{ __('Recuperar contraseña') }}</h1>
-                <p class="text-red-600 mt-1">{{ __('Te enviaremos un enlace para restablecer tu contraseña') }}</p>
+                <p class="text-theme-secondary mt-1">{{ __('Te enviaremos un enlace para restablecer tu contraseña') }}</p>
             </div>
 
             @if(session('status'))

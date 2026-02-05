@@ -8,14 +8,14 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Aviso de menor protegido -->
         @if($isProtectedMinor)
-            <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
                     <div>
-                        <p class="font-medium text-amber-800">{{ __('Informacion protegida') }}</p>
-                        <p class="text-sm text-amber-700">{{ __('Esta persona es menor de edad. Su informacion personal esta protegida y solo es visible para quien la registro.') }}</p>
+                        <p class="font-medium text-amber-800 dark:text-amber-300">{{ __('Informacion protegida') }}</p>
+                        <p class="text-sm text-amber-700 dark:text-amber-400">{{ __('Esta persona es menor de edad. Su informacion personal esta protegida y solo es visible para quien la registro.') }}</p>
                     </div>
                 </div>
             </div>
@@ -44,7 +44,7 @@
                         <!-- Foto (oculta para menores protegidos) -->
                         @if($isProtectedMinor)
                             <div class="w-32 h-32 rounded-full bg-theme-secondary flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
                             </div>
@@ -67,17 +67,17 @@
 
                         <div class="flex flex-wrap justify-center gap-2 mt-4">
                             @if($person->gender)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $person->gender === 'M' ? 'bg-blue-100 text-blue-800' : ($person->gender === 'F' ? 'bg-pink-100 text-pink-800' : 'bg-gray-100 text-gray-800') }}">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $person->gender === 'M' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : ($person->gender === 'F' ? 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' : 'bg-theme-secondary text-theme') }}">
                                     {{ $person->gender === 'M' ? __('Masculino') : ($person->gender === 'F' ? __('Femenino') : __('Otro')) }}
                                 </span>
                             @endif
                             @if($person->marital_status)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
                                     {{ config('mi-familia.marital_statuses')[$person->marital_status] ?? $person->marital_status }}
                                 </span>
                             @endif
                             @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
                                     HR
                                 </span>
                             @endif
@@ -121,8 +121,8 @@
                             @endphp
 
                             @if($isOwnPerson)
-                                <div class="p-3 bg-blue-100  border border-blue-200 rounded-lg text-center mb-2">
-                                    <span class="text-blue-800 font-medium">
+                                <div class="p-3 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-center mb-2">
+                                    <span class="text-blue-800 dark:text-blue-300 font-medium">
                                         <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -130,8 +130,8 @@
                                     </span>
                                 </div>
                             @elseif($hasPendingClaim)
-                                <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center mb-2">
-                                    <span class="text-yellow-700 text-sm">
+                                <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-center mb-2">
+                                    <span class="text-yellow-700 dark:text-yellow-400 text-sm">
                                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -148,8 +148,8 @@
                                 </a>
                             @elseif($isAlreadyInTree)
                                 {{-- La persona ya está en el árbol del usuario --}}
-                                <div class="p-3 bg-green-50 border border-green-200 rounded-lg text-center mb-2">
-                                    <span class="text-green-700 text-sm">
+                                <div class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center mb-2">
+                                    <span class="text-green-700 dark:text-green-400 text-sm">
                                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -165,7 +165,7 @@
                                     {{ __('Agregar a mi árbol') }}
                                 </a>
                             @elseif($person->user_id && $person->user_id !== $user->id)
-                                <div class="p-3 bg-gray-50 border border-theme rounded-lg text-center mb-2">
+                                <div class="p-3 bg-theme-secondary border border-theme rounded-lg text-center mb-2">
                                     <span class="text-theme-secondary text-sm">
                                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -193,6 +193,27 @@
                                 </svg>
                                 {{ __('Ver en arbol') }}
                             </a>
+                            @php $sidebarHooks = trim($hooks->render('person.show.sidebar', ['person' => $person])); @endphp
+                            @if($sidebarHooks)
+                            <div class="w-full" x-data="{ open: false }">
+                                <button @click="open = !open" class="btn-outline w-full justify-between">
+                                    <span class="inline-flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        {{ __('Reportes') }}
+                                    </span>
+                                    <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-collapse>
+                                    <div class="mt-1 border border-theme rounded-lg bg-theme-secondary py-1">
+                                        {!! $sidebarHooks !!}
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                             @if($isOwnPerson)
                                 <a href="{{ route('profile.settings') }}" class="btn-ghost w-full">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,7 +238,7 @@
                     <div class="card-body">
                         @if($isProtectedMinor)
                             <div class="text-center py-6">
-                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-theme-muted mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
                                 <p class="text-theme-muted">{{ __('Informacion protegida por ser menor de edad.') }}</p>
@@ -344,12 +365,12 @@
                                 <h3 class="font-medium text-theme-secondary mb-2">{{ __('Padres') }}</h3>
                                 <div class="flex flex-wrap gap-4">
                                     @if($person->father)
-                                        <a href="{{ route('persons.show', $person->father) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                        <a href="{{ route('persons.show', $person->father) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-theme-hover">
                                             @if($person->father->photo_path)
                                                 <img src="{{ Storage::url($person->father->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
                                             @else
-                                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <span class="text-blue-600 font-medium">{{ substr($person->father->first_name, 0, 1) }}</span>
+                                                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                                    <span class="text-blue-600 dark:text-blue-400 font-medium">{{ substr($person->father->first_name, 0, 1) }}</span>
                                                 </div>
                                             @endif
                                             <div>
@@ -359,12 +380,12 @@
                                         </a>
                                     @endif
                                     @if($person->mother)
-                                        <a href="{{ route('persons.show', $person->mother) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                        <a href="{{ route('persons.show', $person->mother) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-theme-hover">
                                             @if($person->mother->photo_path)
                                                 <img src="{{ Storage::url($person->mother->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
                                             @else
-                                                <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                                    <span class="text-pink-600 font-medium">{{ substr($person->mother->first_name, 0, 1) }}</span>
+                                                <div class="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                                    <span class="text-pink-600 dark:text-pink-400 font-medium">{{ substr($person->mother->first_name, 0, 1) }}</span>
                                                 </div>
                                             @endif
                                             <div>
@@ -386,12 +407,12 @@
                                 <div class="flex flex-wrap gap-4">
                                     @foreach($person->allSpouses as $spouseInfo)
                                         @php $spouse = $spouseInfo['person']; @endphp
-                                        <a href="{{ route('persons.show', $spouse) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                        <a href="{{ route('persons.show', $spouse) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-theme-hover">
                                             @if($spouse->photo_path)
                                                 <img src="{{ Storage::url($spouse->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
                                             @else
-                                                <div class="w-10 h-10 rounded-full bg-{{ $spouse->gender === 'M' ? 'blue' : 'pink' }}-100 flex items-center justify-center">
-                                                    <span class="text-{{ $spouse->gender === 'M' ? 'blue' : 'pink' }}-600 font-medium">{{ substr($spouse->first_name, 0, 1) }}</span>
+                                                <div class="w-10 h-10 rounded-full bg-{{ $spouse->gender === 'M' ? 'blue' : 'pink' }}-100 {{ $spouse->gender === 'M' ? 'dark:bg-blue-900/30' : 'dark:bg-pink-900/30' }} flex items-center justify-center">
+                                                    <span class="text-{{ $spouse->gender === 'M' ? 'blue' : 'pink' }}-600 {{ $spouse->gender === 'M' ? 'dark:text-blue-400' : 'dark:text-pink-400' }} font-medium">{{ substr($spouse->first_name, 0, 1) }}</span>
                                                 </div>
                                             @endif
                                             <div>
@@ -425,7 +446,7 @@
                                 <h3 class="font-medium text-theme-secondary mb-2">{{ __('Hermanos') }}</h3>
                                 <div class="flex flex-wrap gap-4">
                                     @foreach($person->siblings as $sibling)
-                                        <a href="{{ route('persons.show', $sibling) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                        <a href="{{ route('persons.show', $sibling) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-theme-hover">
                                             @if($sibling->photo_path)
                                                 <img src="{{ Storage::url($sibling->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
                                             @else
@@ -449,7 +470,7 @@
                                 <h3 class="font-medium text-theme-secondary mb-2">{{ __('Hijos') }}</h3>
                                 <div class="flex flex-wrap gap-4">
                                     @foreach($person->children as $child)
-                                        <a href="{{ route('persons.show', $child) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                                        <a href="{{ route('persons.show', $child) }}" class="flex items-center gap-2 p-2 rounded-lg hover:bg-theme-hover">
                                             @if($child->photo_path)
                                                 <img src="{{ Storage::url($child->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
                                             @else
@@ -524,7 +545,7 @@
                         @if($person->media && $person->media->isNotEmpty())
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 @foreach($person->media->take(8) as $media)
-                                    <a href="{{ route('media.show', $media) }}" class="group relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                    <a href="{{ route('media.show', $media) }}" class="group relative aspect-square rounded-lg overflow-hidden bg-theme-secondary">
                                         @if(in_array($media->type, ['image', 'photo']))
                                             <img src="{{ Storage::url($media->file_path) }}"
                                                  alt="{{ $media->title }}"
@@ -555,7 +576,7 @@
                             @endif
                         @else
                             <div class="text-center py-8">
-                                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-theme-muted mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                                 <p class="text-theme-muted mb-3">{{ __('No hay fotos ni documentos.') }}</p>
@@ -569,6 +590,7 @@
                         @endif
                     </div>
                 </div>
+                {!! $hooks->render('person.show.content', ['person' => $person]) !!}
             </div>
         </div>
     </div>

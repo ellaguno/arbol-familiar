@@ -1,0 +1,20 @@
+{
+    "slug": "presence-communication",
+    "name": "Presence & Communication",
+    "name_es": "Presencia y Comunicacion",
+    "version": "1.0.0",
+    "description": "Track online users, text chat, and video calls between family members",
+    "description_es": "Seguimiento de usuarios en linea, chat de texto y videollamadas entre familiares",
+    "author": "Mi Familia",
+    "type": "communication",
+    "requires": {
+        "mi-familia": ">=2.1.0",
+        "php": ">=8.1"
+    },
+    "provider": "PresenceCommunicationPlugin",
+    "hooks": [
+        "dashboard.widgets",
+        "person.show.sidebar",
+        "header.menu.items"
+    ]
+}

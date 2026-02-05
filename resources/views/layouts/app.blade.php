@@ -26,6 +26,7 @@
             --mf-light: {{ $siteColors['light'] ?? '#dbeafe' }};
             --mf-dark: {{ $siteColors['dark'] ?? '#1d4ed8' }};
             --mf-font: '{{ $siteFont ?? 'Ubuntu' }}', ui-sans-serif, system-ui, sans-serif;
+            @if($siteBgColor ?? '')--mf-bg: {{ $siteBgColor }};@endif
         }
         body { font-family: var(--mf-font) !important; }
     </style>
@@ -43,8 +44,8 @@
         <main class="flex-1"
               @if($siteBgImage ?? '')
               style="background-image: url('{{ asset($siteBgImage) }}'); background-size: cover; background-position: center; background-attachment: fixed;"
-              @elseif($siteBgColor ?? '')
-              style="background-color: {{ $siteBgColor }};"
+              @else
+              style="background-color: var(--mf-bg);"
               @endif>
             {{ $slot }}
         </main>

@@ -24,13 +24,13 @@
                     {!! $col2 !!}
                 @else
                     @auth
-                        <a href="{{ route('help') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
+                        <a href="{{ route('help') }}" class="block text-theme-secondary hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
                     @else
-                        <a href="{{ route('login') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
+                        <a href="{{ route('login') }}" class="block text-theme-secondary hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
                     @endauth
-                    <a href="{{ route('ancestors-info') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Donde encontrar más información de mis antepasados') }}</a>
-                    <a href="{{ route('privacy') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Privacidad') }}</a>
-                    <a href="{{ route('terms') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Términos y condiciones') }}</a>
+                    <a href="{{ route('ancestors-info') }}" class="block text-theme-secondary hover:text-[#3b82f6]">{{ __('Donde encontrar más información de mis antepasados') }}</a>
+                    <a href="{{ route('privacy') }}" class="block text-theme-secondary hover:text-[#3b82f6]">{{ __('Privacidad') }}</a>
+                    <a href="{{ route('terms') }}" class="block text-theme-secondary hover:text-[#3b82f6]">{{ __('Términos y condiciones') }}</a>
                 @endif
             </div>
 

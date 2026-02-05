@@ -121,7 +121,7 @@
                 <label class="form-label">{{ __('Seleccionar hijos') }}</label>
                 <div class="grid md:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-2 border rounded-lg">
                     @foreach($persons as $person)
-                        <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <label class="flex items-center gap-2 p-2 hover:bg-theme-hover rounded cursor-pointer">
                             <input type="checkbox" name="children[]" value="{{ $person->id }}"
                                    class="form-checkbox"
                                    {{ in_array($person->id, old('children', $childIds)) ? 'checked' : '' }}>

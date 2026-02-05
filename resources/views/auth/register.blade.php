@@ -17,7 +17,7 @@
                     @csrf
 
                     <!-- Datos de la cuenta -->
-                    <div class="border-b pb-6">
+                    <div class="border-b border-theme pb-6">
                         <h2 class="text-lg font-semibold text-theme mb-4">{{ __('Datos de la cuenta') }}</h2>
 
                         <div class="grid md:grid-cols-2 gap-4">
@@ -55,7 +55,7 @@
                     </div>
 
                     <!-- Datos personales -->
-                    <div class="border-b pb-6">
+                    <div class="border-b border-theme pb-6">
                         <h2 class="text-lg font-semibold text-theme mb-4">{{ __('Datos personales') }}</h2>
 
                         <div class="grid md:grid-cols-2 gap-4">
@@ -111,7 +111,7 @@
 
                     <!-- Herencia cultural -->
                     @if($heritageEnabled ?? false)
-                    <div class="border-b pb-6">
+                    <div class="border-b border-theme pb-6">
                         <h2 class="text-lg font-semibold text-theme mb-4">{{ $heritageLabel ?? __('Herencia cultural') }}</h2>
 
                         <div class="mb-4">
@@ -200,7 +200,7 @@
                     </x-button>
                 </form>
 
-                <div class="mt-6 pt-6 border-t text-center">
+                <div class="mt-6 pt-6 border-t border-theme text-center">
                     <p class="text-theme-secondary">
                         {{ __('Ya tienes cuenta?') }}
                         <a href="{{ route('login') }}" class="text-mf-primary hover:underline font-medium">

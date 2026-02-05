@@ -14,10 +14,10 @@
              x-transition:leave-start="opacity-100 transform translate-x-0"
              x-transition:leave-end="opacity-0 transform translate-x-8"
              :class="{
-                 'bg-green-50 border-green-400 text-green-800': toast.type === 'success',
-                 'bg-red-50 border-red-400 text-red-800': toast.type === 'error',
-                 'bg-yellow-50 border-yellow-400 text-yellow-800': toast.type === 'warning',
-                 'bg-blue-50 border-blue-400 text-blue-800': toast.type === 'info'
+                 'bg-green-50 border-green-400 text-green-800 dark:bg-green-900/30 dark:border-green-600 dark:text-green-300': toast.type === 'success',
+                 'bg-red-50 border-red-400 text-red-800 dark:bg-red-900/30 dark:border-red-600 dark:text-red-300': toast.type === 'error',
+                 'bg-yellow-50 border-yellow-400 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-600 dark:text-yellow-300': toast.type === 'warning',
+                 'bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/30 dark:border-blue-600 dark:text-blue-300': toast.type === 'info'
              }"
              class="rounded-lg border-l-4 p-4 shadow-lg flex items-start gap-3">
 
@@ -56,7 +56,7 @@
 
             {{-- Close button --}}
             <button @click="removeToast(toast.id)"
-                    class="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600 transition-colors">
+                    class="flex-shrink-0 ml-2 text-theme-muted hover:text-theme-secondary transition-colors">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>

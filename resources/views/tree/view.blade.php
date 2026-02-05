@@ -65,8 +65,8 @@
                             @if($person->photo_path)
                                 <img src="{{ Storage::url($person->photo_path) }}" class="w-10 h-10 rounded-full object-cover">
                             @else
-                                <div class="w-10 h-10 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 flex items-center justify-center">
-                                    <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 font-bold">{{ substr($person->first_name, 0, 1) }}</span>
+                                <div class="w-10 h-10 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 dark:bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-900/30 flex items-center justify-center">
+                                    <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 dark:text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-400 font-bold">{{ substr($person->first_name, 0, 1) }}</span>
                                 </div>
                             @endif
                             <div>
@@ -118,6 +118,25 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                             </svg>
                         </a>
+                        @php $toolbarHooks = trim($hooks->render('tree.toolbar', ['person' => $person])); @endphp
+                        @if($toolbarHooks)
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open"
+                                    class="p-2 text-theme-muted hover:text-theme-secondary hover:bg-theme-secondary rounded flex items-center gap-1"
+                                    title="{{ __('Reportes') }}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false" x-transition
+                                 class="absolute right-0 mt-1 w-48 bg-theme-card border border-theme rounded-lg shadow-lg z-20 py-1">
+                                {!! $toolbarHooks !!}
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -164,11 +183,11 @@
                     <span>{{ __('Herencia cultural') }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div class="w-3 h-3 rounded bg-gray-300"></div>
+                    <div class="w-3 h-3 rounded bg-gray-300 dark:bg-gray-600"></div>
                     <span>{{ __('Fallecido') }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3 h-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
                     <span>{{ __('Menor protegido') }}</span>
@@ -1262,9 +1281,9 @@
                 <div class="text-center mb-6">
                     <div class="relative inline-block group">
                         ${person.photo
-                            ? `<img src="${person.photo}" class="w-24 h-24 rounded-full object-cover mx-auto ring-4 ring-gray-100">`
-                            : `<div class="w-24 h-24 rounded-full mx-auto flex items-center justify-center ring-4 ring-gray-100 ${person.gender === 'M' ? 'bg-blue-100' : 'bg-pink-100'}">
-                                <span class="text-3xl font-bold ${person.gender === 'M' ? 'text-blue-600' : 'text-pink-600'}">${person.firstName?.charAt(0) || '?'}</span>
+                            ? `<img src="${person.photo}" class="w-24 h-24 rounded-full object-cover mx-auto ring-4 ring-gray-100 dark:ring-gray-700">`
+                            : `<div class="w-24 h-24 rounded-full mx-auto flex items-center justify-center ring-4 ring-gray-100 dark:ring-gray-700 ${person.gender === 'M' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-pink-100 dark:bg-pink-900/30'}">
+                                <span class="text-3xl font-bold ${person.gender === 'M' ? 'text-blue-600 dark:text-blue-400' : 'text-pink-600 dark:text-pink-400'}">${person.firstName?.charAt(0) || '?'}</span>
                                </div>`
                         }
                         <label class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
@@ -1282,7 +1301,7 @@
 
                 <div class="space-y-3 mb-6">
                     ${person.hasEthnicHeritage ? `
-                        <div class="flex items-center gap-2 text-red-600 bg-red-50 p-2 rounded">
+                        <div class="flex items-center gap-2 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded">
                             <span class="text-sm font-medium">{{ __('Herencia cultural') }}</span>
                         </div>
                     ` : ''}
@@ -1293,18 +1312,18 @@
                     </div>
 
                     ${person.siblingsCount > 0 ? `
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                             <div class="flex items-center gap-2 mb-2">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
-                                <span class="text-sm font-medium text-blue-800">
+                                <span class="text-sm font-medium text-blue-800 dark:text-blue-300">
                                     ${person.siblingsCount === 1 ? '{{ __("Tiene 1 hermano/a") }}' : '{{ __("Tiene") }} ' + person.siblingsCount + ' {{ __("hermanos/as") }}'}
                                 </span>
                             </div>
                             <div class="space-y-1">
                                 ${person.siblings.map(sib => `
-                                    <a href="${baseTreeUrl}/${sib.id}" class="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                                    <a href="${baseTreeUrl}/${sib.id}" class="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline">
                                         <span class="w-2 h-2 rounded-full ${sib.gender === 'M' ? 'bg-blue-400' : 'bg-pink-400'}"></span>
                                         ${sib.name}
                                     </a>
@@ -1335,7 +1354,7 @@
                             ? `<span class="py-2 px-3 text-xs text-center border border-theme text-theme-muted rounded cursor-not-allowed" title="{{ __('Ya tiene padre registrado') }}">
                                 {{ __('Padre') }}
                                </span>`
-                            : `<a href="${addPersonUrl}?relation=father&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 rounded hover:bg-blue-50">
+                            : `<a href="${addPersonUrl}?relation=father&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
                                 + {{ __('Padre') }}
                                </a>`
                         }
@@ -1343,17 +1362,17 @@
                             ? `<span class="py-2 px-3 text-xs text-center border border-theme text-theme-muted rounded cursor-not-allowed" title="{{ __('Ya tiene madre registrada') }}">
                                 {{ __('Madre') }}
                                </span>`
-                            : `<a href="${addPersonUrl}?relation=mother&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 rounded hover:bg-blue-50">
+                            : `<a href="${addPersonUrl}?relation=mother&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
                                 + {{ __('Madre') }}
                                </a>`
                         }
-                        <a href="${addPersonUrl}?relation=spouse&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-bñie-500 text-blue-600 rounded hover:bg-blue-50">
+                        <a href="${addPersonUrl}?relation=spouse&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-bñie-500 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             + {{ __('Conyuge') }}
                         </a>
-                        <a href="${addPersonUrl}?relation=child&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 rounded hover:bg-blue-50">
+                        <a href="${addPersonUrl}?relation=child&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             + {{ __('Hijo/a') }}
                         </a>
-                        <a href="${addPersonUrl}?relation=sibling&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 rounded hover:bg-blue-50">
+                        <a href="${addPersonUrl}?relation=sibling&related_to=${person.id}" class="py-2 px-3 text-xs text-center border border-blue-500 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             + {{ __('Hermano/a') }}
                         </a>
                     </div>
@@ -1424,8 +1443,8 @@
             const photoContainer = input.closest('.relative');
             const originalContent = photoContainer.innerHTML;
             photoContainer.innerHTML = `
-                <div class="w-24 h-24 rounded-full mx-auto flex items-center justify-center bg-gray-100 ring-4 ring-gray-100">
-                    <svg class="w-8 h-8 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                <div class="w-24 h-24 rounded-full mx-auto flex items-center justify-center bg-theme-secondary ring-4 ring-gray-100 dark:ring-gray-700">
+                    <svg class="w-8 h-8 text-theme-muted animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -1444,7 +1463,7 @@
                 if (data.success) {
                     // Update photo in panel
                     photoContainer.innerHTML = `
-                        <img src="${data.photo}" class="w-24 h-24 rounded-full object-cover mx-auto ring-4 ring-gray-100">
+                        <img src="${data.photo}" class="w-24 h-24 rounded-full object-cover mx-auto ring-4 ring-gray-100 dark:ring-gray-700">
                         <label class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>

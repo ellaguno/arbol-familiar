@@ -4,7 +4,7 @@
     "description": "Plataforma genealogica de codigo abierto - Mi Familia",
     "keywords": ["genealogy", "family-tree", "open-source", "laravel", "spanish"],
     "license": "MIT",
-    "version": "2.0.0",
+    "version": "2.3.0",
     "authors": [
         {
             "name": "Eduardo Llaguno Velasco",
@@ -17,11 +17,13 @@
     },
     "require": {
         "php": "^8.1",
+        "barryvdh/laravel-dompdf": "^3.1",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "pusher/pusher-php-server": "^7.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -35,6 +37,11 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "Plugin\\ReportsAncestors\\": "plugins/reports-ancestors/src/",
+            "Plugin\\ReportsDescendants\\": "plugins/reports-descendants/src/",
+            "Plugin\\ReportsFanchart\\": "plugins/reports-fanchart/src/",
+            "Plugin\\ReportsPedigree\\": "plugins/reports-pedigree/src/",
+            "Plugin\\PresenceCommunication\\": "plugins/presence-communication/src/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

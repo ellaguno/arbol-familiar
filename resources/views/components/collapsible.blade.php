@@ -4,7 +4,7 @@
     'icon' => null,
 ])
 
-<div {{ $attributes->merge(['class' => 'border border-gray-200 rounded-lg overflow-hidden']) }} x-data="{ open: {{ $open ? 'true' : 'false' }} }">
+<div {{ $attributes->merge(['class' => 'border border-theme rounded-lg overflow-hidden']) }} x-data="{ open: {{ $open ? 'true' : 'false' }} }">
     <button
         @click="open = !open"
         type="button"
@@ -16,10 +16,10 @@
                     {!! $icon !!}
                 </span>
             @endif
-            <span class="font-medium text-gray-900">{{ $title }}</span>
+            <span class="font-medium text-theme">{{ $title }}</span>
         </div>
         <svg
-            class="w-5 h-5 text-gray-500 transition-transform duration-200"
+            class="w-5 h-5 text-theme-muted transition-transform duration-200"
             :class="{ 'rotate-180': open }"
             fill="none"
             stroke="currentColor"
@@ -39,7 +39,7 @@
         x-transition:leave-end="opacity-0 transform -translate-y-2"
         class="collapsible-content"
     >
-        <div class="p-4 bg-white">
+        <div class="p-4 bg-theme-card">
             {{ $slot }}
         </div>
     </div>

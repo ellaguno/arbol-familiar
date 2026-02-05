@@ -1,0 +1,19 @@
+{
+    "slug": "reports-pedigree",
+    "name": "Pedigree Chart",
+    "name_es": "Cuadro de Pedigri",
+    "version": "1.0.0",
+    "description": "Generate classic horizontal pedigree charts with SVG, HTML and PDF output",
+    "description_es": "Genera cuadros de pedigri horizontales clasicos con salida SVG, HTML y PDF",
+    "author": "Mi Familia",
+    "type": "report",
+    "requires": {
+        "mi-familia": ">=2.1.0",
+        "php": ">=8.1"
+    },
+    "provider": "PedigreeChartPlugin",
+    "hooks": [
+        "person.show.sidebar",
+        "tree.toolbar"
+    ]
+}

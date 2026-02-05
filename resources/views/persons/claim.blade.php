@@ -4,11 +4,11 @@
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="card">
             <div class="card-header">
-                <h1 class="text-xl font-bold text-gray-900">{{ __('Reclamar este perfil') }}</h1>
+                <h1 class="text-xl font-bold text-theme">{{ __('Reclamar este perfil') }}</h1>
             </div>
             <div class="card-body">
                 <!-- Informacion de la persona -->
-                <div class="flex items-start gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-start gap-4 mb-6 p-4 bg-theme-secondary rounded-lg">
                     <div class="flex-shrink-0">
                         @if($person->photo_path)
                             <img src="{{ asset('storage/' . $person->photo_path) }}" alt="{{ $person->full_name }}"
@@ -20,9 +20,9 @@
                         @endif
                     </div>
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-900">{{ $person->full_name }}</h2>
+                        <h2 class="text-lg font-semibold text-theme">{{ $person->full_name }}</h2>
                         @if($person->birth_date)
-                            <p class="text-sm text-gray-600">
+                            <p class="text-sm text-theme-secondary">
                                 {{ __('Nacimiento') }}: {{ $person->birth_date->format('d/m/Y') }}
                                 @if($person->birth_place)
                                     - {{ $person->birth_place }}
@@ -30,25 +30,25 @@
                             </p>
                         @endif
                         @if($person->residence_place)
-                            <p class="text-sm text-gray-600">{{ __('Residencia') }}: {{ $person->residence_place }}</p>
+                            <p class="text-sm text-theme-secondary">{{ __('Residencia') }}: {{ $person->residence_place }}</p>
                         @endif
                     </div>
                 </div>
 
                 <!-- Explicacion -->
                 <div class="mb-6">
-                    <div class="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <div>
-                            <h3 class="font-medium text-blue-800">{{ __('Como funciona') }}</h3>
-                            <p class="text-sm text-blue-700 mt-1">
+                            <h3 class="font-medium text-blue-800 dark:text-blue-300">{{ __('Como funciona') }}</h3>
+                            <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
                                 {{ __('Al reclamar este perfil, enviaras una solicitud a') }}
                                 <strong>{{ $creator?->email ?? __('el creador') }}</strong>
                                 {{ __('quien debera aprobar que tu cuenta se vincule con esta persona.') }}
                             </p>
-                            <p class="text-sm text-blue-700 mt-2">
+                            <p class="text-sm text-blue-700 dark:text-blue-400 mt-2">
                                 {{ __('Una vez aprobado, podras editar la informacion de este perfil y sera tu perfil principal en el sistema.') }}
                             </p>
                         </div>

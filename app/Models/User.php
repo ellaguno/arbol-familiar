@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'language',
         'theme_preference',
         'privacy_level',
+        'show_online_status',
         'confirmation_code',
         'first_login_completed',
     ];
@@ -56,6 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
         'is_admin' => 'boolean',
         'first_login_completed' => 'boolean',
+        'show_online_status' => 'boolean',
     ];
 
     /**

@@ -4,10 +4,10 @@
     <div class="min-h-[60vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full text-center">
             <div class="mb-8">
-                <span class="text-8xl font-bold text-gray-200">403</span>
+                <span class="text-8xl font-bold text-gray-200 dark:text-gray-700">403</span>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ __('Acceso denegado') }}</h1>
-            <p class="text-gray-600 mb-8">
+            <h1 class="text-3xl font-bold text-theme mb-4">{{ __('Acceso denegado') }}</h1>
+            <p class="text-theme-secondary mb-8">
                 {{ __('No tienes permiso para acceder a esta pagina.') }}
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">

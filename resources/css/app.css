@@ -182,7 +182,7 @@
     }
 
     .form-error {
-        @apply text-sm text-red-600 mt-1;
+        @apply text-sm text-red-600 dark:text-red-400 mt-1;
     }
 
     .form-help {
@@ -217,19 +217,19 @@
     }
 
     .alert-info {
-        @apply alert bg-blue-50 text-blue-800;
+        @apply alert bg-blue-50 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
     }
 
     .alert-success {
-        @apply alert bg-green-50 text-green-800;
+        @apply alert bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300;
     }
 
     .alert-warning {
-        @apply alert bg-yellow-50 text-yellow-800;
+        @apply alert bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300;
     }
 
     .alert-error {
-        @apply alert bg-red-50 text-red-800;
+        @apply alert bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300;
     }
 
     /* Navegacion */
@@ -259,15 +259,15 @@
     }
 
     .badge-success {
-        @apply badge bg-green-100 text-green-800;
+        @apply badge bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300;
     }
 
     .badge-warning {
-        @apply badge bg-yellow-100 text-yellow-800;
+        @apply badge bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300;
     }
 
     .badge-error {
-        @apply badge bg-red-100 text-red-800;
+        @apply badge bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300;
     }
 
     /* Indicador de herencia cultural */
@@ -381,6 +381,8 @@
     .bg-theme { background-color: var(--mf-bg); }
     .bg-theme-card { background-color: var(--mf-bg-card); }
     .bg-theme-secondary { background-color: var(--mf-bg-secondary); }
+    .bg-theme-hover { background-color: var(--mf-bg-hover); }
+    .hover\:bg-theme-hover:hover { background-color: var(--mf-bg-hover); }
     .border-theme { border-color: var(--mf-border); }
     .border-theme-light { border-color: var(--mf-border-light); }
     .divide-theme > :not([hidden]) ~ :not([hidden]) { border-color: var(--mf-border); }

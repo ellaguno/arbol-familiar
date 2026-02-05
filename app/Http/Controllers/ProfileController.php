@@ -206,6 +206,21 @@ class ProfileController extends Controller
     }
 
     /**
+     * Actualiza la preferencia de visibilidad en linea.
+     */
+    public function updateOnlineStatus(Request $request)
+    {
+        $user = auth()->user();
+        $user->update([
+            'show_online_status' => (bool) $request->input('show_online_status', false),
+        ]);
+
+        ActivityLog::log('online_status_updated', $user);
+
+        return back()->with('success', __('Preferencia de estado en linea actualizada.'));
+    }
+
+    /**
      * Actualiza la contrasena.
      */
     public function updatePassword(Request $request)

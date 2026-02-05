@@ -6,13 +6,13 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('families.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Familias') }}</a>
+                    <a href="{{ route('families.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Familias') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ $family->label }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ $family->label }}</span>
                 </li>
             </ol>
         </nav>
@@ -30,15 +30,15 @@
                                          alt="{{ $family->husband->full_name }}"
                                          class="w-24 h-24 rounded-full object-cover mx-auto border-4 border-blue-100">
                                 @else
-                                    <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
-                                        <span class="text-blue-600 font-bold text-3xl">{{ substr($family->husband->first_name, 0, 1) }}</span>
+                                    <div class="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto">
+                                        <span class="text-blue-600 dark:text-blue-400 font-bold text-3xl">{{ substr($family->husband->first_name, 0, 1) }}</span>
                                     </div>
                                 @endif
                             </div>
                             <h3 class="text-lg font-semibold">{{ $family->husband->full_name }}</h3>
-                            <p class="text-sm text-gray-500">{{ __('Esposo') }}</p>
+                            <p class="text-sm text-theme-muted">{{ __('Esposo') }}</p>
                             @if($family->husband->birth_date)
-                                <p class="text-sm text-gray-500 mt-1">{{ $family->husband->birth_date->format('d/m/Y') }}</p>
+                                <p class="text-sm text-theme-muted mt-1">{{ $family->husband->birth_date->format('d/m/Y') }}</p>
                             @endif
                             <a href="{{ route('persons.show', $family->husband) }}" class="btn-outline btn-sm mt-4">
                                 {{ __('Ver perfil') }}
@@ -57,15 +57,15 @@
                                          alt="{{ $family->wife->full_name }}"
                                          class="w-24 h-24 rounded-full object-cover mx-auto border-4 border-pink-100">
                                 @else
-                                    <div class="w-24 h-24 rounded-full bg-pink-100 flex items-center justify-center mx-auto">
-                                        <span class="text-pink-600 font-bold text-3xl">{{ substr($family->wife->first_name, 0, 1) }}</span>
+                                    <div class="w-24 h-24 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center mx-auto">
+                                        <span class="text-pink-600 dark:text-pink-400 font-bold text-3xl">{{ substr($family->wife->first_name, 0, 1) }}</span>
                                     </div>
                                 @endif
                             </div>
                             <h3 class="text-lg font-semibold">{{ $family->wife->full_name }}</h3>
-                            <p class="text-sm text-gray-500">{{ __('Esposa') }}</p>
+                            <p class="text-sm text-theme-muted">{{ __('Esposa') }}</p>
                             @if($family->wife->birth_date)
-                                <p class="text-sm text-gray-500 mt-1">{{ $family->wife->birth_date->format('d/m/Y') }}</p>
+                                <p class="text-sm text-theme-muted mt-1">{{ $family->wife->birth_date->format('d/m/Y') }}</p>
                             @endif
                             <a href="{{ route('persons.show', $family->wife) }}" class="btn-outline btn-sm mt-4">
                                 {{ __('Ver perfil') }}
@@ -105,8 +105,8 @@
                     <div class="card-body">
                         <dl class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Estado') }}</dt>
-                                <dd class="text-gray-900 font-medium">
+                                <dt class="text-sm text-theme-muted">{{ __('Estado') }}</dt>
+                                <dd class="text-theme font-medium">
                                     @switch($family->status)
                                         @case('married') {{ __('Casados') }} @break
                                         @case('divorced') {{ __('Divorciados') }} @break
@@ -119,32 +119,32 @@
                             </div>
                             @if($family->marriage_date)
                                 <div>
-                                    <dt class="text-sm text-gray-500">{{ __('Fecha de matrimonio') }}</dt>
-                                    <dd class="text-gray-900">
+                                    <dt class="text-sm text-theme-muted">{{ __('Fecha de matrimonio') }}</dt>
+                                    <dd class="text-theme">
                                         {{ $family->marriage_date->format('d/m/Y') }}
                                         @if($family->marriage_date_approx)
-                                            <span class="text-gray-500">({{ __('aprox.') }})</span>
+                                            <span class="text-theme-muted">({{ __('aprox.') }})</span>
                                         @endif
                                     </dd>
                                 </div>
                             @endif
                             @if($family->marriage_place)
                                 <div>
-                                    <dt class="text-sm text-gray-500">{{ __('Lugar de matrimonio') }}</dt>
-                                    <dd class="text-gray-900">{{ $family->marriage_place }}</dd>
+                                    <dt class="text-sm text-theme-muted">{{ __('Lugar de matrimonio') }}</dt>
+                                    <dd class="text-theme">{{ $family->marriage_place }}</dd>
                                 </div>
                             @endif
                             @if($family->divorce_date)
                                 <div>
-                                    <dt class="text-sm text-gray-500">{{ __('Fecha de divorcio') }}</dt>
-                                    <dd class="text-gray-900">{{ $family->divorce_date->format('d/m/Y') }}</dd>
+                                    <dt class="text-sm text-theme-muted">{{ __('Fecha de divorcio') }}</dt>
+                                    <dd class="text-theme">{{ $family->divorce_date->format('d/m/Y') }}</dd>
                                 </div>
                             @endif
                             @if($family->hasEthnicHeritage())
                                 <div>
-                                    <dt class="text-sm text-gray-500">{{ __('Herencia cultural') }}</dt>
+                                    <dt class="text-sm text-theme-muted">{{ __('Herencia cultural') }}</dt>
                                     <dd>
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-100 text-blue-800 text-sm">
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-sm">
                                             *
                                         </span>
                                     </dd>
@@ -161,13 +161,13 @@
                     </div>
                     <div class="card-body">
                         @if($family->children->isEmpty())
-                            <p class="text-gray-500 text-center py-8">{{ __('Esta familia no tiene hijos registrados.') }}</p>
+                            <p class="text-theme-muted text-center py-8">{{ __('Esta familia no tiene hijos registrados.') }}</p>
                         @else
                             <div class="space-y-4">
                                 @foreach($family->children as $index => $child)
-                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center justify-between p-4 bg-theme-secondary rounded-lg">
                                         <div class="flex items-center gap-4">
-                                            <span class="text-gray-400 font-medium">{{ $index + 1 }}</span>
+                                            <span class="text-theme-muted font-medium">{{ $index + 1 }}</span>
                                             @if($child->photo_path)
                                                 <img src="{{ Storage::url($child->photo_path) }}" class="w-12 h-12 rounded-full object-cover">
                                             @else
@@ -176,10 +176,10 @@
                                                 </div>
                                             @endif
                                             <div>
-                                                <a href="{{ route('persons.show', $child) }}" class="font-medium text-gray-900 hover:text-mf-primary">
+                                                <a href="{{ route('persons.show', $child) }}" class="font-medium text-theme hover:text-mf-primary">
                                                     {{ $child->full_name }}
                                                 </a>
-                                                <p class="text-sm text-gray-500">
+                                                <p class="text-sm text-theme-muted">
                                                     {{ $child->gender === 'M' ? __('Hijo') : __('Hija') }}
                                                     @if($child->birth_date)
                                                         - {{ $child->birth_date->format('Y') }}
@@ -191,7 +191,7 @@
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <a href="{{ route('persons.show', $child) }}" class="text-gray-500 hover:text-gray-700">
+                                            <a href="{{ route('persons.show', $child) }}" class="text-theme-muted hover:text-theme-secondary">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -228,10 +228,10 @@
                                         <div>
                                             <p class="font-medium">{{ $event->type_label }}</p>
                                             @if($event->date)
-                                                <p class="text-sm text-gray-500">{{ $event->date->format('d/m/Y') }}</p>
+                                                <p class="text-sm text-theme-muted">{{ $event->date->format('d/m/Y') }}</p>
                                             @endif
                                             @if($event->place)
-                                                <p class="text-sm text-gray-500">{{ $event->place }}</p>
+                                                <p class="text-sm text-theme-muted">{{ $event->place }}</p>
                                             @endif
                                         </div>
                                     </li>

@@ -14,7 +14,7 @@
 
 <div {{ $attributes->merge(['class' => 'relative ' . $class]) }} x-data="{ open: false }">
     <button @click="open = !open" type="button"
-            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-theme-secondary hover:bg-theme-hover rounded-lg transition-colors">
         <span class="text-lg">{{ $flags[$currentLang] ?? '🇲🇽' }}</span>
         <span class="hidden sm:inline">{{ $languages[$currentLang] ?? 'Español' }}</span>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,11 +25,11 @@
     <div x-show="open"
          @click.outside="open = false"
          x-transition
-         class="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+         class="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-lg bg-theme-card shadow-lg ring-1 ring-black ring-opacity-5">
         <div class="py-1">
             @foreach($languages as $code => $name)
                 <a href="?lang={{ $code }}"
-                   class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ $currentLang === $code ? 'bg-mf-light text-mf-primary' : '' }}">
+                   class="flex items-center gap-2 px-4 py-2 text-sm text-theme-secondary hover:bg-theme-hover {{ $currentLang === $code ? 'bg-mf-light text-mf-primary' : '' }}">
                     <span class="text-lg">{{ $flags[$code] }}</span>
                     <span>{{ $name }}</span>
                     @if($currentLang === $code)

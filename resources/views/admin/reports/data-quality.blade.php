@@ -4,8 +4,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Calidad de datos') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Analisis de completitud y consistencia') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Calidad de datos') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Analisis de completitud y consistencia') }}</p>
             </div>
             <a href="{{ route('admin.reports') }}" class="btn-outline">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,8 +20,8 @@
             <div class="card-body">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-900">{{ __('Puntuacion de calidad') }}</h2>
-                        <p class="text-sm text-gray-500">{{ __('Basado en completitud de campos') }}</p>
+                        <h2 class="text-lg font-semibold text-theme">{{ __('Puntuacion de calidad') }}</h2>
+                        <p class="text-sm text-theme-muted">{{ __('Basado en completitud de campos') }}</p>
                     </div>
                     <div class="text-center">
                         @php
@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="w-full bg-theme-secondary rounded-full h-4">
                         <div class="bg-{{ $scoreColor }}-500 h-4 rounded-full transition-all" style="width: {{ $qualityScore }}%"></div>
                     </div>
                 </div>
@@ -55,10 +55,10 @@
                             @endphp
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-900">{{ __($field) }}</span>
+                                    <span class="font-medium text-theme">{{ __($field) }}</span>
                                     <span class="text-{{ $color }}-600">{{ number_format($percentage, 1) }}%</span>
                                 </div>
-                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="w-full bg-theme-secondary rounded-full h-2">
                                     <div class="bg-{{ $color }}-500 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
                                 </div>
                             </div>
@@ -80,10 +80,10 @@
                             @endphp
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
-                                    <span class="font-medium text-gray-900">{{ __($field) }}</span>
+                                    <span class="font-medium text-theme">{{ __($field) }}</span>
                                     <span class="text-{{ $color }}-600">{{ number_format($percentage, 1) }}%</span>
                                 </div>
-                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="w-full bg-theme-secondary rounded-full h-2">
                                     <div class="bg-{{ $color }}-500 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
                                 </div>
                             </div>
@@ -100,7 +100,7 @@
                 <div class="card-body">
                     <div class="space-y-3">
                         @forelse($issues as $issue)
-                            <div class="flex items-start gap-3 p-3 bg-{{ $issue['severity'] === 'high' ? 'red' : ($issue['severity'] === 'medium' ? 'yellow' : 'blue') }}-50 rounded-lg">
+                            <div class="flex items-start gap-3 p-3 bg-{{ $issue['severity'] === 'high' ? 'red' : ($issue['severity'] === 'medium' ? 'yellow' : 'blue') }}-50 dark:bg-{{ $issue['severity'] === 'high' ? 'red' : ($issue['severity'] === 'medium' ? 'yellow' : 'blue') }}-900/20 rounded-lg">
                                 <div class="flex-shrink-0">
                                     @if($issue['severity'] === 'high')
                                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,14 +117,14 @@
                                     @endif
                                 </div>
                                 <div class="flex-1">
-                                    <p class="font-medium text-gray-900">{{ $issue['title'] }}</p>
-                                    <p class="text-sm text-gray-600">{{ $issue['description'] }}</p>
-                                    <p class="text-xs text-gray-500 mt-1">{{ $issue['count'] }} {{ __('registros afectados') }}</p>
+                                    <p class="font-medium text-theme">{{ $issue['title'] }}</p>
+                                    <p class="text-sm text-theme-secondary">{{ $issue['description'] }}</p>
+                                    <p class="text-xs text-theme-muted mt-1">{{ $issue['count'] }} {{ __('registros afectados') }}</p>
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center py-8 text-gray-500">
-                                <svg class="w-12 h-12 mx-auto text-green-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="text-center py-8 text-theme-muted">
+                                <svg class="w-12 h-12 mx-auto text-green-300 dark:text-green-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                                 {{ __('No se detectaron problemas') }}
@@ -142,19 +142,19 @@
                 <div class="card-body">
                     <div class="space-y-3">
                         @forelse($recommendations as $rec)
-                            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex items-start gap-3 p-3 bg-theme-secondary rounded-lg">
+                                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="font-medium text-gray-900">{{ $rec['title'] }}</p>
-                                    <p class="text-sm text-gray-600">{{ $rec['description'] }}</p>
+                                    <p class="font-medium text-theme">{{ $rec['title'] }}</p>
+                                    <p class="text-sm text-theme-secondary">{{ $rec['description'] }}</p>
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center py-8 text-gray-500">
+                            <div class="text-center py-8 text-theme-muted">
                                 {{ __('No hay recomendaciones en este momento') }}
                             </div>
                         @endforelse
@@ -166,23 +166,23 @@
             <div class="card lg:col-span-2">
                 <div class="card-header flex justify-between items-center">
                     <h2 class="text-lg font-semibold">{{ __('Posibles duplicados') }}</h2>
-                    <span class="text-sm text-gray-500">{{ count($duplicates) }} {{ __('encontrados') }}</span>
+                    <span class="text-sm text-theme-muted">{{ count($duplicates) }} {{ __('encontrados') }}</span>
                 </div>
                 <div class="card-body">
                     @if(count($duplicates) > 0)
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                            <table class="min-w-full divide-y divide-theme">
+                                <thead class="bg-theme-secondary">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Persona 1') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Persona 2') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Similitud') }}</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Razon') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Persona 1') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Persona 2') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Similitud') }}</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Razon') }}</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody class="bg-theme-card divide-y divide-theme">
                                     @foreach($duplicates as $dup)
-                                        <tr class="hover:bg-gray-50">
+                                        <tr class="hover:bg-theme-hover">
                                             <td class="px-4 py-3">
                                                 <a href="{{ route('persons.show', $dup['person1']) }}" class="text-mf-primary hover:underline">
                                                     {{ $dup['person1']->full_name }}
@@ -194,19 +194,19 @@
                                                 </a>
                                             </td>
                                             <td class="px-4 py-3">
-                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">
                                                     {{ $dup['similarity'] }}%
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-3 text-sm text-gray-500">{{ $dup['reason'] }}</td>
+                                            <td class="px-4 py-3 text-sm text-theme-muted">{{ $dup['reason'] }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     @else
-                        <div class="text-center py-8 text-gray-500">
-                            <svg class="w-12 h-12 mx-auto text-green-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="text-center py-8 text-theme-muted">
+                            <svg class="w-12 h-12 mx-auto text-green-300 dark:text-green-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             {{ __('No se encontraron registros duplicados') }}

@@ -1,0 +1,19 @@
+{
+    "slug": "reports-fanchart",
+    "name": "Fan Chart",
+    "name_es": "Grafico de Abanico",
+    "version": "1.0.0",
+    "description": "Generate fan charts (semicircular ancestor charts) with HTML, SVG and PDF output",
+    "description_es": "Genera graficos de abanico (diagramas semicirculares de ancestros) con salida HTML, SVG y PDF",
+    "author": "Mi Familia",
+    "type": "report",
+    "requires": {
+        "mi-familia": ">=2.1.0",
+        "php": ">=8.1"
+    },
+    "provider": "FanChartPlugin",
+    "hooks": [
+        "person.show.sidebar",
+        "tree.toolbar"
+    ]
+}

@@ -10,9 +10,9 @@
             @if(isset($header))
                 {{ $header }}
             @else
-                <h3 class="text-lg font-semibold text-gray-900">{{ $title }}</h3>
+                <h3 class="text-lg font-semibold text-theme">{{ $title }}</h3>
                 @if($subtitle)
-                    <p class="text-sm text-gray-500 mt-1">{{ $subtitle }}</p>
+                    <p class="text-sm text-theme-muted mt-1">{{ $subtitle }}</p>
                 @endif
             @endif
         </div>

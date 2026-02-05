@@ -16,8 +16,8 @@
         </div>
 
         @if(session('success'))
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p class="text-green-700">{{ session('success') }}</p>
+            <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <p class="text-green-700 dark:text-green-300">{{ session('success') }}</p>
             </div>
         @endif
 
@@ -31,7 +31,7 @@
                         $currentBgColor = \App\Models\SiteSetting::get('colors', 'bg_color', '');
                         $currentBgImage = \App\Models\SiteSetting::get('colors', 'bg_image', '');
                     @endphp
-                    <span class="px-2 py-1 text-xs rounded-full {{ $currentTheme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-yellow-100 text-yellow-700' }}">
+                    <span class="px-2 py-1 text-xs rounded-full {{ $currentTheme === 'dark' ? 'bg-gray-800 text-gray-200 dark:bg-gray-700 dark:text-gray-300' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' }}">
                         {{ $currentTheme === 'dark' ? __('Oscuro') : __('Claro') }}
                     </span>
                 </div>
@@ -46,7 +46,7 @@
                         <div class="mb-6">
                             <label class="form-label">{{ __('Modo de tema por defecto') }}</label>
                             <div class="flex gap-4 mt-2">
-                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ $currentTheme === 'light' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ $currentTheme === 'light' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-theme' }}">
                                     <input type="radio" name="theme_mode" value="light" class="form-radio" {{ $currentTheme === 'light' ? 'checked' : '' }}>
                                     <div>
                                         <div class="flex items-center gap-2">
@@ -58,7 +58,7 @@
                                         <p class="text-xs text-theme-muted mt-1">{{ __('Fondos blancos, texto oscuro') }}</p>
                                     </div>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ $currentTheme === 'dark' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ $currentTheme === 'dark' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-theme' }}">
                                     <input type="radio" name="theme_mode" value="dark" class="form-radio" {{ $currentTheme === 'dark' ? 'checked' : '' }}>
                                     <div>
                                         <div class="flex items-center gap-2">
@@ -383,7 +383,7 @@
                     @php
                         $hEnabled = \App\Models\SiteSetting::get('heritage', 'heritage_enabled', '0');
                     @endphp
-                    <span class="px-2 py-1 text-xs rounded-full {{ $hEnabled ? 'bg-green-100 text-green-700' : 'bg-theme-secondary text-theme-muted' }}">
+                    <span class="px-2 py-1 text-xs rounded-full {{ $hEnabled ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-theme-secondary text-theme-muted' }}">
                         {{ $hEnabled ? __('Habilitado') : __('Deshabilitado') }}
                     </span>
                 </div>
@@ -545,11 +545,11 @@
                 <div class="card-header flex justify-between items-center">
                     <h2 class="text-lg font-semibold">{{ __('Correo electronico') }}</h2>
                     @if(config('mail.default') === 'log')
-                        <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">{{ __('Modo desarrollo') }}</span>
+                        <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-full">{{ __('Modo desarrollo') }}</span>
                     @elseif(config('mail.mailers.smtp.host') && config('mail.mailers.smtp.host') !== 'smtp.example.com')
-                        <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">{{ __('Configurado') }}</span>
+                        <span class="px-2 py-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-full">{{ __('Configurado') }}</span>
                     @else
-                        <span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">{{ __('No configurado') }}</span>
+                        <span class="px-2 py-1 text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full">{{ __('No configurado') }}</span>
                     @endif
                 </div>
                 <div class="card-body">
@@ -581,15 +581,15 @@
                     </dl>
 
                     @if(config('mail.default') === 'log')
-                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                             <div class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                 </svg>
                                 <div>
-                                    <h4 class="font-medium text-yellow-800">{{ __('Modo desarrollo activo') }}</h4>
-                                    <p class="text-sm text-yellow-700 mt-1">
-                                        {{ __('Los correos no se envian, se guardan en') }} <code class="bg-yellow-100 px-1 rounded">storage/logs/laravel.log</code>
+                                    <h4 class="font-medium text-yellow-800 dark:text-yellow-300">{{ __('Modo desarrollo activo') }}</h4>
+                                    <p class="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                                        {{ __('Los correos no se envian, se guardan en') }} <code class="bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">storage/logs/laravel.log</code>
                                     </p>
                                 </div>
                             </div>
@@ -642,7 +642,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
 
                         <!-- Modal de diagnostico -->
                         <div id="diagnosticModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-                            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                            <div class="bg-theme-card rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                                 <div class="p-6">
                                     <div class="flex justify-between items-center mb-4">
                                         <h3 class="text-lg font-semibold text-theme">{{ __('Diagnostico de Correo') }}</h3>
@@ -679,7 +679,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    <span class="ml-3 text-gray-600">{{ __('Ejecutando diagnostico...') }}</span>
+                                    <span class="ml-3 text-theme-secondary">{{ __('Ejecutando diagnostico...') }}</span>
                                 </div>
                             `;
 
@@ -690,8 +690,8 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                                 })
                                 .catch(error => {
                                     content.innerHTML = `
-                                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                                            <p class="text-red-700">Error al ejecutar diagnostico: ${error.message}</p>
+                                        <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                                            <p class="text-red-700 dark:text-red-300">Error al ejecutar diagnostico: ${error.message}</p>
                                         </div>
                                     `;
                                 });
@@ -723,23 +723,23 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                             // Configuracion actual
                             html += `
                                 <div class="mb-4">
-                                    <h4 class="font-medium text-gray-900 mb-2">{{ __('Configuracion Actual') }}</h4>
-                                    <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                                    <h4 class="font-medium text-theme mb-2">{{ __('Configuracion Actual') }}</h4>
+                                    <div class="bg-theme-secondary rounded-lg p-3 text-sm">
                                         <dl class="grid grid-cols-2 gap-2">
-                                            <dt class="text-gray-500">Mailer:</dt><dd class="font-mono">${data.config.mailer || '-'}</dd>
-                                            <dt class="text-gray-500">Host:</dt><dd class="font-mono">${data.config.host || '-'}</dd>
-                                            <dt class="text-gray-500">Puerto:</dt><dd class="font-mono">${data.config.port || '-'}</dd>
-                                            <dt class="text-gray-500">Encriptacion:</dt><dd class="font-mono">${data.config.encryption || '-'}</dd>
-                                            <dt class="text-gray-500">Usuario:</dt><dd class="font-mono">${data.config.username || '-'}</dd>
-                                            <dt class="text-gray-500">EHLO Domain:</dt><dd class="font-mono ${!data.config.ehlo_domain ? 'text-red-600 font-bold' : ''}">${data.config.ehlo_domain || '{{ __('NO CONFIGURADO') }}'}</dd>
-                                            <dt class="text-gray-500">Remitente:</dt><dd class="font-mono">${data.config.from_address || '-'}</dd>
+                                            <dt class="text-theme-muted">Mailer:</dt><dd class="font-mono">${data.config.mailer || '-'}</dd>
+                                            <dt class="text-theme-muted">Host:</dt><dd class="font-mono">${data.config.host || '-'}</dd>
+                                            <dt class="text-theme-muted">Puerto:</dt><dd class="font-mono">${data.config.port || '-'}</dd>
+                                            <dt class="text-theme-muted">Encriptacion:</dt><dd class="font-mono">${data.config.encryption || '-'}</dd>
+                                            <dt class="text-theme-muted">Usuario:</dt><dd class="font-mono">${data.config.username || '-'}</dd>
+                                            <dt class="text-theme-muted">EHLO Domain:</dt><dd class="font-mono ${!data.config.ehlo_domain ? 'text-red-600 dark:text-red-400 font-bold' : ''}">${data.config.ehlo_domain || '{{ __('NO CONFIGURADO') }}'}</dd>
+                                            <dt class="text-theme-muted">Remitente:</dt><dd class="font-mono">${data.config.from_address || '-'}</dd>
                                         </dl>
                                     </div>
                                 </div>
                             `;
 
                             // Verificaciones
-                            html += `<div class="mb-4"><h4 class="font-medium text-gray-900 mb-2">{{ __('Verificaciones') }}</h4><div class="space-y-2">`;
+                            html += `<div class="mb-4"><h4 class="font-medium text-theme mb-2">{{ __('Verificaciones') }}</h4><div class="space-y-2">`;
                             for (const [key, check] of Object.entries(data.checks)) {
                                 const icon = check.status
                                     ? '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
@@ -749,7 +749,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                                         ${icon}
                                         <div class="flex-1">
                                             <p class="font-medium text-sm">${check.name}</p>
-                                            <p class="text-xs text-gray-600">${check.message}</p>
+                                            <p class="text-xs text-theme-secondary">${check.message}</p>
                                         </div>
                                     </div>
                                 `;
@@ -763,7 +763,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                                     : '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
                                 html += `
                                     <div class="mb-4">
-                                        <h4 class="font-medium text-gray-900 mb-2">{{ __('Conexion SMTP') }}</h4>
+                                        <h4 class="font-medium text-theme mb-2">{{ __('Conexion SMTP') }}</h4>
                                         <div class="flex items-start gap-2 p-2 rounded ${data.smtp_test.status ? 'bg-green-50' : 'bg-red-50'}">
                                             ${smtpIcon}
                                             <p class="text-sm">${data.smtp_test.message}</p>
@@ -774,7 +774,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
 
                             // DNS
                             if (Object.keys(data.dns).length > 0) {
-                                html += `<div class="mb-4"><h4 class="font-medium text-gray-900 mb-2">{{ __('Registros DNS') }}</h4><div class="space-y-2">`;
+                                html += `<div class="mb-4"><h4 class="font-medium text-theme mb-2">{{ __('Registros DNS') }}</h4><div class="space-y-2">`;
                                 for (const [key, record] of Object.entries(data.dns)) {
                                     const icon = record.status
                                         ? '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
@@ -784,7 +784,7 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                                             ${icon}
                                             <div class="flex-1">
                                                 <p class="font-medium text-sm">${record.name}</p>
-                                                <p class="text-xs text-gray-600 break-all">${record.message}</p>
+                                                <p class="text-xs text-theme-secondary break-all">${record.message}</p>
                                             </div>
                                         </div>
                                     `;
@@ -795,11 +795,11 @@ MAIL_FROM_NAME="${APP_NAME}"</pre>
                             // Recomendaciones si EHLO no esta configurado
                             if (!data.config.ehlo_domain) {
                                 html += `
-                                    <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                                        <h4 class="font-medium text-red-800 mb-2">{{ __('Accion Requerida') }}</h4>
-                                        <p class="text-sm text-red-700 mb-2">{{ __('Agrega la siguiente linea a tu archivo .env:') }}</p>
-                                        <code class="block bg-red-100 p-2 rounded text-sm font-mono">MAIL_EHLO_DOMAIN={{ config('app.url') ? parse_url(config('app.url'), PHP_URL_HOST) : 'tudominio.com' }}</code>
-                                        <p class="text-xs text-red-600 mt-2">{{ __('Luego ejecuta: php artisan config:clear') }}</p>
+                                    <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                                        <h4 class="font-medium text-red-800 dark:text-red-300 mb-2">{{ __('Accion Requerida') }}</h4>
+                                        <p class="text-sm text-red-700 dark:text-red-400 mb-2">{{ __('Agrega la siguiente linea a tu archivo .env:') }}</p>
+                                        <code class="block bg-red-100 dark:bg-red-900/30 p-2 rounded text-sm font-mono">MAIL_EHLO_DOMAIN={{ config('app.url') ? parse_url(config('app.url'), PHP_URL_HOST) : 'tudominio.com' }}</code>
+                                        <p class="text-xs text-red-600 dark:text-red-400 mt-2">{{ __('Luego ejecuta: php artisan config:clear') }}</p>
                                     </div>
                                 `;
                             }

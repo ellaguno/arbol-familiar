@@ -1,0 +1,19 @@
+{
+    "slug": "reports-descendants",
+    "name": "Descendant Report",
+    "name_es": "Reporte de Descendientes",
+    "version": "1.0.0",
+    "description": "Generate descendant reports in indented tree format with HTML and PDF output",
+    "description_es": "Genera reportes de descendientes en formato de arbol indentado con salida HTML y PDF",
+    "author": "Mi Familia",
+    "type": "report",
+    "requires": {
+        "mi-familia": ">=2.1.0",
+        "php": ">=8.1"
+    },
+    "provider": "DescendantReportPlugin",
+    "hooks": [
+        "person.show.sidebar",
+        "tree.toolbar"
+    ]
+}

@@ -5,26 +5,26 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('families.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Familias') }}</a>
+                    <a href="{{ route('families.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Familias') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <a href="{{ route('families.show', $family) }}" class="text-gray-500 hover:text-gray-700 ml-1 md:ml-2">{{ $family->label }}</a>
+                    <a href="{{ route('families.show', $family) }}" class="text-theme-muted hover:text-theme-secondary ml-1 md:ml-2">{{ $family->label }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Editar') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Editar') }}</span>
                 </li>
             </ol>
         </nav>
 
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Editar familia') }}</h1>
-            <p class="text-gray-600 mt-1">{{ $family->label }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Editar familia') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ $family->label }}</p>
         </div>
 
         <form action="{{ route('families.update', $family) }}" method="POST" class="space-y-6">
@@ -52,7 +52,7 @@
             <div class="modal-content" @click.away="open = false">
                 <div class="p-6">
                     <h3 class="text-xl font-bold text-red-600 mb-4">{{ __('Eliminar familia') }}</h3>
-                    <p class="text-gray-600 mb-6">
+                    <p class="text-theme-secondary mb-6">
                         {{ __('Esta accion eliminara la familia') }} <strong>{{ $family->label }}</strong>.
                         {{ __('Los registros de personas no seran afectados.') }}
                     </p>

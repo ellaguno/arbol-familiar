@@ -45,9 +45,9 @@
                                 <p class="text-theme">{{ $user->email }}</p>
                                 <p class="form-help">
                                     @if($user->email_verified_at)
-                                        <span class="text-green-600">{{ __('Verificado') }}</span>
+                                        <span class="text-green-600 dark:text-green-400">{{ __('Verificado') }}</span>
                                     @else
-                                        <span class="text-yellow-600">{{ __('Pendiente de verificacion') }}</span>
+                                        <span class="text-yellow-600 dark:text-yellow-400">{{ __('Pendiente de verificacion') }}</span>
                                     @endif
                                 </p>
                             </div>
@@ -118,13 +118,13 @@
                             @method('PUT')
 
                             <div class="flex flex-wrap gap-3">
-                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'default' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'default' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-theme' }}">
                                     <input type="radio" name="theme_preference" value="default" class="form-radio" {{ ($user->theme_preference ?? 'default') === 'default' ? 'checked' : '' }}>
                                     <div>
                                         <span class="font-medium">{{ __('Default del sitio') }}</span>
                                     </div>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'light' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'light' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-theme' }}">
                                     <input type="radio" name="theme_preference" value="light" class="form-radio" {{ ($user->theme_preference ?? 'default') === 'light' ? 'checked' : '' }}>
                                     <div class="flex items-center gap-2">
                                         <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
                                         <span class="font-medium">{{ __('Claro') }}</span>
                                     </div>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'dark' ? 'border-blue-500 bg-blue-50' : 'border-theme' }}">
+                                <label class="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-lg border-2 transition-colors {{ ($user->theme_preference ?? 'default') === 'dark' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-theme' }}">
                                     <input type="radio" name="theme_preference" value="dark" class="form-radio" {{ ($user->theme_preference ?? 'default') === 'dark' ? 'checked' : '' }}>
                                     <div class="flex items-center gap-2">
                                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,10 +151,38 @@
                     </div>
                 </div>
 
+                <!-- Estado en linea -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-lg font-semibold">{{ __('Estado en linea') }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-sm text-theme-secondary mb-4">
+                            {{ __('Si desactivas esta opcion, no apareceras en las listas de usuarios en linea y nadie podra ver que estas conectado.') }}
+                        </p>
+                        <form action="{{ route('profile.online-status.update') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="hidden" name="show_online_status" value="0">
+                                <input type="checkbox" name="show_online_status" value="1"
+                                       class="form-checkbox"
+                                       {{ ($user->show_online_status ?? true) ? 'checked' : '' }}>
+                                <span class="font-medium text-theme">{{ __('Mostrar mi estado en linea') }}</span>
+                            </label>
+
+                            <button type="submit" class="btn-primary mt-4">
+                                {{ __('Guardar preferencia') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- Zona de peligro -->
-                <div class="card border-red-200">
-                    <div class="card-header bg-red-50">
-                        <h2 class="text-lg font-semibold text-red-800">{{ __('Eliminar perfil ¡Precaución!') }}</h2>
+                <div class="card border-red-200 dark:border-red-800">
+                    <div class="card-header bg-red-50 dark:bg-red-900/20">
+                        <h2 class="text-lg font-semibold text-red-800 dark:text-red-400">{{ __('Eliminar perfil ¡Precaución!') }}</h2>
                     </div>
                     <div class="card-body">
                         <p class="text-theme-secondary mb-4">
@@ -176,7 +204,7 @@
         <div x-show="open" x-transition x-cloak class="modal">
             <div class="modal-content" @click.away="open = false">
                 <div class="p-6">
-                    <h3 class="text-xl font-bold text-red-600 mb-4">{{ __('Eliminar cuenta') }}</h3>
+                    <h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-4">{{ __('Eliminar cuenta') }}</h3>
                     <p class="text-theme-secondary mb-6">
                         {{ __('Esta accion eliminara permanentemente tu cuenta y todos tus datos. Para confirmar, ingresa tu contrasena y escribe ELIMINAR.') }}
                     </p>

@@ -7,6 +7,8 @@ use App\Models\FamilyChild;
 use App\Models\Media;
 use App\Models\Person;
 use App\Observers\CacheInvalidationObserver;
+use App\Plugins\HookManager;
+use App\Plugins\PluginManager;
 use App\Services\SiteSettingsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SiteSettingsService::class);
+        $this->app->singleton(PluginManager::class);
+        $this->app->singleton(HookManager::class);
     }
 
     /**
@@ -60,6 +64,16 @@ class AppServiceProvider extends ServiceProvider
                     $view->with('siteThemeClass', $siteSettings->themeClass($user));
                 }
             });
+        }
+
+        // Boot plugin system
+        if (Schema::hasTable('plugins')) {
+            $pluginManager = app(PluginManager::class);
+            $pluginManager->bootEnabled();
+            View::share('hooks', app(HookManager::class));
+        } else {
+            // Share empty HookManager so views don't break
+            View::share('hooks', app(HookManager::class));
         }
     }
 }

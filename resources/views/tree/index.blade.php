@@ -42,8 +42,8 @@
                                 @if($person->photo_path)
                                     <img src="{{ Storage::url($person->photo_path) }}" class="w-12 h-12 rounded-full object-cover">
                                 @else
-                                    <div class="w-12 h-12 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 flex items-center justify-center">
-                                        <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 font-bold">{{ substr($person->first_name, 0, 1) }}</span>
+                                    <div class="w-12 h-12 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 dark:bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-900/30 flex items-center justify-center">
+                                        <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 dark:text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-400 font-bold">{{ substr($person->first_name, 0, 1) }}</span>
                                     </div>
                                 @endif
                                 <div class="flex-1 min-w-0">
@@ -53,7 +53,7 @@
                                             {{ $person->birth_date->format('Y') }}
                                         @endif
                                         @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
-                                            <span class="text-blue-600 ml-1">*</span>
+                                            <span class="text-blue-600 dark:text-blue-400 ml-1">*</span>
                                         @endif
                                     </p>
                                 </div>
