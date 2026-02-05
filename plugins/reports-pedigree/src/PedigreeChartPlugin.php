@@ -37,12 +37,16 @@ class PedigreeChartPlugin extends PluginServiceProvider implements ReportPluginI
 
         $generations = min(max((int) ($options['generations'] ?? 4), 2), 8);
 
-        // Construir lista Ahnentafel para el pedigri
+        // Construir lista Ahnentafel para el pedigri (usado en PDF/SVG)
         $ahnentafel = $this->buildAhnentafel($person, $generations);
+
+        // Construir estructura de arbol para D3.js (usado en HTML interactivo)
+        $fanData = $traversal->buildFanData($person, $generations);
 
         $data = [
             'person' => $person,
             'ahnentafel' => $ahnentafel,
+            'fanData' => $fanData,
             'generations' => $generations,
             'totalFound' => count($ahnentafel),
         ];
@@ -57,6 +61,7 @@ class PedigreeChartPlugin extends PluginServiceProvider implements ReportPluginI
             return $renderer->renderPdf('reports-pedigree::pdf', $data, [
                 'filename' => __('Pedigri') . ' - ' . $person->full_name . '.pdf',
                 'orientation' => 'landscape',
+                'svgView' => 'reports-pedigree::svg',
             ]);
         }
 
@@ -85,6 +90,17 @@ class PedigreeChartPlugin extends PluginServiceProvider implements ReportPluginI
             // Proteger datos de menores
             $isProtected = $p->shouldProtectMinorData();
 
+            // Obtener foto como base64 para PDF (si existe y no es menor protegido)
+            $photoBase64 = null;
+            if (!$isProtected && $p->photo_path) {
+                $photoPath = storage_path('app/public/' . $p->photo_path);
+                if (file_exists($photoPath)) {
+                    $photoData = file_get_contents($photoPath);
+                    $mimeType = mime_content_type($photoPath);
+                    $photoBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($photoData);
+                }
+            }
+
             $list[$num] = [
                 'number' => $num,
                 'person' => $p,
@@ -94,6 +110,7 @@ class PedigreeChartPlugin extends PluginServiceProvider implements ReportPluginI
                 'death_year' => $isProtected ? null : ($p->death_year ?? ($p->death_date?->format('Y'))),
                 'is_living' => $p->is_living,
                 'gender' => $p->gender,
+                'photo' => $photoBase64,
             ];
 
             if ($gen < $maxGenerations) {

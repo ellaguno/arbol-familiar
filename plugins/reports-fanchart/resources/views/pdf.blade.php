@@ -92,9 +92,11 @@
     </p>
 
     {{-- Grafico SVG del abanico --}}
+    @if(!empty($svgDataUri))
     <div class="chart-container">
-        @include('reports-fanchart::svg')
+        <img src="{{ $svgDataUri }}" style="width: 700px; height: auto;">
     </div>
+    @endif
 
     {{-- Datos tabulares --}}
     <h1>{{ __('Datos del Abanico') }}</h1>

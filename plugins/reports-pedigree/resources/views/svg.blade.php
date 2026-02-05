@@ -110,7 +110,9 @@
         @php
             $entry = $pos['entry'];
             $colors = pedigreeBoxColors($entry['gender']);
-            $name = pedigreeTruncate($entry['name']);
+            $hasPhoto = !empty($entry['photo']);
+            $textOffsetX = $hasPhoto ? 22 : 0;
+            $name = pedigreeTruncate($entry['name'], $hasPhoto ? 18 : 22);
             $dates = '';
             if ($entry['birth_year']) {
                 $dates = $entry['birth_year'];
@@ -129,14 +131,30 @@
               rx="4" ry="4"
               fill="{{ $colors['fill'] }}" stroke="{{ $colors['stroke'] }}" stroke-width="1.5"/>
 
-        <text x="{{ $pos['x'] + $boxWidth / 2 }}" y="{{ $pos['y'] + 20 }}"
+        @if($hasPhoto)
+            {{-- Foto circular --}}
+            <defs>
+                <clipPath id="clip-photo-{{ $num }}">
+                    <circle cx="{{ $pos['x'] + 22 }}" cy="{{ $pos['y'] + $boxHeight / 2 }}" r="16"/>
+                </clipPath>
+            </defs>
+            <image x="{{ $pos['x'] + 6 }}" y="{{ $pos['y'] + $boxHeight / 2 - 16 }}"
+                   width="32" height="32"
+                   href="{{ $entry['photo'] }}"
+                   clip-path="url(#clip-photo-{{ $num }})"
+                   preserveAspectRatio="xMidYMid slice"/>
+            <circle cx="{{ $pos['x'] + 22 }}" cy="{{ $pos['y'] + $boxHeight / 2 }}" r="16"
+                    fill="none" stroke="{{ $colors['stroke'] }}" stroke-width="1"/>
+        @endif
+
+        <text x="{{ $pos['x'] + $textOffsetX + ($boxWidth - $textOffsetX) / 2 }}" y="{{ $pos['y'] + 20 }}"
               text-anchor="middle" class="pedigree-name">{{ $name }}</text>
 
-        <text x="{{ $pos['x'] + $boxWidth / 2 }}" y="{{ $pos['y'] + 35 }}"
+        <text x="{{ $pos['x'] + $textOffsetX + ($boxWidth - $textOffsetX) / 2 }}" y="{{ $pos['y'] + 35 }}"
               text-anchor="middle" class="pedigree-dates">{{ $dates }}</text>
 
         {{-- Ahnentafel number indicator --}}
-        <text x="{{ $pos['x'] + 6 }}" y="{{ $pos['y'] + $boxHeight - 5 }}"
+        <text x="{{ $pos['x'] + $boxWidth - 12 }}" y="{{ $pos['y'] + $boxHeight - 5 }}"
               class="pedigree-num" fill="{{ $colors['stroke'] }}">{{ $num }}</text>
     @endforeach
 </svg>

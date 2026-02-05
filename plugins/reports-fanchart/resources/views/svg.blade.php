@@ -125,19 +125,50 @@
         @php
             $rootData = $flatData[1]['data'];
             $rootGender = $rootData['gender'] ?? null;
+            $hasRootPhoto = !empty($rootPhotoBase64);
+            $photoRadius = 25;
         @endphp
         <circle cx="{{ $centerX }}" cy="{{ $centerY }}" r="{{ $minRadius }}" fill="{{ genderColor($rootGender) }}" stroke="{{ genderStroke($rootGender) }}" stroke-width="1.5"/>
-        <text x="{{ $centerX }}" y="{{ $centerY - 12 }}" text-anchor="middle" class="fan-text fan-text-root">{{ truncateName($flatData[1]['name'], 20) }}</text>
-        @php
-            $rootBirth = $rootData['birthDate'] ?? '';
-            $rootDeath = $rootData['deathDate'] ?? '';
-            $rootDates = '';
-            if ($rootBirth || $rootDeath) {
-                $rootDates = ($rootBirth ?: '?') . ' - ' . ($rootDeath ?: ($rootData['isLiving'] ? e(__('vivo/a')) : '?'));
-            }
-        @endphp
-        @if($rootDates)
-            <text x="{{ $centerX }}" y="{{ $centerY + 4 }}" text-anchor="middle" class="fan-dates" style="font-size: 9px;">{{ $rootDates }}</text>
+
+        @if($hasRootPhoto)
+            {{-- Foto circular de la persona raiz --}}
+            <defs>
+                <clipPath id="clip-root-photo">
+                    <circle cx="{{ $centerX }}" cy="{{ $centerY - 15 }}" r="{{ $photoRadius }}"/>
+                </clipPath>
+            </defs>
+            <image x="{{ $centerX - $photoRadius }}" y="{{ $centerY - 15 - $photoRadius }}"
+                   width="{{ $photoRadius * 2 }}" height="{{ $photoRadius * 2 }}"
+                   href="{{ $rootPhotoBase64 }}"
+                   clip-path="url(#clip-root-photo)"
+                   preserveAspectRatio="xMidYMid slice"/>
+            <circle cx="{{ $centerX }}" cy="{{ $centerY - 15 }}" r="{{ $photoRadius }}"
+                    fill="none" stroke="{{ genderStroke($rootGender) }}" stroke-width="2"/>
+            <text x="{{ $centerX }}" y="{{ $centerY + 20 }}" text-anchor="middle" class="fan-text fan-text-root">{{ truncateName($flatData[1]['name'], 20) }}</text>
+            @php
+                $rootBirth = $rootData['birthDate'] ?? '';
+                $rootDeath = $rootData['deathDate'] ?? '';
+                $rootDates = '';
+                if ($rootBirth || $rootDeath) {
+                    $rootDates = ($rootBirth ?: '?') . ' - ' . ($rootDeath ?: ($rootData['isLiving'] ? e(__('vivo/a')) : '?'));
+                }
+            @endphp
+            @if($rootDates)
+                <text x="{{ $centerX }}" y="{{ $centerY + 35 }}" text-anchor="middle" class="fan-dates" style="font-size: 9px;">{{ $rootDates }}</text>
+            @endif
+        @else
+            <text x="{{ $centerX }}" y="{{ $centerY - 12 }}" text-anchor="middle" class="fan-text fan-text-root">{{ truncateName($flatData[1]['name'], 20) }}</text>
+            @php
+                $rootBirth = $rootData['birthDate'] ?? '';
+                $rootDeath = $rootData['deathDate'] ?? '';
+                $rootDates = '';
+                if ($rootBirth || $rootDeath) {
+                    $rootDates = ($rootBirth ?: '?') . ' - ' . ($rootDeath ?: ($rootData['isLiving'] ? e(__('vivo/a')) : '?'));
+                }
+            @endphp
+            @if($rootDates)
+                <text x="{{ $centerX }}" y="{{ $centerY + 4 }}" text-anchor="middle" class="fan-dates" style="font-size: 9px;">{{ $rootDates }}</text>
+            @endif
         @endif
     @endif
 

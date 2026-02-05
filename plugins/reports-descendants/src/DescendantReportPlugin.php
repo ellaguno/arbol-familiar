@@ -56,8 +56,11 @@ class DescendantReportPlugin extends PluginServiceProvider implements ReportPlug
         ];
 
         if ($format === 'pdf') {
+            // Solo incluir SVG si hay pocos descendientes (evitar PDF enorme)
+            $svgView = count($flatList) <= 80 ? 'reports-descendants::svg-tree' : null;
             return $renderer->renderPdf('reports-descendants::pdf', $data, [
                 'filename' => __('Descendientes') . ' - ' . $person->full_name . '.pdf',
+                'svgView' => $svgView,
             ]);
         }
 

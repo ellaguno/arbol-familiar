@@ -415,6 +415,8 @@
             isCameraOff: false,
             signalPollInterval: null,
             _ringtoneOscillators: [],
+            _pendingIceCandidates: [],
+            _hasRemoteDescription: false,
 
             async init() {
                 await Promise.all([this.fetchOnline(), this.fetchConversations()]);
@@ -426,7 +428,7 @@
                 this.heartbeat();
                 setInterval(() => this.heartbeat(), 30000);
 
-                // Poll de senales WebRTC cada 3s
+                // Poll de senales WebRTC cada 3s (se acelera a 1s durante llamadas)
                 this.startSignalPolling();
 
                 // Escuchar evento de abrir chat desde widget
@@ -664,8 +666,12 @@
                         body: JSON.stringify({ caller_id: this.callPeerId, response: 'accept' }),
                     });
 
-                    // Obtener media y esperar offer del caller
+                    // Obtener media y preparar PeerConnection (callee side)
                     await this.getLocalMedia();
+                    await this.setupWebRTC(false);
+
+                    // Acelerar polling para recibir offer/ICE candidates rapido
+                    this.setSignalPollingSpeed(true);
 
                 } catch (e) {
                     console.error('Error accepting call:', e);
@@ -730,10 +736,17 @@
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
                     ]
                 };
 
+                // Resetear buffer de candidates pendientes
+                this._pendingIceCandidates = [];
+                this._hasRemoteDescription = false;
+
                 this.peerConnection = new RTCPeerConnection(config);
+                console.log('[WebRTC] PeerConnection creado, rol:', isCaller ? 'caller' : 'callee');
 
                 // Agregar tracks locales
                 if (this.localStream) {
@@ -751,58 +764,137 @@
                     if (this.callType === 'video' && this.$refs.remoteVideo) {
                         this.$refs.remoteVideo.srcObject = this.remoteStream;
                     }
+                    // Para voz: conectar audio remoto
+                    if (this.callType === 'voice') {
+                        const audio = new Audio();
+                        audio.srcObject = this.remoteStream;
+                        audio.play().catch(e => console.warn('[WebRTC] Audio autoplay blocked:', e));
+                    }
                 };
 
-                // ICE candidates
+                // ICE candidates — enviar al peer
                 this.peerConnection.onicecandidate = async (event) => {
                     if (event.candidate) {
+                        console.log('[WebRTC] ICE candidate local:', event.candidate.type, event.candidate.protocol);
                         await this.sendSignal('ice-candidate', JSON.stringify(event.candidate));
                     }
                 };
 
-                // Estado de conexion
+                // ICE connection state (clave para diagnosticar problemas)
+                this.peerConnection.oniceconnectionstatechange = () => {
+                    const state = this.peerConnection?.iceConnectionState;
+                    console.log('[WebRTC] ICE connection state:', state);
+                    if (state === 'connected' || state === 'completed') {
+                        this.callState = 'active';
+                        this.stopRingtone();
+                        this.startCallTimer();
+                        this.setSignalPollingSpeed(false);
+                    } else if (state === 'failed') {
+                        console.error('[WebRTC] ICE connection failed');
+                        this.cleanupWebRTC();
+                        this.resetCall();
+                    }
+                };
+
+                // ICE gathering state
+                this.peerConnection.onicegatheringstatechange = () => {
+                    console.log('[WebRTC] ICE gathering state:', this.peerConnection?.iceGatheringState);
+                };
+
+                // Connection state (DTLS + ICE)
                 this.peerConnection.onconnectionstatechange = () => {
                     const state = this.peerConnection?.connectionState;
+                    console.log('[WebRTC] Connection state:', state);
                     if (state === 'connected') {
                         this.callState = 'active';
                         this.stopRingtone();
                         this.startCallTimer();
+                        this.setSignalPollingSpeed(false);
                     } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
                         this.cleanupWebRTC();
                         this.resetCall();
                     }
                 };
 
+                // Signaling state
+                this.peerConnection.onsignalingstatechange = () => {
+                    console.log('[WebRTC] Signaling state:', this.peerConnection?.signalingState);
+                };
+
                 if (isCaller) {
                     const offer = await this.peerConnection.createOffer();
                     await this.peerConnection.setLocalDescription(offer);
+                    console.log('[WebRTC] Offer creado y enviado');
                     await this.sendSignal('offer', JSON.stringify(offer));
                 }
             },
 
             async processSignal(signal) {
-                if (!this.peerConnection && (signal.type === 'offer' || signal.type === 'answer')) {
-                    // Si no hay peerConnection y recibimos offer, crear uno
-                    if (signal.type === 'offer') {
-                        await this.setupWebRTC(false);
-                    }
+                // Si no hay PeerConnection y recibimos offer, crear uno (fallback)
+                if (!this.peerConnection && signal.type === 'offer') {
+                    console.log('[WebRTC] PeerConnection no existe, creando para offer...');
+                    await this.getLocalMedia();
+                    await this.setupWebRTC(false);
                 }
 
-                if (!this.peerConnection) return;
+                if (!this.peerConnection) {
+                    // Si llega ICE candidate sin PeerConnection, bufferearlo
+                    if (signal.type === 'ice-candidate') {
+                        console.log('[WebRTC] Buffering ICE candidate (no PeerConnection aun)');
+                        this._pendingIceCandidates.push(JSON.parse(signal.payload));
+                    }
+                    return;
+                }
 
                 try {
                     if (signal.type === 'offer') {
-                        await this.peerConnection.setRemoteDescription(JSON.parse(signal.payload));
+                        console.log('[WebRTC] Procesando offer remoto');
+                        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.payload)));
+                        this._hasRemoteDescription = true;
+
+                        // Crear y enviar answer
                         const answer = await this.peerConnection.createAnswer();
                         await this.peerConnection.setLocalDescription(answer);
+                        console.log('[WebRTC] Answer creado y enviado');
                         await this.sendSignal('answer', JSON.stringify(answer));
+
+                        // Procesar ICE candidates pendientes
+                        await this._drainPendingCandidates();
+
                     } else if (signal.type === 'answer') {
-                        await this.peerConnection.setRemoteDescription(JSON.parse(signal.payload));
+                        console.log('[WebRTC] Procesando answer remoto');
+                        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.payload)));
+                        this._hasRemoteDescription = true;
+
+                        // Procesar ICE candidates pendientes
+                        await this._drainPendingCandidates();
+
                     } else if (signal.type === 'ice-candidate') {
-                        await this.peerConnection.addIceCandidate(JSON.parse(signal.payload));
+                        const candidate = JSON.parse(signal.payload);
+                        if (this._hasRemoteDescription) {
+                            console.log('[WebRTC] Agregando ICE candidate remoto');
+                            await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                        } else {
+                            console.log('[WebRTC] Buffering ICE candidate (esperando remoteDescription)');
+                            this._pendingIceCandidates.push(candidate);
+                        }
                     }
                 } catch (e) {
-                    console.error('Error processing signal:', e);
+                    console.error('[WebRTC] Error processing signal:', signal.type, e);
+                }
+            },
+
+            async _drainPendingCandidates() {
+                if (this._pendingIceCandidates.length === 0) return;
+                console.log('[WebRTC] Procesando', this._pendingIceCandidates.length, 'ICE candidates pendientes');
+                const candidates = [...this._pendingIceCandidates];
+                this._pendingIceCandidates = [];
+                for (const candidate of candidates) {
+                    try {
+                        await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch (e) {
+                        console.warn('[WebRTC] Error agregando ICE candidate pendiente:', e);
+                    }
                 }
             },
 
@@ -826,13 +918,30 @@
                 this.signalPollInterval = setInterval(() => this.pollSignals(), 3000);
             },
 
+            setSignalPollingSpeed(fast) {
+                if (this.signalPollInterval) {
+                    clearInterval(this.signalPollInterval);
+                }
+                const interval = fast ? 1000 : 3000;
+                this.signalPollInterval = setInterval(() => this.pollSignals(), interval);
+                // Inmediatamente hacer un poll
+                if (fast) this.pollSignals();
+            },
+
             async pollSignals() {
                 try {
                     const res = await fetch('{{ route("call.poll") }}');
                     const data = await res.json();
                     const signals = data.signals || [];
 
-                    for (const signal of signals) {
+                    // Ordenar: offer/answer primero, luego ice-candidates
+                    // Esto asegura que remoteDescription se establezca antes de ICE
+                    const sorted = signals.sort((a, b) => {
+                        const priority = { 'call-request': 0, 'call-accept': 1, 'call-reject': 1, 'call-end': 1, 'offer': 2, 'answer': 2, 'ice-candidate': 3 };
+                        return (priority[a.type] ?? 5) - (priority[b.type] ?? 5);
+                    });
+
+                    for (const signal of sorted) {
                         await this.handleSignal(signal);
                     }
                 } catch (e) {}
@@ -865,6 +974,8 @@
                             // Caller: obtener media, crear peer connection, enviar offer
                             await this.getLocalMedia();
                             await this.setupWebRTC(true);
+                            // Acelerar polling para recibir answer/ICE rapido
+                            this.setSignalPollingSpeed(true);
                         }
                         break;
 
@@ -906,9 +1017,14 @@
                     this.peerConnection = null;
                 }
                 this.remoteStream = null;
+                this._pendingIceCandidates = [];
+                this._hasRemoteDescription = false;
 
                 if (this.$refs.localVideo) this.$refs.localVideo.srcObject = null;
                 if (this.$refs.remoteVideo) this.$refs.remoteVideo.srcObject = null;
+
+                // Restaurar polling normal
+                this.setSignalPollingSpeed(false);
             },
 
             resetCall() {

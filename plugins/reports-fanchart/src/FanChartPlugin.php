@@ -38,10 +38,14 @@ class FanChartPlugin extends PluginServiceProvider implements ReportPluginInterf
         $generations = $options['generations'] ?? 5;
         $fanData = $traversal->buildFanData($person, $generations);
 
+        // Obtener foto de la persona raiz como base64 para el SVG
+        $rootPhotoBase64 = $this->getPhotoAsBase64($person);
+
         $data = [
             'person' => $person,
             'fanData' => $fanData,
             'generations' => $generations,
+            'rootPhotoBase64' => $rootPhotoBase64,
         ];
 
         if ($format === 'svg') {
@@ -57,10 +61,30 @@ class FanChartPlugin extends PluginServiceProvider implements ReportPluginInterf
             return $renderer->renderPdf('reports-fanchart::pdf', $data, [
                 'filename' => __('Abanico') . ' - ' . $person->full_name . '.pdf',
                 'orientation' => 'landscape',
+                'svgView' => 'reports-fanchart::svg',
             ]);
         }
 
         return view('reports-fanchart::report', $data);
+    }
+
+    /**
+     * Obtener foto de persona como data URI base64.
+     */
+    protected function getPhotoAsBase64(Person $person): ?string
+    {
+        if ($person->shouldProtectMinorData() || !$person->photo_path) {
+            return null;
+        }
+
+        $photoPath = storage_path('app/public/' . $person->photo_path);
+        if (!file_exists($photoPath)) {
+            return null;
+        }
+
+        $photoData = file_get_contents($photoPath);
+        $mimeType = mime_content_type($photoPath);
+        return 'data:' . $mimeType . ';base64,' . base64_encode($photoData);
     }
 
     /**

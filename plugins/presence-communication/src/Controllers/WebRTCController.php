@@ -48,6 +48,7 @@ class WebRTCController extends Controller
         $signal = WebrtcSignal::create([
             'caller_id' => $caller->id,
             'callee_id' => $calleeId,
+            'sent_by' => $caller->id,
             'type' => 'call-request',
             'media_type' => $request->input('media_type'),
         ]);
@@ -82,6 +83,7 @@ class WebRTCController extends Controller
         WebrtcSignal::create([
             'caller_id' => $callerId,
             'callee_id' => $callee->id,
+            'sent_by' => $callee->id,
             'type' => $responseType,
             'media_type' => $originalRequest->media_type ?? 'video',
         ]);
@@ -124,6 +126,7 @@ class WebRTCController extends Controller
         WebrtcSignal::create([
             'caller_id' => $existingSignal->caller_id ?? $currentUser->id,
             'callee_id' => $existingSignal->callee_id ?? $peerId,
+            'sent_by' => $currentUser->id,
             'type' => $request->input('type'),
             'media_type' => $existingSignal->media_type ?? 'video',
             'payload' => $request->input('payload'),
@@ -203,6 +206,7 @@ class WebRTCController extends Controller
         WebrtcSignal::create([
             'caller_id' => $existingSignal->caller_id ?? $currentUser->id,
             'callee_id' => $existingSignal->callee_id ?? $peerId,
+            'sent_by' => $currentUser->id,
             'type' => 'call-end',
             'media_type' => $existingSignal->media_type ?? 'video',
         ]);

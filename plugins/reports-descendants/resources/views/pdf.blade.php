@@ -111,9 +111,9 @@
     </p>
 
     {{-- Grafico SVG del arbol de descendientes --}}
-    @if(count($flatList) <= 80)
+    @if(!empty($svgDataUri))
         <div class="chart-container">
-            @include('reports-descendants::svg-tree')
+            <img src="{{ $svgDataUri }}" style="max-width: 100%; height: auto;">
         </div>
     @endif
 

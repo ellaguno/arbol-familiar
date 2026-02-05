@@ -67,17 +67,17 @@
 
                         <div class="flex flex-wrap justify-center gap-2 mt-4">
                             @if($person->gender)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $person->gender === 'M' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : ($person->gender === 'F' ? 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' : 'bg-theme-secondary text-theme') }}">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border {{ $person->gender === 'M' ? 'bg-blue-200 text-blue-900 border-blue-400 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700' : ($person->gender === 'F' ? 'bg-pink-200 text-pink-900 border-pink-400 dark:bg-pink-900/40 dark:text-pink-200 dark:border-pink-700' : 'bg-theme-secondary text-theme border-gray-300 dark:border-gray-600') }}">
                                     {{ $person->gender === 'M' ? __('Masculino') : ($person->gender === 'F' ? __('Femenino') : __('Otro')) }}
                                 </span>
                             @endif
                             @if($person->marital_status)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-purple-200 text-purple-900 border-purple-400 dark:bg-purple-900/40 dark:text-purple-200 dark:border-purple-700">
                                     {{ config('mi-familia.marital_statuses')[$person->marital_status] ?? $person->marital_status }}
                                 </span>
                             @endif
                             @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border bg-red-200 text-red-900 border-red-400 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700">
                                     HR
                                 </span>
                             @endif
@@ -121,8 +121,8 @@
                             @endphp
 
                             @if($isOwnPerson)
-                                <div class="p-3 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-center mb-2">
-                                    <span class="text-blue-800 dark:text-blue-300 font-medium">
+                                <div class="p-3 bg-emerald-100 dark:bg-emerald-900/30 border-2 border-emerald-400 dark:border-emerald-700 rounded-lg text-center mb-2">
+                                    <span class="text-emerald-800 dark:text-emerald-300 font-medium">
                                         <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>

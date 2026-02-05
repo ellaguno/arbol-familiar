@@ -10,6 +10,7 @@ class WebrtcSignal extends Model
     protected $fillable = [
         'caller_id',
         'callee_id',
+        'sent_by',
         'type',
         'media_type',
         'payload',
@@ -31,11 +32,14 @@ class WebrtcSignal extends Model
     }
 
     /**
-     * Senales pendientes para un usuario (como caller o callee).
+     * Senales pendientes para un usuario.
+     * Retorna senales donde el usuario participa (caller o callee)
+     * pero NO fue quien la envio (sent_by != userId).
      */
     public function scopeForUser($query, int $userId)
     {
         return $query->where('consumed', false)
+            ->where('sent_by', '!=', $userId)
             ->where(function ($q) use ($userId) {
                 $q->where('callee_id', $userId)
                   ->orWhere('caller_id', $userId);

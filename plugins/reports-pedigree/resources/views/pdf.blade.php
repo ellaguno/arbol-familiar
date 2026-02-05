@@ -101,9 +101,26 @@
     </p>
 
     {{-- Grafico SVG del pedigri --}}
+    @if(!empty($svgDataUri))
+    @php
+        // Calcular dimensiones del SVG para escalar correctamente
+        $boxWidth = 160;
+        $boxHeight = 50;
+        $horizontalGap = 40;
+        $baseVerticalGap = 10;
+        $totalSlots = pow(2, $generations);
+        $slotHeight = $boxHeight + $baseVerticalGap;
+        $svgHeight = $totalSlots * $slotHeight;
+        $svgWidth = ($generations + 1) * ($boxWidth + $horizontalGap) + 20;
+        // Escalar para que quepa en la pagina (max 700px de ancho)
+        $scale = min(1, 700 / $svgWidth);
+        $displayWidth = $svgWidth * $scale;
+        $displayHeight = $svgHeight * $scale;
+    @endphp
     <div class="chart-container">
-        @include('reports-pedigree::svg')
+        <img src="{{ $svgDataUri }}" style="width: {{ $displayWidth }}px; height: {{ $displayHeight }}px;">
     </div>
+    @endif
 
     {{-- Datos tabulares --}}
     <h1>{{ __('Datos del Pedigri') }}</h1>
