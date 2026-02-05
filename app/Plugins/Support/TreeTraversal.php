@@ -162,6 +162,42 @@ class TreeTraversal
     }
 
     /**
+     * Construye arbol de descendientes compatible con d3.hierarchy().
+     * Incluye conyuges como _spouses en cada nodo.
+     */
+    public function buildDescendantTree(Person $person, int $generations): array
+    {
+        $node = [
+            'name' => $person->shouldProtectMinorData() ? $person->first_name : $person->full_name,
+            'data' => $this->personToNode($person),
+            '_spouses' => [],
+            'children' => [],
+        ];
+
+        if ($generations <= 0) {
+            return $node;
+        }
+
+        $families = $person->familiesAsSpouse()->with(['husband', 'wife', 'children'])->get();
+
+        foreach ($families as $family) {
+            $spouse = $family->husband_id === $person->id ? $family->wife : $family->husband;
+            if ($spouse) {
+                $node['_spouses'][] = [
+                    'data' => $this->personToNode($spouse),
+                    'marriageDate' => $family->marriage_date?->format('Y'),
+                ];
+            }
+
+            foreach ($family->children as $child) {
+                $node['children'][] = $this->buildDescendantTree($child, $generations - 1);
+            }
+        }
+
+        return $node;
+    }
+
+    /**
      * Retorna una coleccion plana de ancestros con atributo 'generation'.
      * Util para reportes y listados.
      */

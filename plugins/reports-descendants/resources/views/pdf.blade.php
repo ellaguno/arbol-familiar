@@ -20,6 +20,15 @@
             color: #6b7280;
             margin-bottom: 20px;
         }
+        .chart-container {
+            text-align: center;
+            margin-bottom: 20px;
+            page-break-after: always;
+        }
+        .chart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
         .tree-entry {
             padding: 3px 0;
             border-bottom: 1px solid #f3f4f6;
@@ -100,6 +109,16 @@
         {{ __(':gen generaciones', ['gen' => $generations]) }} &mdash;
         {{ now()->format('d/m/Y') }}
     </p>
+
+    {{-- Grafico SVG del arbol de descendientes --}}
+    @if(count($flatList) <= 80)
+        <div class="chart-container">
+            @include('reports-descendants::svg-tree')
+        </div>
+    @endif
+
+    {{-- Lista indentada detallada --}}
+    <h1>{{ __('Detalle de Descendientes') }}</h1>
 
     @foreach($flatList as $index => $entry)
         @php

@@ -36,13 +36,16 @@ class DescendantReportPlugin extends PluginServiceProvider implements ReportPlug
         $renderer = app(ReportRenderer::class);
 
         $generations = $options['generations'] ?? 10;
-        $descendantTree = $traversal->getDescendants($person, $generations);
+        $rawDescendants = $traversal->getDescendants($person, $generations);
 
-        // Construir lista indentada a partir del arbol jerarquico
+        // Construir lista indentada a partir del arbol jerarquico (para PDF)
         $flatList = [];
-        $this->flattenTree($person, $descendantTree, 0, $flatList);
+        $this->flattenTree($person, $rawDescendants, 0, $flatList);
 
         $totalDescendants = $this->countDescendants($flatList);
+
+        // Arbol jerarquico compatible con d3.hierarchy() (para vista interactiva)
+        $descendantTree = $traversal->buildDescendantTree($person, $generations);
 
         $data = [
             'person' => $person,

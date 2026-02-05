@@ -2,9 +2,9 @@
     "slug": "reports-descendants",
     "name": "Descendant Report",
     "name_es": "Reporte de Descendientes",
-    "version": "1.0.0",
-    "description": "Generate descendant reports in indented tree format with HTML and PDF output",
-    "description_es": "Genera reportes de descendientes en formato de arbol indentado con salida HTML y PDF",
+    "version": "2.0.0",
+    "description": "Interactive D3.js collapsible descendant tree with spouses, zoom, pan, and PDF export",
+    "description_es": "Arbol de descendientes interactivo y colapsable con D3.js, conyuges, zoom, arrastre, y exportacion PDF",
     "author": "Mi Familia",
     "type": "report",
     "requires": {

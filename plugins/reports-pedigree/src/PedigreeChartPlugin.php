@@ -35,7 +35,7 @@ class PedigreeChartPlugin extends PluginServiceProvider implements ReportPluginI
         $traversal = app(TreeTraversal::class);
         $renderer = app(ReportRenderer::class);
 
-        $generations = min(max((int) ($options['generations'] ?? 4), 2), 5);
+        $generations = min(max((int) ($options['generations'] ?? 4), 2), 8);
 
         // Construir lista Ahnentafel para el pedigri
         $ahnentafel = $this->buildAhnentafel($person, $generations);

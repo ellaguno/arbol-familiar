@@ -10,6 +10,7 @@
      * Aplanar la estructura de arbol del abanico en un array indexado por posicion Ahnentafel.
      * index 1 = persona raiz, index 2 = padre, index 3 = madre, etc.
      */
+    if (!function_exists('flattenFanData')) {
     function flattenFanData($node, $index = 1, $generation = 0, &$result = []) {
         $result[$index] = [
             'data' => $node['data'] ?? $node,
@@ -23,23 +24,25 @@
             }
         }
         return $result;
-    }
+    }}
 
     /**
      * Calcular el punto en coordenadas cartesianas dado angulo y radio.
      * Angulo 0 = izquierda (PI rad), angulo PI = derecha (0 rad).
      * El abanico va de PI a 0 (izquierda a derecha, semicirculo superior).
      */
+    if (!function_exists('polarToCartesian')) {
     function polarToCartesian($cx, $cy, $radius, $angleRad) {
         return [
             'x' => $cx + $radius * cos($angleRad),
             'y' => $cy - $radius * sin($angleRad),
         ];
-    }
+    }}
 
     /**
      * Generar el path SVG de un arco (sector anular).
      */
+    if (!function_exists('arcPath')) {
     function arcPath($cx, $cy, $innerR, $outerR, $startAngle, $endAngle) {
         // Puntos del arco exterior (de startAngle a endAngle)
         $outerStart = polarToCartesian($cx, $cy, $outerR, $startAngle);
@@ -61,39 +64,42 @@
         );
 
         return $d;
-    }
+    }}
 
     /**
      * Truncar nombre para que quepa en el arco.
      */
+    if (!function_exists('truncateName')) {
     function truncateName($name, $maxChars) {
         if (mb_strlen($name) <= $maxChars) {
             return $name;
         }
         return mb_substr($name, 0, $maxChars - 1) . "\u{2026}";
-    }
+    }}
 
     /**
      * Color de fondo segun genero.
      */
+    if (!function_exists('genderColor')) {
     function genderColor($gender) {
         return match ($gender) {
             'M' => '#dbeafe',  // blue-100
             'F' => '#fce7f3',  // pink-100
             default => '#f3f4f6', // gray-100
         };
-    }
+    }}
 
     /**
      * Color del borde segun genero.
      */
+    if (!function_exists('genderStroke')) {
     function genderStroke($gender) {
         return match ($gender) {
             'M' => '#93c5fd',  // blue-300
             'F' => '#f9a8d4',  // pink-300
             default => '#d1d5db', // gray-300
         };
-    }
+    }}
 
     $flatData = flattenFanData($fanData);
     $totalGenerations = $generations;

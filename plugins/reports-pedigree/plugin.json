@@ -2,9 +2,9 @@
     "slug": "reports-pedigree",
     "name": "Pedigree Chart",
     "name_es": "Cuadro de Pedigri",
-    "version": "1.0.0",
-    "description": "Generate classic horizontal pedigree charts with SVG, HTML and PDF output",
-    "description_es": "Genera cuadros de pedigri horizontales clasicos con salida SVG, HTML y PDF",
+    "version": "2.0.0",
+    "description": "Interactive D3.js horizontal pedigree charts with zoom, pan, clickable nodes, plus SVG and PDF export",
+    "description_es": "Cuadros de pedigri horizontales interactivos con D3.js con zoom, arrastre, nodos clickeables, y exportacion SVG y PDF",
     "author": "Mi Familia",
     "type": "report",
     "requires": {

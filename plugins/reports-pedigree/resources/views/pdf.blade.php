@@ -20,6 +20,15 @@
             color: #6b7280;
             margin-bottom: 20px;
         }
+        .chart-container {
+            text-align: center;
+            margin-bottom: 20px;
+            page-break-after: always;
+        }
+        .chart-container svg {
+            max-width: 100%;
+            height: auto;
+        }
         .generation-header {
             background-color: #f3f4f6;
             padding: 6px 10px;
@@ -74,14 +83,6 @@
             font-size: 9px;
             font-style: italic;
         }
-        .note {
-            margin-top: 15px;
-            padding: 8px 12px;
-            background-color: #eff6ff;
-            border-left: 3px solid #3b82f6;
-            font-size: 10px;
-            color: #374151;
-        }
         .footer {
             margin-top: 20px;
             text-align: center;
@@ -99,10 +100,13 @@
         {{ now()->format('d/m/Y') }}
     </p>
 
-    <div class="note">
-        {{ __('Este PDF contiene los datos del cuadro de pedigri en formato tabular. Para ver el grafico visual, descargue la version SVG.') }}
+    {{-- Grafico SVG del pedigri --}}
+    <div class="chart-container">
+        @include('reports-pedigree::svg')
     </div>
 
+    {{-- Datos tabulares --}}
+    <h1>{{ __('Datos del Pedigri') }}</h1>
     <table>
         <thead>
             <tr>
@@ -139,7 +143,6 @@
                 @php
                     $p = $entry['person'];
                     $isProtected = $p->shouldProtectMinorData();
-                    // Determinar relacion basada en numero Ahnentafel
                     $relation = '';
                     if ($num === 1) {
                         $relation = __('Persona raiz');

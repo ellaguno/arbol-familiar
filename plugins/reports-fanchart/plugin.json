@@ -2,9 +2,9 @@
     "slug": "reports-fanchart",
     "name": "Fan Chart",
     "name_es": "Grafico de Abanico",
-    "version": "1.0.0",
-    "description": "Generate fan charts (semicircular ancestor charts) with HTML, SVG and PDF output",
-    "description_es": "Genera graficos de abanico (diagramas semicirculares de ancestros) con salida HTML, SVG y PDF",
+    "version": "2.0.0",
+    "description": "Interactive D3.js fan charts (semicircular ancestor charts) with zoom, pan, tooltips, plus SVG and PDF export",
+    "description_es": "Graficos de abanico interactivos con D3.js (diagramas semicirculares de ancestros) con zoom, arrastre, tooltips, y exportacion SVG y PDF",
     "author": "Mi Familia",
     "type": "report",
     "requires": {
