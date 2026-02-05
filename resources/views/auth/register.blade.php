@@ -110,8 +110,9 @@
                     </div>
 
                     <!-- Herencia cultural -->
+                    @if($heritageEnabled ?? false)
                     <div class="border-b pb-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Herencia cultural') }}</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ $heritageLabel ?? __('Herencia cultural') }}</h2>
 
                         <div class="mb-4">
                             <label class="form-label">{{ __('¿Tienes una herencia cultural que deseas registrar?') }}</label>
@@ -142,7 +143,7 @@
                                     <x-select
                                         name="heritage_region"
                                         :label="__('Region de origen')"
-                                        :options="$regions"
+                                        :options="$heritageRegions ?? []"
                                         :selected="old('heritage_region')"
                                         :placeholder="__('Selecciona la region...')"
                                     />
@@ -150,7 +151,7 @@
                                     <x-select
                                         name="migration_decade"
                                         :label="__('Decada de migracion')"
-                                        :options="$decades"
+                                        :options="$heritageDecades ?? []"
                                         :selected="old('migration_decade')"
                                         :placeholder="__('Selecciona...')"
                                     />
@@ -158,6 +159,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- Privacidad -->
                     <div>

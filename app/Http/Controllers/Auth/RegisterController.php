@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use App\Services\SiteSettingsService;
 
 class RegisterController extends Controller
 {
@@ -24,8 +25,6 @@ class RegisterController extends Controller
     public function showRegistrationForm()
     {
         return view('auth.register', [
-            'regions' => config('mi-familia.heritage_regions'),
-            'decades' => config('mi-familia.migration_decades'),
             'relationships' => config('mi-familia.relationship_degrees'),
             'familyRelationships' => config('mi-familia.family_relationships'),
         ]);
@@ -67,19 +66,6 @@ class RegisterController extends Controller
             'birth_country' => ['nullable', 'string', 'max:255'],
             'residence_country' => ['nullable', 'string', 'max:255'],
 
-            // Herencia etnica
-            'has_ethnic_heritage' => ['required', 'boolean'],
-            'ancestor_first_name' => ['required_if:has_ethnic_heritage,1', 'nullable', 'string', 'max:100'],
-            'ancestor_patronymic' => ['required_if:has_ethnic_heritage,1', 'nullable', 'string', 'max:100'],
-            'heritage_region' => ['required_if:has_ethnic_heritage,1', 'nullable', 'in:central,dalmatia,slavonia,istria,other,unknown'],
-            'migration_decade' => ['nullable', 'string', 'max:20'],
-            'relationship_degree' => ['nullable', 'string', 'max:50'],
-
-            // Familiar con herencia (para usuarios sin herencia directa)
-            'is_heritage_family_member' => ['nullable', 'boolean'],
-            'heritage_family_member_name' => ['nullable', 'required_if:is_heritage_family_member,1', 'string', 'max:200'],
-            'heritage_family_relationship' => ['nullable', 'required_if:is_heritage_family_member,1', 'string', 'max:50'],
-
             // Privacidad
             'privacy_accepted' => ['required', 'accepted'],
         ], [
@@ -92,14 +78,18 @@ class RegisterController extends Controller
             'first_name.required' => 'El nombre es obligatorio.',
             'patronymic.required' => 'El apellido paterno es obligatorio.',
             'gender.required' => 'El genero es obligatorio.',
-            'has_ethnic_heritage.required' => 'Indica si tienes herencia etnica.',
-            'ancestor_first_name.required_if' => 'El nombre del ancestro es obligatorio.',
-            'ancestor_patronymic.required_if' => 'El apellido del ancestro es obligatorio.',
-            'heritage_region.required_if' => 'La region de origen es obligatoria.',
-            'heritage_family_member_name.required_if' => 'El nombre del familiar con herencia es obligatorio.',
-            'heritage_family_relationship.required_if' => 'La relacion con el familiar es obligatoria.',
             'privacy_accepted.accepted' => 'Debes aceptar la politica de privacidad.',
         ]);
+
+        // Heritage validation (only if feature is enabled)
+        $heritageService = app(SiteSettingsService::class);
+        if ($heritageService->heritageEnabled()) {
+            $request->validate([
+                'has_ethnic_heritage' => ['required', 'boolean'],
+                'heritage_region' => ['nullable', 'string', 'max:100'],
+                'migration_decade' => ['nullable', 'string', 'max:20'],
+            ]);
+        }
 
         try {
             DB::beginTransaction();
@@ -125,18 +115,16 @@ class RegisterController extends Controller
                 'is_living' => true,
                 'residence_country' => $request->residence_country,
                 'email' => $request->email,
-                'has_ethnic_heritage' => $request->boolean('has_ethnic_heritage'),
-                'heritage_region' => $request->heritage_region,
-                'migration_decade' => $request->migration_decade,
                 'privacy_level' => 'family',
                 'consent_status' => 'not_required',
                 'created_by' => $user->id,
             ];
 
-            // Si no tiene herencia directa pero tiene familiar con herencia, guardar esa informacion
-            if (!$request->boolean('has_ethnic_heritage') && $request->boolean('is_heritage_family_member')) {
-                $personData['heritage_family_member_name'] = $request->heritage_family_member_name;
-                $personData['heritage_family_relationship'] = $request->heritage_family_relationship;
+            // Heritage data (only if feature is enabled)
+            if ($heritageService->heritageEnabled()) {
+                $personData['has_ethnic_heritage'] = $request->boolean('has_ethnic_heritage');
+                $personData['heritage_region'] = $request->heritage_region;
+                $personData['migration_decade'] = $request->migration_decade;
             }
 
             $person = Person::create($personData);

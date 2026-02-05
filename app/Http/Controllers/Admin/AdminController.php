@@ -663,6 +663,56 @@ class AdminController extends Controller
     }
 
     /**
+     * Actualizar configuracion de herencia cultural.
+     */
+    public function updateHeritage(Request $request)
+    {
+        // Toggle
+        SiteSetting::set('heritage', 'heritage_enabled', $request->has('heritage_enabled') ? '1' : '0', 'text');
+
+        // Label
+        if ($request->has('heritage_label')) {
+            SiteSetting::set('heritage', 'heritage_label', $request->input('heritage_label', 'Herencia cultural'), 'text');
+        }
+
+        // Regions (formato: clave|Nombre, una por linea)
+        if ($request->has('heritage_regions')) {
+            $regions = $this->parsePipeFormat($request->input('heritage_regions', ''));
+            SiteSetting::set('heritage', 'heritage_regions', json_encode($regions), 'json');
+        }
+
+        // Decades (formato: clave|Nombre, una por linea)
+        if ($request->has('heritage_decades')) {
+            $decades = $this->parsePipeFormat($request->input('heritage_decades', ''));
+            SiteSetting::set('heritage', 'heritage_decades', json_encode($decades), 'json');
+        }
+
+        $this->logActivity('heritage_settings_updated');
+
+        return back()->with('success', __('Configuracion de herencia actualizada correctamente.'));
+    }
+
+    /**
+     * Parsear formato "clave|Nombre" (una por linea) a array asociativo.
+     */
+    protected function parsePipeFormat(string $text): array
+    {
+        $result = [];
+        $lines = array_filter(array_map('trim', explode("\n", $text)));
+        foreach ($lines as $line) {
+            if (str_contains($line, '|')) {
+                [$key, $value] = explode('|', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                if ($key !== '') {
+                    $result[$key] = $value;
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Listado de secciones de contenido editable.
      */
     public function content()

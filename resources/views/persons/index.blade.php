@@ -58,9 +58,10 @@
                     </div>
 
                     <div class="grid md:grid-cols-4 gap-4">
+                        @if($heritageEnabled ?? false)
                         <!-- Herencia cultural -->
                         <div>
-                            <label for="ethnic_heritage" class="form-label">{{ __('Herencia cultural') }}</label>
+                            <label for="ethnic_heritage" class="form-label">{{ $heritageLabel ?? __('Herencia cultural') }}</label>
                             <select name="ethnic_heritage" id="ethnic_heritage" class="form-input">
                                 <option value="">{{ __('Todos') }}</option>
                                 <option value="yes" {{ request('ethnic_heritage') === 'yes' ? 'selected' : '' }}>{{ __('Si') }}</option>
@@ -73,13 +74,14 @@
                             <label for="heritage_region" class="form-label">{{ __('Region de origen') }}</label>
                             <select name="heritage_region" id="heritage_region" class="form-input">
                                 <option value="">{{ __('Todas') }}</option>
-                                @foreach($heritageRegions as $code => $name)
+                                @foreach($heritageRegions ?? [] as $code => $name)
                                     <option value="{{ $code }}" {{ request('heritage_region') === $code ? 'selected' : '' }}>
                                         {{ $name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
+                        @endif
 
                         <!-- Ordenar por -->
                         <div>
@@ -168,7 +170,7 @@
                                                 {{ $person->gender === 'M' ? __('Masculino') : ($person->gender === 'F' ? __('Femenino') : __('Otro')) }}
                                             </span>
                                         @endif
-                                        @if($person->has_ethnic_heritage)
+                                        @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                                 *
                                             </span>

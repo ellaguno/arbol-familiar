@@ -39,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
             View::share('siteColors', $siteSettings->colors());
             View::share('siteFont', $siteSettings->font());
             View::share('siteFontUrl', $siteSettings->fontUrl());
+            View::share('heritageEnabled', $siteSettings->heritageEnabled());
+            View::share('heritageRegions', $siteSettings->heritageRegions());
+            View::share('heritageDecades', $siteSettings->heritageDecades());
+            View::share('heritageLabel', $siteSettings->heritageLabel());
         }
     }
 }

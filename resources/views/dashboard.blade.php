@@ -39,11 +39,11 @@
                                             {{ $person->residence_place }}
                                         @endif
                                     </p>
-                                    @if($person->has_ethnic_heritage)
+                                    @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
                                         <span class="badge badge-primary mt-2">
-                                            {{ __('Herencia cultural') }}
+                                            {{ $heritageLabel ?? __('Herencia cultural') }}
                                             @if($person->heritage_region)
-                                                - {{ config('mi-familia.heritage_regions')[$person->heritage_region] ?? $person->heritage_region }}
+                                                - {{ ($heritageRegions ?? [])[$person->heritage_region] ?? $person->heritage_region }}
                                             @endif
                                         </span>
                                     @endif

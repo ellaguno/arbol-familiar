@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use App\Services\SiteSettingsService;
 
 class ProfileController extends Controller
 {
@@ -20,10 +21,7 @@ class ProfileController extends Controller
         $user = auth()->user();
         $person = $user->person;
 
-        // Regiones de herencia para el select
-        $heritageRegions = config('mi-familia.heritage_regions', []);
-
-        return view('profile.edit', compact('user', 'person', 'heritageRegions'));
+        return view('profile.edit', compact('user', 'person'));
     }
 
     /**
@@ -50,12 +48,6 @@ class ProfileController extends Controller
             'occupation' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
 
-            // Herencia etnica
-            'has_ethnic_heritage' => ['boolean'],
-            'heritage_region' => ['nullable', 'string', 'max:100'],
-            'origin_town' => ['nullable', 'string', 'max:255'],
-            'migration_decade' => ['nullable', 'string', 'max:10'],
-
             // Configuracion de usuario
             'language' => ['required', 'in:es,en'],
             'privacy_level' => ['required', 'in:direct_family,extended_family,selected_users,community'],
@@ -66,9 +58,20 @@ class ProfileController extends Controller
             'birth_date.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
         ]);
 
+        // Heritage fields (only if feature is enabled)
+        $heritageData = [];
+        if (app(SiteSettingsService::class)->heritageEnabled()) {
+            $heritageData = [
+                'has_ethnic_heritage' => (bool) $request->input('has_ethnic_heritage'),
+                'heritage_region' => $request->input('heritage_region'),
+                'origin_town' => $request->input('origin_town'),
+                'migration_decade' => $request->input('migration_decade'),
+            ];
+        }
+
         // Actualizar o crear persona
         if ($person) {
-            $person->update([
+            $person->update(array_merge([
                 'first_name' => $validated['first_name'],
                 'patronymic' => $validated['patronymic'],
                 'matronymic' => $validated['matronymic'] ?? null,
@@ -82,14 +85,10 @@ class ProfileController extends Controller
                 'residence_country' => $validated['residence_country'] ?? null,
                 'occupation' => $validated['occupation'] ?? null,
                 'phone' => $validated['phone'] ?? null,
-                'has_ethnic_heritage' => $validated['has_ethnic_heritage'] ?? false,
-                'heritage_region' => $validated['heritage_region'] ?? null,
-                'origin_town' => $validated['origin_town'] ?? null,
-                'migration_decade' => $validated['migration_decade'] ?? null,
                 'updated_by' => $user->id,
-            ]);
+            ], $heritageData));
         } else {
-            $person = Person::create([
+            $person = Person::create(array_merge([
                 'first_name' => $validated['first_name'],
                 'patronymic' => $validated['patronymic'],
                 'matronymic' => $validated['matronymic'] ?? null,
@@ -104,14 +103,10 @@ class ProfileController extends Controller
                 'occupation' => $validated['occupation'] ?? null,
                 'phone' => $validated['phone'] ?? null,
                 'email' => $user->email,
-                'has_ethnic_heritage' => $validated['has_ethnic_heritage'] ?? false,
-                'heritage_region' => $validated['heritage_region'] ?? null,
-                'origin_town' => $validated['origin_town'] ?? null,
-                'migration_decade' => $validated['migration_decade'] ?? null,
                 'is_living' => true,
                 'privacy_level' => $validated['privacy_level'],
                 'created_by' => $user->id,
-            ]);
+            ], $heritageData));
 
             $user->update(['person_id' => $person->id]);
         }

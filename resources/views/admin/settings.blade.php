@@ -213,6 +213,83 @@
                 </div>
             </div>
 
+            <!-- Herencia cultural -->
+            <div class="card">
+                <div class="card-header flex items-center justify-between">
+                    <h2 class="text-lg font-semibold">{{ __('Herencia cultural') }}</h2>
+                    @php
+                        $hEnabled = \App\Models\SiteSetting::get('heritage', 'heritage_enabled', '0');
+                    @endphp
+                    <span class="px-2 py-1 text-xs rounded-full {{ $hEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                        {{ $hEnabled ? __('Habilitado') : __('Deshabilitado') }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-600 mb-4">{{ __('Permite a los usuarios registrar su herencia cultural, region de origen y datos de migracion familiar.') }}</p>
+
+                    <form action="{{ route('admin.settings.heritage') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        @php
+                            $hLabel = \App\Models\SiteSetting::get('heritage', 'heritage_label', 'Herencia cultural');
+                            $hRegionsJson = \App\Models\SiteSetting::get('heritage', 'heritage_regions', '{}');
+                            $hDecadesJson = \App\Models\SiteSetting::get('heritage', 'heritage_decades', '{}');
+                            $hRegions = json_decode($hRegionsJson, true) ?: [];
+                            $hDecades = json_decode($hDecadesJson, true) ?: [];
+                            $hRegionsText = collect($hRegions)->map(fn($v, $k) => "$k|$v")->implode("\n");
+                            $hDecadesText = collect($hDecades)->map(fn($v, $k) => "$k|$v")->implode("\n");
+                        @endphp
+
+                        <!-- Toggle -->
+                        <div class="mb-6">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" name="heritage_enabled" value="1"
+                                       class="form-checkbox"
+                                       {{ $hEnabled ? 'checked' : '' }}>
+                                <span class="font-medium">{{ __('Habilitar herencia cultural') }}</span>
+                            </label>
+                            <p class="text-xs text-gray-400 mt-1">{{ __('Cuando esta deshabilitado, la seccion de herencia no aparece en ningun formulario ni perfil.') }}</p>
+                        </div>
+
+                        <!-- Label -->
+                        <div class="mb-6">
+                            <label for="heritage_label" class="form-label">{{ __('Nombre de la seccion') }}</label>
+                            <input type="text" name="heritage_label" id="heritage_label"
+                                   value="{{ $hLabel }}"
+                                   class="form-input max-w-md"
+                                   placeholder="Herencia cultural">
+                            <p class="text-xs text-gray-400 mt-1">{{ __('Este texto se muestra como titulo de la seccion en formularios y perfiles.') }}</p>
+                        </div>
+
+                        <!-- Regions -->
+                        <div class="mb-6">
+                            <label for="heritage_regions" class="form-label">{{ __('Regiones de origen') }}</label>
+                            <textarea name="heritage_regions" id="heritage_regions"
+                                      rows="6"
+                                      class="form-input font-mono text-sm resize-y max-w-lg">{{ $hRegionsText }}</textarea>
+                            <p class="text-xs text-gray-400 mt-1">{{ __('Una region por linea, formato: clave|Nombre. Ejemplo: dalmacia|Dalmacia') }}</p>
+                        </div>
+
+                        <!-- Decades -->
+                        <div class="mb-6">
+                            <label for="heritage_decades" class="form-label">{{ __('Decadas de migracion') }}</label>
+                            <textarea name="heritage_decades" id="heritage_decades"
+                                      rows="6"
+                                      class="form-input font-mono text-sm resize-y max-w-lg">{{ $hDecadesText }}</textarea>
+                            <p class="text-xs text-gray-400 mt-1">{{ __('Una decada por linea, formato: clave|Nombre. Ejemplo: 1900-1910|1900 - 1910') }}</p>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {{ __('Guardar configuracion de herencia') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <!-- Informacion del sistema -->
             <div class="card">
                 <div class="card-header">

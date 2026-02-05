@@ -76,7 +76,7 @@
                                     {{ config('mi-familia.marital_statuses')[$person->marital_status] ?? $person->marital_status }}
                                 </span>
                             @endif
-                            @if($person->has_ethnic_heritage)
+                            @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                                     HR
                                 </span>
@@ -284,20 +284,17 @@
                 </div>
 
                 <!-- Herencia cultural -->
-                @if($person->has_ethnic_heritage)
+                @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
                     <div class="card">
                         <div class="card-header flex items-center gap-2">
-                             <div class="flex gap-1">
-
-                            </div>
-                            <h2 class="text-lg font-semibold">{{ __('Herencia cultural') }}</h2>
+                            <h2 class="text-lg font-semibold">{{ $heritageLabel ?? __('Herencia cultural') }}</h2>
                         </div>
                         <div class="card-body">
                             <dl class="grid md:grid-cols-2 gap-4">
                                 @if($person->heritage_region)
                                     <div>
                                         <dt class="text-sm text-gray-500">{{ __('Region de origen') }}</dt>
-                                        <dd class="text-gray-900">{{ config('mi-familia.heritage_regions.' . $person->heritage_region, $person->heritage_region) }}</dd>
+                                        <dd class="text-gray-900">{{ ($heritageRegions ?? [])[$person->heritage_region] ?? $person->heritage_region }}</dd>
                                     </div>
                                 @endif
 
@@ -311,7 +308,7 @@
                                 @if($person->migration_decade)
                                     <div>
                                         <dt class="text-sm text-gray-500">{{ __('Decada de migracion') }}</dt>
-                                        <dd class="text-gray-900">{{ config('mi-familia.migration_decades')[$person->migration_decade] ?? $person->migration_decade }}</dd>
+                                        <dd class="text-gray-900">{{ ($heritageDecades ?? [])[$person->migration_decade] ?? $person->migration_decade }}</dd>
                                     </div>
                                 @endif
 

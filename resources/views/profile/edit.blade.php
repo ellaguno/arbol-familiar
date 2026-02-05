@@ -215,12 +215,10 @@
                     </div>
 
                     <!-- Herencia cultural -->
+                    @if($heritageEnabled ?? false)
                     <div class="card mb-6" x-data="{ hasHeritage: {{ old('has_ethnic_heritage', $person?->has_ethnic_heritage) ? 'true' : 'false' }} }">
                         <div class="card-header flex items-center gap-2">
-                             <div class="flex gap-1">
-
-                            </div> 
-                            <h2 class="text-lg font-semibold">{{ __('Herencia cultural') }}</h2>
+                            <h2 class="text-lg font-semibold">{{ $heritageLabel ?? __('Herencia cultural') }}</h2>
                         </div>
                         <div class="card-body space-y-4">
                             <label class="flex items-center gap-3 cursor-pointer">
@@ -237,7 +235,7 @@
                                         <label for="heritage_region" class="form-label">{{ __('Region de origen') }}</label>
                                         <select name="heritage_region" id="heritage_region" class="form-input">
                                             <option value="">{{ __('Seleccionar...') }}</option>
-                                            @foreach($heritageRegions as $key => $name)
+                                            @foreach($heritageRegions ?? [] as $key => $name)
                                                 <option value="{{ $key }}" {{ old('heritage_region', $person?->heritage_region) == $key ? 'selected' : '' }}>
                                                     {{ $name }}
                                                 </option>
@@ -249,7 +247,6 @@
                                         <label for="origin_town" class="form-label">{{ __('Ciudad/Pueblo de origen') }}</label>
                                         <input type="text" name="origin_town" id="origin_town"
                                                value="{{ old('origin_town', $person?->origin_town) }}"
-                                               placeholder="Ej: Split, Dubrovnik, Zagreb..."
                                                class="form-input">
                                     </div>
                                 </div>
@@ -258,7 +255,7 @@
                                     <label for="migration_decade" class="form-label">{{ __('Decada de migracion familiar') }}</label>
                                     <select name="migration_decade" id="migration_decade" class="form-input">
                                         <option value="">{{ __('No lo se / No aplica') }}</option>
-                                        @foreach(config('mi-familia.migration_decades') as $value => $label)
+                                        @foreach($heritageDecades ?? [] as $value => $label)
                                             <option value="{{ $value }}" {{ old('migration_decade', $person?->migration_decade) == $value ? 'selected' : '' }}>
                                                 {{ $label }}
                                             </option>
@@ -268,6 +265,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- Configuracion -->
                     <div class="card mb-6">

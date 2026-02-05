@@ -353,6 +353,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/settings/test-mail', [AdminController::class, 'testMail'])->name('settings.test-mail');
         Route::get('/settings/mail-diagnostic', [AdminController::class, 'mailDiagnostic'])->name('settings.mail-diagnostic');
         Route::put('/settings/colors', [AdminController::class, 'updateColors'])->name('settings.colors');
+        Route::put('/settings/heritage', [AdminController::class, 'updateHeritage'])->name('settings.heritage');
 
         // Editor de contenido
         Route::get('/content', [AdminController::class, 'content'])->name('content');

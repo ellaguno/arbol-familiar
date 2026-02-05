@@ -94,10 +94,7 @@ class PersonController extends Controller
 
         $persons = $query->paginate(20)->withQueryString();
 
-        // Regiones de herencia para filtro
-        $heritageRegions = config('mi-familia.heritage_regions', []);
-
-        return view('persons.index', compact('persons', 'heritageRegions'));
+        return view('persons.index', compact('persons'));
     }
 
     /**
@@ -105,8 +102,6 @@ class PersonController extends Controller
      */
     public function create(Request $request)
     {
-        $heritageRegions = config('mi-familia.heritage_regions', []);
-
         // Datos prellenados segun parentesco
         $prefill = [];
         $relatedPerson = null;
@@ -178,7 +173,7 @@ class PersonController extends Controller
             }
         }
 
-        return view('persons.create', compact('heritageRegions', 'prefill', 'relatedPerson', 'relation', 'families', 'selectedFamilyId'));
+        return view('persons.create', compact('prefill', 'relatedPerson', 'relation', 'families', 'selectedFamilyId'));
     }
 
     /**
@@ -299,9 +294,7 @@ class PersonController extends Controller
     {
         $this->authorizeEdit($person);
 
-        $heritageRegions = config('mi-familia.heritage_regions', []);
-
-        return view('persons.edit', compact('person', 'heritageRegions'));
+        return view('persons.edit', compact('person'));
     }
 
     /**
@@ -665,7 +658,7 @@ class PersonController extends Controller
             'occupation' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
-            'has_ethnic_heritage' => ['boolean'],
+            'has_ethnic_heritage' => ['nullable', 'boolean'],
             'heritage_region' => ['nullable', 'string', 'max:100'],
             'origin_town' => ['nullable', 'string', 'max:255'],
             'migration_decade' => ['nullable', 'string', 'max:10'],

@@ -75,6 +75,52 @@ class SiteSettingsService
     }
 
     /**
+     * Check if heritage feature is enabled.
+     */
+    public function heritageEnabled(): bool
+    {
+        return (bool) (SiteSetting::get('heritage', 'heritage_enabled', '0') ?? '0');
+    }
+
+    /**
+     * Get heritage regions as associative array.
+     */
+    public function heritageRegions(): array
+    {
+        $json = SiteSetting::get('heritage', 'heritage_regions', '');
+        if ($json) {
+            $decoded = json_decode($json, true);
+            if (is_array($decoded) && !empty($decoded)) {
+                return $decoded;
+            }
+        }
+        return config('mi-familia.heritage_regions', []);
+    }
+
+    /**
+     * Get heritage migration decades as associative array.
+     */
+    public function heritageDecades(): array
+    {
+        $json = SiteSetting::get('heritage', 'heritage_decades', '');
+        if ($json) {
+            $decoded = json_decode($json, true);
+            if (is_array($decoded) && !empty($decoded)) {
+                return $decoded;
+            }
+        }
+        return config('mi-familia.migration_decades', []);
+    }
+
+    /**
+     * Get heritage feature label.
+     */
+    public function heritageLabel(): string
+    {
+        return SiteSetting::get('heritage', 'heritage_label', 'Herencia cultural') ?? 'Herencia cultural';
+    }
+
+    /**
      * Generate CSS variables block for injection in <head>.
      */
     public function cssVariables(): string

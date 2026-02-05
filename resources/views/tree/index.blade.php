@@ -52,7 +52,7 @@
                                         @if($person->birth_date)
                                             {{ $person->birth_date->format('Y') }}
                                         @endif
-                                        @if($person->has_ethnic_heritage)
+                                        @if(($heritageEnabled ?? false) && $person->has_ethnic_heritage)
                                             <span class="text-blue-600 ml-1">*</span>
                                         @endif
                                     </p>
