@@ -422,20 +422,10 @@
                 return d.depth === 0 ? 3 : 1.5;
             });
 
-        // Clip path for photos (one per node)
+        // Clip path for photos - defined in defs
         const defs = svg.append('defs');
-        nodes.each(function(d, i) {
-            if (d.data.data && d.data.data.photo) {
-                defs.append('clipPath')
-                    .attr('id', 'photo-clip-' + i)
-                    .append('circle')
-                    .attr('cx', 0)
-                    .attr('cy', 0)
-                    .attr('r', PHOTO_R);
-            }
-        });
 
-        // Photo circle
+        // Photo circles (rendered directly without problematic clipPath)
         nodes.each(function(d, i) {
             const info = d.data.data;
             if (!info || !info.photo) return;
@@ -443,6 +433,15 @@
             const node = d3.select(this);
             const cx = 24;
             const cy = BOX_H / 2;
+
+            // Create a clipPath for this specific node with correct position
+            const clipId = 'photo-clip-' + i;
+            defs.append('clipPath')
+                .attr('id', clipId)
+                .append('circle')
+                .attr('cx', cx)
+                .attr('cy', cy)
+                .attr('r', PHOTO_R);
 
             // Photo border circle
             node.append('circle')
@@ -453,14 +452,14 @@
                 .attr('stroke', isDark ? '#4b5563' : '#d1d5db')
                 .attr('stroke-width', 1);
 
-            // Photo image
+            // Photo image with clip
             node.append('image')
                 .attr('href', info.photo)
                 .attr('x', cx - PHOTO_R)
                 .attr('y', cy - PHOTO_R)
                 .attr('width', PHOTO_R * 2)
                 .attr('height', PHOTO_R * 2)
-                .attr('clip-path', 'url(#photo-clip-' + i + ')')
+                .attr('clip-path', 'url(#' + clipId + ')')
                 .attr('preserveAspectRatio', 'xMidYMid slice');
         });
 

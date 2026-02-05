@@ -71,11 +71,11 @@
         </div>
 
         @if($actionCount > 0)
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-center gap-3">
+            <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 mb-6 flex items-center gap-3">
                 <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
-                <span class="text-yellow-800">
+                <span class="text-yellow-800 dark:text-yellow-200">
                     {{ __('Tienes :count solicitudes pendientes que requieren tu atencion.', ['count' => $actionCount]) }}
                 </span>
             </div>
@@ -104,7 +104,7 @@
             <div class="card divide-y divide-theme">
                 @foreach($messages as $message)
                     <a href="{{ route('messages.show', $message) }}"
-                       class="block p-4 hover:bg-theme-secondary transition-colors {{ !$message->isRead() ? 'bg-blue-50' : '' }}">
+                       class="block p-4 hover:bg-theme-secondary transition-colors {{ !$message->isRead() ? 'bg-blue-50 dark:bg-blue-900/30' : '' }}">
                         <div class="flex items-start gap-4">
                             <!-- Avatar -->
                             <div class="flex-shrink-0">
@@ -135,9 +135,9 @@
 
                                     @if($message->type !== 'message')
                                         <span class="px-2 py-0.5 text-xs rounded-full
-                                            {{ $message->type === 'invitation' ? 'bg-green-100 text-green-700' : '' }}
-                                            {{ $message->type === 'consent_request' ? 'bg-purple-100 text-purple-700' : '' }}
-                                            {{ $message->type === 'system' ? 'bg-gray-100 text-gray-700' : '' }}">
+                                            {{ $message->type === 'invitation' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : '' }}
+                                            {{ $message->type === 'consent_request' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300' : '' }}
+                                            {{ $message->type === 'system' ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' : '' }}">
                                             @switch($message->type)
                                                 @case('invitation')
                                                     {{ __('Invitacion') }}
@@ -153,7 +153,7 @@
                                     @endif
 
                                     @if($message->action_required && $message->action_status === 'pending')
-                                        <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700">
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300">
                                             {{ __('Accion requerida') }}
                                         </span>
                                     @endif
