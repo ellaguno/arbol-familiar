@@ -12,13 +12,12 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700&display=swap" rel="stylesheet" />
+    <link href="{{ $siteFontUrl ?? 'https://fonts.bunny.net/css?family=ubuntu:400,500,600,700&display=swap' }}" rel="stylesheet" />
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Dynamic colors -->
-    @if(isset($siteColors))
+    <!-- Dynamic colors and font -->
     <style>
         :root {
             --mf-primary: {{ $siteColors['primary'] ?? '#3b82f6' }};
@@ -26,9 +25,10 @@
             --mf-accent: {{ $siteColors['accent'] ?? '#f59e0b' }};
             --mf-light: {{ $siteColors['light'] ?? '#dbeafe' }};
             --mf-dark: {{ $siteColors['dark'] ?? '#1d4ed8' }};
+            --mf-font: '{{ $siteFont ?? 'Ubuntu' }}', ui-sans-serif, system-ui, sans-serif;
         }
+        body { font-family: var(--mf-font) !important; }
     </style>
-    @endif
 
     <style>
         .genealogy-overlay {
@@ -174,12 +174,16 @@
     <div class="hidden md:block h-20 bg-white"></div>
 
     <!-- Seccion de tres columnas -->
+    @php
+        $featureShape = $sc ? $sc->content('welcome', 'feature_images_shape', 'round') : 'round';
+        $featureRounded = $featureShape === 'round' ? 'rounded-full' : 'rounded-xl';
+    @endphp
     <section class="py-16 md:pb-16 md:pt-0" style="margin-top: 50px; background-color:#eae8e4;">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-12">
                 <!-- Columna 1 -->
                 <div class="text-center">
-                    <div class="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 floating-image">
+                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-gray-200 floating-image">
                         <img src="{{ asset($sc ? $sc->content('welcome', 'feature_1_image', 'images/feature-start.jpg') : 'images/feature-start.jpg') }}" alt="{{ __('Empezar') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>1</text></svg>'">
                     </div>
@@ -192,7 +196,7 @@
                 </div>
                 <!-- Columna 2 -->
                 <div class="text-center">
-                    <div class="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 floating-image">
+                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-gray-200 floating-image">
                         <img src="{{ asset($sc ? $sc->content('welcome', 'feature_2_image', 'images/feature-import.jpg') : 'images/feature-import.jpg') }}" alt="{{ __('Importar') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>2</text></svg>'">
                     </div>
@@ -205,7 +209,7 @@
                 </div>
                 <!-- Columna 3 -->
                 <div class="text-center">
-                    <div class="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 floating-image">
+                    <div class="w-40 h-40 mx-auto mb-6 {{ $featureRounded }} overflow-hidden bg-gray-200 floating-image">
                         <img src="{{ asset($sc ? $sc->content('welcome', 'feature_3_image', 'images/feature-privacy.jpg') : 'images/feature-privacy.jpg') }}" alt="{{ __('Privacidad') }}" class="w-full h-full object-cover"
                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2230%22>3</text></svg>'">
                     </div>

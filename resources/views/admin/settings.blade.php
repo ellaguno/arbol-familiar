@@ -22,6 +22,77 @@
         @endif
 
         <div class="space-y-6">
+            <!-- Tipografia del sitio -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-lg font-semibold">{{ __('Tipografia del sitio') }}</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-600 mb-4">{{ __('Selecciona la tipografia que se usara en todo el sitio.') }}</p>
+
+                    <form action="{{ route('admin.settings.colors') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        @php
+                            $currentFont = \App\Models\SiteSetting::get('colors', 'font', 'Ubuntu');
+                            $availableFonts = \App\Services\SiteSettingsService::AVAILABLE_FONTS;
+                        @endphp
+
+                        <div class="max-w-md">
+                            <label for="font" class="form-label">{{ __('Tipografia') }}</label>
+                            <select name="font" id="font" class="form-input" onchange="previewFont(this.value)">
+                                @foreach($availableFonts as $fontName => $fontData)
+                                    <option value="{{ $fontName }}" {{ $currentFont === $fontName ? 'selected' : '' }}>{{ $fontName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ __('Vista previa') }}</h4>
+                            <div id="font-preview" style="font-family: '{{ $currentFont }}', sans-serif;">
+                                <p class="text-2xl font-bold mb-1">{{ config('app.name') }}</p>
+                                <p class="text-base mb-1">{{ __('El veloz murcielago hindu comia feliz cardillo y kiwi.') }}</p>
+                                <p class="text-sm text-gray-500">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn-primary">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                {{ __('Guardar tipografia') }}
+                            </button>
+                        </div>
+                    </form>
+
+                    <script>
+                    const fontSlugs = @json(collect($availableFonts)->map(fn($f) => $f['slug'].':'.$f['weights'])->toArray());
+
+                    function previewFont(fontName) {
+                        const data = fontSlugs[fontName];
+                        if (!data) return;
+
+                        // Load font from Bunny Fonts
+                        const linkId = 'preview-font-link';
+                        let link = document.getElementById(linkId);
+                        if (!link) {
+                            link = document.createElement('link');
+                            link.id = linkId;
+                            link.rel = 'stylesheet';
+                            document.head.appendChild(link);
+                        }
+                        link.href = 'https://fonts.bunny.net/css?family=' + data + '&display=swap';
+
+                        // Update preview
+                        document.getElementById('font-preview').style.fontFamily = "'" + fontName + "', sans-serif";
+                    }
+                    </script>
+                </div>
+            </div>
+
             <!-- Colores del sitio -->
             <div class="card">
                 <div class="card-header">

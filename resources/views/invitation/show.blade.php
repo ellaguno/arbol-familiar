@@ -9,10 +9,18 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="{{ $siteFontUrl ?? 'https://fonts.bunny.net/css?family=ubuntu:400,500,600,700&display=swap' }}" rel="stylesheet" />
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Dynamic font -->
+    <style>
+        :root {
+            --mf-font: '{{ $siteFont ?? 'Ubuntu' }}', ui-sans-serif, system-ui, sans-serif;
+        }
+        body { font-family: var(--mf-font) !important; }
+    </style>
 </head>
 <body class="font-sans antialiased bg-gray-100">
     <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">

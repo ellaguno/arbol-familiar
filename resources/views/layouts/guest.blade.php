@@ -9,7 +9,7 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700&display=swap" rel="stylesheet" />
+    <link href="{{ $siteFontUrl ?? 'https://fonts.bunny.net/css?family=ubuntu:400,500,600,700&display=swap' }}" rel="stylesheet" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}">
@@ -17,8 +17,7 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Dynamic colors -->
-    @if(isset($siteColors))
+    <!-- Dynamic colors and font -->
     <style>
         :root {
             --mf-primary: {{ $siteColors['primary'] ?? '#3b82f6' }};
@@ -26,9 +25,10 @@
             --mf-accent: {{ $siteColors['accent'] ?? '#f59e0b' }};
             --mf-light: {{ $siteColors['light'] ?? '#dbeafe' }};
             --mf-dark: {{ $siteColors['dark'] ?? '#1d4ed8' }};
+            --mf-font: '{{ $siteFont ?? 'Ubuntu' }}', ui-sans-serif, system-ui, sans-serif;
         }
+        body { font-family: var(--mf-font) !important; }
     </style>
-    @endif
 
     @stack('styles')
 </head>

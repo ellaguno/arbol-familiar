@@ -1,23 +1,42 @@
+@php
+    $col1 = isset($siteSettings) ? $siteSettings->content('footer', 'footer_col_1', '') : '';
+    $col2 = isset($siteSettings) ? $siteSettings->content('footer', 'footer_col_2', '') : '';
+    $col3 = isset($siteSettings) ? $siteSettings->content('footer', 'footer_col_3', '') : '';
+@endphp
+
 <!-- Footer -->
 <footer class="py-8" style="background-color: #e5e5e5;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid md:grid-cols-4 gap-8 items-start">
-            <!-- Logo -->
+        <div class="grid md:grid-cols-3 gap-8 items-start">
+            <!-- Columna 1 -->
             <div>
-                <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="h-20 object-contain"
-                     onerror="this.outerHTML='<span class=\'text-2xl font-bold text-[#3b82f6]\'>Mi Familia</span>'">
+                @if($col1)
+                    {!! $col1 !!}
+                @else
+                    <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="h-20 object-contain"
+                         onerror="this.outerHTML='<span class=&quot;text-2xl font-bold&quot; style=&quot;color: var(--mf-primary, #3b82f6);&quot;>{{ config('app.name') }}</span>'">
+                @endif
             </div>
 
-            <!-- Menu de enlaces -->
+            <!-- Columna 2 -->
             <div class="text-sm space-y-0">
-                @auth
-                    <a href="{{ route('help') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
+                @if($col2)
+                    {!! $col2 !!}
                 @else
-                    <a href="{{ route('login') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
-                @endauth
-                <a href="{{ route('ancestors-info') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Donde encontrar más información de mis antepasados') }}</a>
-                <a href="{{ route('privacy') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Privacidad') }}</a>
-                <a href="{{ route('terms') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Términos y condiciones') }}</a>
+                    @auth
+                        <a href="{{ route('help') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
+                    @else
+                        <a href="{{ route('login') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('¿Cómo funciona Mi Familia?') }}</a>
+                    @endauth
+                    <a href="{{ route('ancestors-info') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Donde encontrar más información de mis antepasados') }}</a>
+                    <a href="{{ route('privacy') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Privacidad') }}</a>
+                    <a href="{{ route('terms') }}" class="block text-gray-600 hover:text-[#3b82f6]">{{ __('Términos y condiciones') }}</a>
+                @endif
+            </div>
+
+            <!-- Columna 3 -->
+            <div class="text-sm space-y-0">
+                {!! $col3 !!}
             </div>
         </div>
     </div>

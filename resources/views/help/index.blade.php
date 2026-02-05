@@ -167,7 +167,7 @@
                         <ul class="list-disc pl-6 space-y-2">
                             <li><strong>{{ __('Familia directa:') }}</strong> {{ __('Solo padres, hijos y conyuges pueden ver tu informacion') }}</li>
                             <li><strong>{{ __('Familia extendida:') }}</strong> {{ __('Incluye abuelos, tios, primos, etc.') }}</li>
-                            <li><strong>{{ __('Usuarios seleccionados:') }}</strong> {{ __('Tu eliges quien puede verte') }}</li>
+                            <li><strong>{{ __('Familia + usuarios seleccionados:') }}</strong> {{ __('Tu familia y las personas que tu elijas pueden verte') }}</li>
                             <li><strong>{{ __('Comunidad:') }}</strong> {{ __('Todos los miembros verificados de la plataforma') }}</li>
                         </ul>
 

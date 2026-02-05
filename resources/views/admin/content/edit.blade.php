@@ -34,7 +34,13 @@
                                 <span class="text-xs text-gray-400 ml-2">({{ $setting->type }})</span>
                             </label>
 
-                            @if($setting->type === 'text')
+                            @if($key === 'feature_images_shape')
+                                <select name="settings_{{ $key }}" id="settings_{{ $key }}" class="form-input">
+                                    <option value="round" {{ old('settings_' . $key, $setting->value) === 'round' ? 'selected' : '' }}>{{ __('Redondas') }}</option>
+                                    <option value="square" {{ old('settings_' . $key, $setting->value) === 'square' ? 'selected' : '' }}>{{ __('Cuadradas') }}</option>
+                                </select>
+
+                            @elseif($setting->type === 'text')
                                 <input type="text"
                                        name="settings_{{ $key }}"
                                        id="settings_{{ $key }}"
@@ -46,6 +52,13 @@
                                           id="settings_{{ $key }}"
                                           rows="4"
                                           class="form-input resize-y">{{ old('settings_' . $key, $setting->value) }}</textarea>
+
+                            @elseif($setting->type === 'html')
+                                <textarea name="settings_{{ $key }}"
+                                          id="settings_{{ $key }}"
+                                          rows="8"
+                                          class="form-input resize-y font-mono text-sm">{{ old('settings_' . $key, $setting->value) }}</textarea>
+                                <p class="text-xs text-gray-400 mt-1">{{ __('Se permite HTML. Los enlaces, imagenes y estilos se renderizaran directamente.') }}</p>
 
                             @elseif($setting->type === 'image')
                                 <div class="space-y-3">

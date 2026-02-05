@@ -23,6 +23,7 @@ class SiteSettingsSeeder extends Seeder
             ['group' => 'welcome', 'key' => 'register_cta', 'value' => '¡Da click aquí y únete!', 'type' => 'text'],
             ['group' => 'welcome', 'key' => 'register_question', 'value' => '¿Todavía no estás registrado?', 'type' => 'text'],
             ['group' => 'welcome', 'key' => 'register_tagline', 'value' => 'Disfruta tu origen y vive la historia. Compártelo con los miembros de tu familia.', 'type' => 'textarea'],
+            ['group' => 'welcome', 'key' => 'feature_images_shape', 'value' => 'round', 'type' => 'text'],
             ['group' => 'welcome', 'key' => 'feature_1_title', 'value' => '¡Solo necesitas empezar!', 'type' => 'text'],
             ['group' => 'welcome', 'key' => 'feature_1_text', 'value' => 'Es muy sencillo, ingresa primero tus datos y después podrás añadir a tus padres, abuelos, hermanos, hijos y demás familiares. Una vez agregados podrás invitarlos a participar en tu árbol y compartir información, imágenes y documentos de su historia.', 'type' => 'textarea'],
             ['group' => 'welcome', 'key' => 'feature_1_image', 'value' => 'images/feature-start.jpg', 'type' => 'image'],
@@ -71,11 +72,22 @@ class SiteSettingsSeeder extends Seeder
             // =============================================
             // Colors
             // =============================================
+            ['group' => 'colors', 'key' => 'font', 'value' => 'Ubuntu', 'type' => 'text'],
             ['group' => 'colors', 'key' => 'primary', 'value' => '#3b82f6', 'type' => 'color'],
             ['group' => 'colors', 'key' => 'secondary', 'value' => '#2563eb', 'type' => 'color'],
             ['group' => 'colors', 'key' => 'accent', 'value' => '#f59e0b', 'type' => 'color'],
             ['group' => 'colors', 'key' => 'light', 'value' => '#dbeafe', 'type' => 'color'],
             ['group' => 'colors', 'key' => 'dark', 'value' => '#1d4ed8', 'type' => 'color'],
+
+            // =============================================
+            // Footer
+            // =============================================
+            ['group' => 'footer', 'key' => 'footer_col_1', 'value' => '<img src="/images/logo.png" alt="Mi Familia" class="h-20 object-contain">', 'type' => 'html'],
+            ['group' => 'footer', 'key' => 'footer_col_2', 'value' => '<a href="/help" class="block text-gray-600 hover:text-[#3b82f6]">¿Cómo funciona Mi Familia?</a>
+<a href="/ancestors-info" class="block text-gray-600 hover:text-[#3b82f6]">Donde encontrar más información de mis antepasados</a>
+<a href="/privacy" class="block text-gray-600 hover:text-[#3b82f6]">Privacidad</a>
+<a href="/terms" class="block text-gray-600 hover:text-[#3b82f6]">Términos y condiciones</a>', 'type' => 'html'],
+            ['group' => 'footer', 'key' => 'footer_col_3', 'value' => '', 'type' => 'html'],
         ];
 
         foreach ($settings as $setting) {

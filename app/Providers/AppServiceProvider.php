@@ -37,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
             $siteSettings = app(SiteSettingsService::class);
             View::share('siteSettings', $siteSettings);
             View::share('siteColors', $siteSettings->colors());
+            View::share('siteFont', $siteSettings->font());
+            View::share('siteFontUrl', $siteSettings->fontUrl());
         }
     }
 }

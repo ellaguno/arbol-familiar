@@ -294,7 +294,7 @@
                                             {{ __('Familia extendida') }}
                                         </option>
                                         <option value="selected_users" {{ old('privacy_level', $user->privacy_level) == 'selected_users' ? 'selected' : '' }}>
-                                            {{ __('Usuarios seleccionados') }}
+                                            {{ __('Familia + usuarios seleccionados') }}
                                         </option>
                                         <option value="community" {{ old('privacy_level', $user->privacy_level) == 'community' ? 'selected' : '' }}>
                                             {{ __('Toda la comunidad') }}
