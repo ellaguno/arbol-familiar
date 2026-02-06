@@ -26,9 +26,12 @@ try {
 
     echo "1. Laravel inicializado correctamente\n\n";
 
-    // Ejecutar seeders
-    echo "2. Ejecutando seeders...\n";
-    Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    // Ejecutar seeder de producción (solo admin + site settings)
+    echo "2. Ejecutando ProductionSeeder...\n";
+    Illuminate\Support\Facades\Artisan::call('db:seed', [
+        '--class' => 'Database\\Seeders\\ProductionSeeder',
+        '--force' => true
+    ]);
     echo Illuminate\Support\Facades\Artisan::output();
 
     echo "\n=== SEEDERS EJECUTADOS CORRECTAMENTE ===\n";
