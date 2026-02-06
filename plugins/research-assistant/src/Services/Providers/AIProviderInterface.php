@@ -17,6 +17,11 @@ interface AIProviderInterface
     public function getModels(): array;
 
     /**
+     * Check if provider supports custom model input.
+     */
+    public function supportsCustomModel(): bool;
+
+    /**
      * Analyze the given prompt and context using AI.
      *
      * @param string $prompt The main prompt/question

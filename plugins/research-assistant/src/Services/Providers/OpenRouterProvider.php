@@ -10,6 +10,9 @@ class OpenRouterProvider implements AIProviderInterface
     protected string $baseUrl = 'https://openrouter.ai/api/v1';
     protected int $tokensUsed = 0;
 
+    // Marcador especial para modelo personalizado
+    public const CUSTOM_MODEL = '_custom_';
+
     public function __construct(?string $apiKey = null)
     {
         if ($apiKey) {
@@ -24,20 +27,34 @@ class OpenRouterProvider implements AIProviderInterface
 
     public function getModels(): array
     {
+        // Modelos populares de OpenRouter (actualizar periodicamente)
+        // Ver: https://openrouter.ai/models?order=most-popular
         return [
+            'anthropic/claude-sonnet-4' => 'Claude Sonnet 4',
             'anthropic/claude-3.5-sonnet' => 'Claude 3.5 Sonnet',
-            'anthropic/claude-3-haiku' => 'Claude 3 Haiku',
-            'openai/gpt-4-turbo' => 'GPT-4 Turbo',
-            'openai/gpt-3.5-turbo' => 'GPT-3.5 Turbo',
-            'google/gemini-pro' => 'Gemini Pro',
-            'meta-llama/llama-3-70b-instruct' => 'Llama 3 70B',
-            'mistralai/mixtral-8x7b-instruct' => 'Mixtral 8x7B',
+            'openai/gpt-4o' => 'GPT-4o',
+            'openai/gpt-4o-mini' => 'GPT-4o Mini',
+            'google/gemini-2.0-flash-001' => 'Gemini 2.0 Flash',
+            'google/gemini-pro-1.5' => 'Gemini Pro 1.5',
+            'deepseek/deepseek-chat' => 'DeepSeek V3',
+            'deepseek/deepseek-r1' => 'DeepSeek R1',
+            'meta-llama/llama-3.3-70b-instruct' => 'Llama 3.3 70B',
+            'qwen/qwen-2.5-72b-instruct' => 'Qwen 2.5 72B',
+            self::CUSTOM_MODEL => '-- ' . __('Modelo personalizado') . ' --',
         ];
+    }
+
+    /**
+     * Check if custom model input is supported.
+     */
+    public function supportsCustomModel(): bool
+    {
+        return true;
     }
 
     public function analyze(string $prompt, array $context = []): array
     {
-        $model = $context['model'] ?? 'anthropic/claude-3.5-sonnet';
+        $model = $context['model'] ?? 'anthropic/claude-sonnet-4';
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->apiKey,

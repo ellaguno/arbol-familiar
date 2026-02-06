@@ -10,6 +10,8 @@ class OpenAIProvider implements AIProviderInterface
     protected string $baseUrl = 'https://api.openai.com/v1';
     protected int $tokensUsed = 0;
 
+    public const CUSTOM_MODEL = '_custom_';
+
     public function __construct(?string $apiKey = null)
     {
         if ($apiKey) {
@@ -24,16 +26,27 @@ class OpenAIProvider implements AIProviderInterface
 
     public function getModels(): array
     {
+        // Modelos actuales de OpenAI (Feb 2025)
         return [
-            'gpt-4-turbo-preview' => 'GPT-4 Turbo',
+            'gpt-4o' => 'GPT-4o',
+            'gpt-4o-mini' => 'GPT-4o Mini',
+            'gpt-4-turbo' => 'GPT-4 Turbo',
             'gpt-4' => 'GPT-4',
-            'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
+            'o1' => 'o1 (Reasoning)',
+            'o1-mini' => 'o1 Mini',
+            'o3-mini' => 'o3 Mini',
+            self::CUSTOM_MODEL => '-- ' . __('Modelo personalizado') . ' --',
         ];
+    }
+
+    public function supportsCustomModel(): bool
+    {
+        return true;
     }
 
     public function analyze(string $prompt, array $context = []): array
     {
-        $model = $context['model'] ?? 'gpt-4-turbo-preview';
+        $model = $context['model'] ?? 'gpt-4o';
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->apiKey,

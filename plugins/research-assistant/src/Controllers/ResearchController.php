@@ -27,7 +27,7 @@ class ResearchController extends Controller
      */
     protected function loadPluginSettings(): void
     {
-        $plugin = \App\Plugins\Models\Plugin::where('name', 'research-assistant')->first();
+        $plugin = \App\Plugins\Models\Plugin::where('slug', 'research-assistant')->first();
         $this->pluginSettings = $plugin?->settings ?? [];
     }
 
@@ -42,14 +42,15 @@ class ResearchController extends Controller
             ->get();
 
         $aiService = new AIService($this->pluginSettings);
-        $providers = $aiService->getAvailableProviders();
+        $defaultProvider = $this->pluginSettings['ai_provider'] ?? 'openrouter';
+        $provider = $aiService->getProvider($defaultProvider);
 
         return view('research-assistant::index', [
             'recentSessions' => $recentSessions,
-            'providers' => $providers,
             'sources' => $this->getAvailableSources(),
-            'defaultProvider' => $this->pluginSettings['ai_provider'] ?? 'openrouter',
-            'defaultModel' => $this->pluginSettings['ai_model'] ?? 'anthropic/claude-3.5-sonnet',
+            'aiConfigured' => $provider && $provider->isConfigured(),
+            'providerName' => $provider ? $provider->getName() : 'N/A',
+            'defaultModel' => $this->pluginSettings['ai_model'] ?? 'N/A',
         ]);
     }
 
@@ -61,14 +62,15 @@ class ResearchController extends Controller
         $this->authorize('view', $person);
 
         $aiService = new AIService($this->pluginSettings);
-        $providers = $aiService->getAvailableProviders();
+        $defaultProvider = $this->pluginSettings['ai_provider'] ?? 'openrouter';
+        $provider = $aiService->getProvider($defaultProvider);
 
         return view('research-assistant::search', [
             'person' => $person,
-            'providers' => $providers,
             'sources' => $this->getAvailableSources(),
-            'defaultProvider' => $this->pluginSettings['ai_provider'] ?? 'openrouter',
-            'defaultModel' => $this->pluginSettings['ai_model'] ?? 'anthropic/claude-3.5-sonnet',
+            'aiConfigured' => $provider && $provider->isConfigured(),
+            'providerName' => $provider ? $provider->getName() : 'N/A',
+            'defaultModel' => $this->pluginSettings['ai_model'] ?? 'N/A',
         ]);
     }
 
@@ -82,9 +84,17 @@ class ResearchController extends Controller
             'query' => 'required|string|max:1000',
             'sources' => 'required|array|min:1',
             'sources.*' => 'string|in:familysearch,wikipedia',
-            'ai_provider' => 'required|string|in:openrouter,deepseek,openai,anthropic',
-            'ai_model' => 'required|string|max:100',
         ]);
+
+        // Use admin-configured provider and model
+        $aiProvider = $this->pluginSettings['ai_provider'] ?? 'openrouter';
+        $aiModel = $this->pluginSettings['ai_model'] ?? null;
+
+        if (!$aiModel) {
+            return back()->withErrors([
+                'query' => __('El administrador no ha configurado un modelo de IA.'),
+            ])->withInput();
+        }
 
         // Verify person access if provided
         if ($request->person_id) {
@@ -94,26 +104,26 @@ class ResearchController extends Controller
 
         // Check if AI provider is configured
         $aiService = new AIService($this->pluginSettings);
-        $provider = $aiService->getProvider($request->ai_provider);
+        $provider = $aiService->getProvider($aiProvider);
 
         if (!$provider || !$provider->isConfigured()) {
             return back()->withErrors([
-                'ai_provider' => __('El proveedor de IA seleccionado no esta configurado. Por favor contacta al administrador.'),
+                'query' => __('El proveedor de IA no esta configurado. Por favor contacta al administrador.'),
             ])->withInput();
         }
 
         // Create research session
         $session = ResearchSession::create([
             'user_id' => Auth::id(),
-            'person_id' => $request->person_id,
-            'query' => $request->query,
-            'ai_provider' => $request->ai_provider,
-            'ai_model' => $request->ai_model,
+            'person_id' => $request->input('person_id'),
+            'query' => $request->input('query'),
+            'ai_provider' => $aiProvider,
+            'ai_model' => $aiModel,
             'status' => ResearchSession::STATUS_PENDING,
         ]);
 
         // Dispatch the job
-        ProcessResearchJob::dispatch($session, $request->sources, $this->pluginSettings);
+        ProcessResearchJob::dispatch($session, $request->input('sources'), $this->pluginSettings);
 
         return redirect()->route('research.session', $session)
             ->with('success', __('Investigacion iniciada. Los resultados apareceran en breve.'));

@@ -43,13 +43,63 @@
         </div>
 
         <!-- Loading indicator -->
-        <div x-show="isLoading" x-transition class="card mb-6">
-            <div class="card-body flex items-center gap-4">
-                <svg class="animate-spin w-6 h-6 text-mf-primary" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span class="text-theme" x-text="loadingMessage"></span>
+        <div x-show="isLoading" x-transition class="card mb-6 border-mf-primary/50">
+            <div class="card-body">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="relative">
+                        <svg class="animate-spin w-8 h-8 text-mf-primary" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-medium text-theme" x-text="loadingMessage"></p>
+                        <p class="text-sm text-theme-muted" x-text="loadingSubmessage"></p>
+                    </div>
+                </div>
+
+                <!-- Progress steps -->
+                <div class="flex items-center gap-2 text-sm">
+                    <div class="flex items-center gap-1" :class="stepCompleted('pending') ? 'text-green-600 dark:text-green-400' : (status === 'pending' ? 'text-mf-primary' : 'text-theme-muted')">
+                        <svg x-show="stepCompleted('pending')" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg x-show="status === 'pending'" class="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="5"/>
+                        </svg>
+                        <span>{{ __('Iniciando') }}</span>
+                    </div>
+                    <svg class="w-4 h-4 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    <div class="flex items-center gap-1" :class="stepCompleted('searching') ? 'text-green-600 dark:text-green-400' : (status === 'searching' ? 'text-mf-primary' : 'text-theme-muted')">
+                        <svg x-show="stepCompleted('searching')" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg x-show="status === 'searching'" class="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="5"/>
+                        </svg>
+                        <span>{{ __('Buscando') }}</span>
+                    </div>
+                    <svg class="w-4 h-4 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    <div class="flex items-center gap-1" :class="stepCompleted('analyzing') ? 'text-green-600 dark:text-green-400' : (status === 'analyzing' ? 'text-mf-primary' : 'text-theme-muted')">
+                        <svg x-show="stepCompleted('analyzing')" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg x-show="status === 'analyzing'" class="w-4 h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="5"/>
+                        </svg>
+                        <span>{{ __('Analizando') }}</span>
+                    </div>
+                    <svg class="w-4 h-4 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    <div class="flex items-center gap-1 text-theme-muted">
+                        <span>{{ __('Listo') }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -136,7 +186,7 @@
                 </span>
             </div>
             <div class="card-body">
-                <div class="prose prose-sm max-w-none dark:prose-invert" x-html="formatAnalysis(aiAnalysis.content)"></div>
+                <div class="ai-analysis-content text-gray-800 dark:text-gray-100" x-html="formatAnalysis(aiAnalysis.content)"></div>
             </div>
         </div>
 
@@ -189,8 +239,158 @@
         </div>
     </div>
 
+    @push('styles')
+    <style>
+        .ai-analysis-content {
+            line-height: 1.75;
+            color: #374151;
+        }
+        .dark .ai-analysis-content {
+            color: #e5e7eb;
+        }
+        .ai-analysis-content h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #111827;
+        }
+        .ai-analysis-content h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+        .ai-analysis-content h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+        .ai-analysis-content h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        .dark .ai-analysis-content h1,
+        .dark .ai-analysis-content h2,
+        .dark .ai-analysis-content h3,
+        .dark .ai-analysis-content h4 {
+            color: #f9fafb;
+        }
+        .ai-analysis-content p {
+            margin: 0.75rem 0;
+        }
+        .ai-analysis-content ul, .ai-analysis-content ol {
+            margin: 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+        .ai-analysis-content ul {
+            list-style-type: disc;
+        }
+        .ai-analysis-content ol {
+            list-style-type: decimal;
+        }
+        .ai-analysis-content li {
+            margin: 0.375rem 0;
+        }
+        .ai-analysis-content li > ul, .ai-analysis-content li > ol {
+            margin: 0.25rem 0;
+        }
+        .ai-analysis-content strong {
+            font-weight: 600;
+            color: #111827;
+        }
+        .dark .ai-analysis-content strong {
+            color: #f3f4f6;
+        }
+        .ai-analysis-content em {
+            font-style: italic;
+        }
+        .ai-analysis-content a {
+            color: var(--mf-primary);
+            text-decoration: underline;
+        }
+        .ai-analysis-content a:hover {
+            text-decoration: none;
+        }
+        .ai-analysis-content blockquote {
+            border-left: 4px solid var(--mf-primary);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #6b7280;
+            font-style: italic;
+        }
+        .dark .ai-analysis-content blockquote {
+            color: #9ca3af;
+        }
+        .ai-analysis-content code {
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-family: ui-monospace, monospace;
+        }
+        .dark .ai-analysis-content code {
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+        .ai-analysis-content pre {
+            background-color: #1f2937;
+            color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .ai-analysis-content pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .ai-analysis-content hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 1.5rem 0;
+        }
+        .dark .ai-analysis-content hr {
+            border-top-color: #4b5563;
+        }
+        .ai-analysis-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .ai-analysis-content th, .ai-analysis-content td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .dark .ai-analysis-content th, .dark .ai-analysis-content td {
+            border-color: #4b5563;
+        }
+        .ai-analysis-content th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        .dark .ai-analysis-content th {
+            background-color: #374151;
+        }
+    </style>
+    @endpush
+
     @push('scripts')
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
+        // Configure marked for safe rendering
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+        });
+
         function researchSession(sessionId, initialStatus) {
             return {
                 status: initialStatus,
@@ -202,6 +402,8 @@
                 hasError: false,
                 errorMessage: '',
                 pollInterval: null,
+                elapsedSeconds: 0,
+                timerInterval: null,
 
                 get statusLabel() {
                     const labels = {
@@ -225,10 +427,30 @@
                 get loadingMessage() {
                     const messages = {
                         'pending': '{{ __("Preparando investigacion...") }}',
-                        'searching': '{{ __("Buscando en fuentes externas...") }}',
+                        'searching': '{{ __("Buscando en fuentes genealogicas...") }}',
                         'analyzing': '{{ __("La IA esta analizando los resultados...") }}',
                     };
                     return messages[this.status] || '{{ __("Procesando...") }}';
+                },
+
+                get loadingSubmessage() {
+                    const messages = {
+                        'pending': '{{ __("Iniciando conexion con las fuentes de datos") }}',
+                        'searching': '{{ __("Consultando FamilySearch, Wikipedia y otras fuentes...") }}',
+                        'analyzing': '{{ __("Esto puede tomar unos segundos dependiendo del modelo") }}',
+                    };
+                    let msg = messages[this.status] || '';
+                    if (this.elapsedSeconds > 0) {
+                        msg += ` (${this.elapsedSeconds}s)`;
+                    }
+                    return msg;
+                },
+
+                stepCompleted(step) {
+                    const order = ['pending', 'searching', 'analyzing', 'completed'];
+                    const currentIndex = order.indexOf(this.status);
+                    const stepIndex = order.indexOf(step);
+                    return stepIndex < currentIndex;
                 },
 
                 startPolling() {
@@ -236,6 +458,7 @@
 
                     if (!['completed', 'failed'].includes(this.status)) {
                         this.pollInterval = setInterval(() => this.checkStatus(), 2000);
+                        this.timerInterval = setInterval(() => this.elapsedSeconds++, 1000);
                     }
                 },
 
@@ -268,6 +491,7 @@
                         if (['completed', 'failed'].includes(data.status)) {
                             this.isLoading = false;
                             clearInterval(this.pollInterval);
+                            clearInterval(this.timerInterval);
                         }
                     } catch (error) {
                         console.error('Error checking status:', error);
@@ -276,12 +500,19 @@
 
                 formatAnalysis(content) {
                     if (!content) return '';
-                    // Convert markdown-like formatting to HTML
-                    return content
-                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\n/g, '<br>')
-                        .replace(/^- (.+)$/gm, '<li>$1</li>')
-                        .replace(/(<li>.*<\/li>)/s, '<ul class="list-disc list-inside my-2">$1</ul>');
+
+                    // Use marked.js to parse markdown
+                    try {
+                        return marked.parse(content);
+                    } catch (e) {
+                        console.error('Error parsing markdown:', e);
+                        // Fallback: basic HTML escape and line breaks
+                        return content
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/\n/g, '<br>');
+                    }
                 }
             }
         }

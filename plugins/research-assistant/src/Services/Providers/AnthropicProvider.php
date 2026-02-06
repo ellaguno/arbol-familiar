@@ -10,6 +10,8 @@ class AnthropicProvider implements AIProviderInterface
     protected string $baseUrl = 'https://api.anthropic.com/v1';
     protected int $tokensUsed = 0;
 
+    public const CUSTOM_MODEL = '_custom_';
+
     public function __construct(?string $apiKey = null)
     {
         if ($apiKey) {
@@ -24,16 +26,24 @@ class AnthropicProvider implements AIProviderInterface
 
     public function getModels(): array
     {
+        // Modelos actuales de Anthropic (Feb 2025)
         return [
+            'claude-sonnet-4-20250514' => 'Claude Sonnet 4',
             'claude-3-5-sonnet-20241022' => 'Claude 3.5 Sonnet',
+            'claude-3-5-haiku-20241022' => 'Claude 3.5 Haiku',
             'claude-3-opus-20240229' => 'Claude 3 Opus',
-            'claude-3-haiku-20240307' => 'Claude 3 Haiku',
+            self::CUSTOM_MODEL => '-- ' . __('Modelo personalizado') . ' --',
         ];
+    }
+
+    public function supportsCustomModel(): bool
+    {
+        return true;
     }
 
     public function analyze(string $prompt, array $context = []): array
     {
-        $model = $context['model'] ?? 'claude-3-5-sonnet-20241022';
+        $model = $context['model'] ?? 'claude-sonnet-4-20250514';
 
         $response = Http::withHeaders([
             'x-api-key' => $this->apiKey,

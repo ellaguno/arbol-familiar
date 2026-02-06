@@ -61,7 +61,13 @@
                             </select>
                         </div>
 
-                        <div x-data="modelSelector(@js($providers), '{{ old('ai_provider', $settings['ai_provider'] ?? 'openrouter') }}', '{{ old('ai_model', $settings['ai_model'] ?? '') }}')"
+                        @php
+                            $savedModel = old('ai_model', $settings['ai_model'] ?? '');
+                            $savedProvider = old('ai_provider', $settings['ai_provider'] ?? 'openrouter');
+                            // Check if saved model is a custom one (not in the provider's list)
+                            $isCustomSaved = !empty($savedModel) && !isset($providers[$savedProvider]['models'][$savedModel]);
+                        @endphp
+                        <div x-data="modelSelector(@js($providers), '{{ $savedProvider }}', '{{ $isCustomSaved ? '_custom_' : $savedModel }}', '{{ $isCustomSaved ? $savedModel : '' }}')"
                              @provider-changed.window="updateModels($event.detail)">
                             <label class="block text-sm font-medium text-theme mb-2">{{ __('Modelo por defecto') }}</label>
                             <select name="ai_model" class="form-input w-full" x-model="selectedModel">
@@ -69,6 +75,13 @@
                                     <option :value="id" x-text="name"></option>
                                 </template>
                             </select>
+                            <!-- Custom model input -->
+                            <div x-show="isCustomModel" x-cloak class="mt-2">
+                                <input type="text" name="custom_model" x-model="customModel"
+                                       class="form-input w-full"
+                                       placeholder="{{ __('Ingresa el ID del modelo (ej: anthropic/claude-3.5-sonnet)') }}">
+                                <p class="text-xs text-theme-muted mt-1">{{ __('Consulta la documentacion del proveedor para IDs de modelos validos') }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -145,12 +158,17 @@
 
     @push('scripts')
     <script>
-        function modelSelector(providers, initialProvider, initialModel) {
+        function modelSelector(providers, initialProvider, initialModel, initialCustomModel) {
             return {
                 providers: providers,
                 currentProvider: initialProvider,
                 selectedModel: initialModel,
+                customModel: initialCustomModel || '',
                 models: {},
+
+                get isCustomModel() {
+                    return this.selectedModel === '_custom_';
+                },
 
                 init() {
                     this.updateModels(this.currentProvider);

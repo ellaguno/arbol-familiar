@@ -19,7 +19,7 @@ class SettingsController extends Controller
      */
     public function index()
     {
-        $plugin = Plugin::where('name', 'research-assistant')->first();
+        $plugin = Plugin::where('slug', 'research-assistant')->first();
         $settings = $plugin?->settings ?? [];
 
         $aiService = new AIService($settings);
@@ -36,7 +36,7 @@ class SettingsController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
+        $rules = [
             'ai_provider' => 'required|string|in:openrouter,deepseek,openai,anthropic',
             'ai_model' => 'required|string|max:100',
             'openrouter_api_key' => 'nullable|string|max:255',
@@ -46,9 +46,21 @@ class SettingsController extends Controller
             'familysearch_enabled' => 'boolean',
             'wikipedia_enabled' => 'boolean',
             'max_results_per_source' => 'integer|min:1|max:50',
-        ]);
+        ];
 
-        $plugin = Plugin::where('name', 'research-assistant')->first();
+        // Add custom_model validation if custom model is selected
+        if ($request->ai_model === '_custom_') {
+            $rules['custom_model'] = 'required|string|max:100';
+        }
+
+        $request->validate($rules);
+
+        // Determine the actual model to use
+        $aiModel = $request->ai_model === '_custom_'
+            ? $request->custom_model
+            : $request->ai_model;
+
+        $plugin = Plugin::where('slug', 'research-assistant')->first();
 
         if (!$plugin) {
             return back()->withErrors(['error' => __('Plugin no encontrado.')]);
@@ -58,7 +70,7 @@ class SettingsController extends Controller
 
         // Update basic settings
         $settings['ai_provider'] = $request->ai_provider;
-        $settings['ai_model'] = $request->ai_model;
+        $settings['ai_model'] = $aiModel;
         $settings['familysearch_enabled'] = $request->boolean('familysearch_enabled');
         $settings['wikipedia_enabled'] = $request->boolean('wikipedia_enabled');
         $settings['max_results_per_source'] = $request->integer('max_results_per_source', 10);
