@@ -39,24 +39,28 @@ class PersonController extends Controller
                 $q->orWhere('id', $user->person_id);
             }
 
-            // Personas con nivel 'community' o 'public' (visibles para todos)
-            $q->orWhereIn('privacy_level', ['community', 'public']);
+            // Personas con nivel 'community' (visibles para todos los registrados)
+            $q->orWhere('privacy_level', 'community');
 
-            // Personas con nivel 'family' que son familia directa del usuario
+            // Personas con nivel 'selected_users' o 'extended_family' que son familia extendida
+            if (!empty($extendedFamilyIds)) {
+                $q->orWhere(function ($subQ) use ($extendedFamilyIds) {
+                    $subQ->whereIn('privacy_level', ['extended_family', 'selected_users'])
+                         ->whereIn('id', $extendedFamilyIds);
+                });
+            }
+
+            // Personas con nivel 'direct_family' que son familia directa del usuario
             if (!empty($directFamilyIds)) {
                 $q->orWhere(function ($subQ) use ($directFamilyIds) {
-                    $subQ->where('privacy_level', 'family')
+                    $subQ->where('privacy_level', 'direct_family')
                          ->whereIn('id', $directFamilyIds);
                 });
             }
 
-            // También mostrar personas creadas por el mismo creador que la persona del usuario
-            // (pertenecen al mismo árbol familiar)
-            if ($user->person_id && $user->person) {
-                $q->orWhere(function ($subQ) use ($user) {
-                    $subQ->where('created_by', $user->person->created_by);
-                });
-            }
+            // Personas con nivel 'selected_users' aparecen en la lista (nombre visible)
+            // para permitir que envien solicitudes de acceso
+            $q->orWhere('privacy_level', 'selected_users');
         });
 
         // Busqueda por nombre (inteligente)
@@ -460,7 +464,7 @@ class PersonController extends Controller
         $availablePersons = Person::where('id', '!=', $person->id)
             ->where(function ($q) use ($user, $familyIds) {
                 $q->where('created_by', $user->id)
-                  ->orWhereIn('privacy_level', ['community', 'public']);
+                  ->orWhereIn('privacy_level', ['community', 'selected_users']);
 
                 // Agregar personas de la familia del usuario
                 if (!empty($familyIds)) {
@@ -663,7 +667,7 @@ class PersonController extends Controller
             'origin_town' => ['nullable', 'string', 'max:255'],
             'migration_decade' => ['nullable', 'string', 'max:10'],
             'migration_destination' => ['nullable', 'string', 'max:255'],
-            'privacy_level' => ['required', 'in:private,family,community,public'],
+            'privacy_level' => ['required', 'in:direct_family,extended_family,selected_users,community'],
         ], [
             'first_name.required' => 'El nombre es obligatorio.',
             'patronymic.required' => 'El apellido paterno es obligatorio.',
@@ -708,13 +712,21 @@ class PersonController extends Controller
      * Verifica si el usuario puede ver la persona.
      * Usa el método canBeViewedBy del modelo Person que implementa
      * los 4 niveles de privacidad: private, family, community, public.
+     * Usa redirect en lugar de abort(403) para evitar que el middleware
+     * de autenticacion redirija al login (bug de logout).
      */
     protected function authorizeView(Person $person): void
     {
         $user = auth()->user();
 
         if (!$person->canBeViewedBy($user)) {
-            abort(403, __('No tienes permiso para ver esta persona.'));
+            $previousUrl = url()->previous();
+            $currentUrl = url()->current();
+            $redirectUrl = ($previousUrl && $previousUrl !== $currentUrl)
+                ? $previousUrl
+                : route('persons.index');
+
+            abort(redirect($redirectUrl)->with('error', __('No tienes permiso para ver esta persona.')));
         }
     }
 
@@ -750,6 +762,7 @@ class PersonController extends Controller
 
     /**
      * Agrega relacion de conyuge.
+     * Verifica que no exista ya una familia con los mismos conyuges para evitar duplicados.
      */
     protected function addSpouseRelationship(Person $person, Person $related, array $data): void
     {
@@ -761,6 +774,59 @@ class PersonController extends Controller
         if ($person->gender === $related->gender) {
             $husband = $person;
             $wife = $related;
+        }
+
+        // Verificar que no exista ya una familia con estos conyuges
+        $existingFamily = Family::where(function ($q) use ($husband, $wife) {
+            $q->where(function ($inner) use ($husband, $wife) {
+                $inner->where('husband_id', $husband->id)
+                      ->where('wife_id', $wife->id);
+            })->orWhere(function ($inner) use ($husband, $wife) {
+                $inner->where('husband_id', $wife->id)
+                      ->where('wife_id', $husband->id);
+            });
+        })->first();
+
+        if ($existingFamily) {
+            // Si ya existe, actualizar datos si se proporcionaron
+            $updateData = [];
+            if (!empty($data['marriage_date']) && !$existingFamily->marriage_date) {
+                $updateData['marriage_date'] = $data['marriage_date'];
+            }
+            if (!empty($data['family_status'])) {
+                $updateData['status'] = $data['family_status'];
+            }
+            if (!empty($updateData)) {
+                $existingFamily->update($updateData);
+            }
+            return;
+        }
+
+        // Verificar si alguno tiene una familia sin conyuge (familia incompleta)
+        $incompleteFamilyHusband = Family::where('husband_id', $husband->id)
+            ->whereNull('wife_id')
+            ->first();
+
+        if ($incompleteFamilyHusband) {
+            $incompleteFamilyHusband->update([
+                'wife_id' => $wife->id,
+                'marriage_date' => $data['marriage_date'] ?? $incompleteFamilyHusband->marriage_date,
+                'status' => $data['family_status'] ?? $incompleteFamilyHusband->status,
+            ]);
+            return;
+        }
+
+        $incompleteFamilyWife = Family::where('wife_id', $wife->id)
+            ->whereNull('husband_id')
+            ->first();
+
+        if ($incompleteFamilyWife) {
+            $incompleteFamilyWife->update([
+                'husband_id' => $husband->id,
+                'marriage_date' => $data['marriage_date'] ?? $incompleteFamilyWife->marriage_date,
+                'status' => $data['family_status'] ?? $incompleteFamilyWife->status,
+            ]);
+            return;
         }
 
         Family::create([

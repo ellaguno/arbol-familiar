@@ -248,10 +248,10 @@
                         <div>
                             <label for="privacy_level" class="form-label">{{ __('Nivel de privacidad para personas importadas') }}</label>
                             <select name="privacy_level" id="privacy_level" class="form-input">
-                                <option value="private">{{ __('Solo yo (privado)') }}</option>
-                                <option value="family" selected>{{ __('Mi familia') }}</option>
+                                <option value="direct_family">{{ __('Solo familia directa') }}</option>
+                                <option value="extended_family" selected>{{ __('Familia extendida') }}</option>
+                                <option value="selected_users">{{ __('Familia + usuarios seleccionados') }}</option>
                                 <option value="community">{{ __('Toda la comunidad') }}</option>
-                                <option value="public">{{ __('Público') }}</option>
                             </select>
                             <p class="form-help">{{ __('Puedes cambiar la privacidad individualmente despues.') }}</p>
                         </div>

@@ -115,7 +115,7 @@ class RegisterController extends Controller
                 'is_living' => true,
                 'residence_country' => $request->residence_country,
                 'email' => $request->email,
-                'privacy_level' => 'family',
+                'privacy_level' => 'extended_family',
                 'consent_status' => 'not_required',
                 'created_by' => $user->id,
             ];

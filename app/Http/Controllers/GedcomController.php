@@ -188,7 +188,7 @@ class GedcomController extends Controller
         $content = Storage::get($tempPath);
 
         $options = [
-            'privacy_level' => $request->input('privacy_level', 'family'),
+            'privacy_level' => $request->input('privacy_level', 'extended_family'),
             'check_duplicates' => $request->boolean('check_duplicates'),
             'update_existing' => $request->boolean('update_existing'),
             'import_media' => $request->boolean('import_media'),

@@ -355,7 +355,7 @@ class GedcomParser
             'death_place' => $data['death']['place'] ?? null,
             'is_living' => !isset($data['death']),
             'biography' => $data['note'] ?? null,
-            'privacy_level' => $options['privacy_level'] ?? 'family',
+            'privacy_level' => $options['privacy_level'] ?? 'extended_family',
             'created_by' => Auth::id(),
         ];
 

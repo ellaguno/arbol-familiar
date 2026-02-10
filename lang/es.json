@@ -82,10 +82,10 @@
 
     "Privacidad": "Privacidad",
     "Quien puede ver esta persona": "Quién puede ver esta persona",
-    "Solo yo (privado)": "Solo yo (privado)",
-    "Mi familia": "Mi familia",
+    "Solo familia directa": "Solo familia directa",
+    "Familia extendida": "Familia extendida",
+    "Familia + usuarios seleccionados": "Familia + usuarios seleccionados",
     "Toda la comunidad": "Toda la comunidad",
-    "Publico": "Público",
     "Controla quien puede ver los datos de esta persona en la plataforma.": "Controla quién puede ver los datos de esta persona en la plataforma.",
 
     "Familia": "Familia",

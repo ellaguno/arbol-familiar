@@ -196,7 +196,7 @@ class TreeTest extends TestCase
         $stranger = User::factory()->create();
 
         $person = Person::factory()->create([
-            'privacy_level' => 'private',
+            'privacy_level' => 'direct_family',
             'created_by' => $owner->id,
         ]);
 

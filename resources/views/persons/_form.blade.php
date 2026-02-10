@@ -404,17 +404,17 @@
         <div class="card-body">
             <label for="privacy_level" class="form-label">{{ __('Quien puede ver esta persona') }} <span class="text-red-500">*</span></label>
             <select name="privacy_level" id="privacy_level" class="form-input max-w-md" required>
-                <option value="private" {{ old('privacy_level', $person?->privacy_level ?? 'family') === 'private' ? 'selected' : '' }}>
-                    {{ __('Solo yo (privado)') }}
+                <option value="direct_family" {{ old('privacy_level', $person?->privacy_level ?? 'extended_family') === 'direct_family' ? 'selected' : '' }}>
+                    {{ __('Solo familia directa') }}
                 </option>
-                <option value="family" {{ old('privacy_level', $person?->privacy_level ?? 'family') === 'family' ? 'selected' : '' }}>
-                    {{ __('Mi familia') }}
+                <option value="extended_family" {{ old('privacy_level', $person?->privacy_level ?? 'extended_family') === 'extended_family' ? 'selected' : '' }}>
+                    {{ __('Familia extendida') }}
+                </option>
+                <option value="selected_users" {{ old('privacy_level', $person?->privacy_level) === 'selected_users' ? 'selected' : '' }}>
+                    {{ __('Familia + usuarios seleccionados') }}
                 </option>
                 <option value="community" {{ old('privacy_level', $person?->privacy_level) === 'community' ? 'selected' : '' }}>
                     {{ __('Toda la comunidad') }}
-                </option>
-                <option value="public" {{ old('privacy_level', $person?->privacy_level) === 'public' ? 'selected' : '' }}>
-                    {{ __('Publico') }}
                 </option>
             </select>
             <p class="form-help mt-2">

@@ -69,12 +69,20 @@ class FamilyController extends Controller
     {
         $user = auth()->user();
 
-        // Personas disponibles para seleccionar
-        $persons = Person::where(function ($q) use ($user) {
+        // Personas disponibles: creadas por el usuario, community, familia del usuario
+        $familyPersonIds = [];
+        if ($user->person_id && $user->person) {
+            $familyPersonIds = $user->person->extendedFamilyIds;
+        }
+
+        $persons = Person::where(function ($q) use ($user, $familyPersonIds) {
             $q->where('created_by', $user->id)
               ->orWhere('privacy_level', 'community');
             if ($user->person_id) {
                 $q->orWhere('id', $user->person_id);
+            }
+            if (!empty($familyPersonIds)) {
+                $q->orWhereIn('id', $familyPersonIds);
             }
         })->orderBy('first_name')->get();
 
@@ -102,6 +110,24 @@ class FamilyController extends Controller
         // Debe haber al menos un conyuge
         if (empty($validated['husband_id']) && empty($validated['wife_id'])) {
             return back()->withErrors(['husband_id' => 'Debe seleccionar al menos un conyuge.'])->withInput();
+        }
+
+        // Verificar que no exista ya una familia con los mismos conyuges
+        if (!empty($validated['husband_id']) && !empty($validated['wife_id'])) {
+            $existingFamily = Family::where(function ($q) use ($validated) {
+                $q->where(function ($inner) use ($validated) {
+                    $inner->where('husband_id', $validated['husband_id'])
+                          ->where('wife_id', $validated['wife_id']);
+                })->orWhere(function ($inner) use ($validated) {
+                    $inner->where('husband_id', $validated['wife_id'])
+                          ->where('wife_id', $validated['husband_id']);
+                });
+            })->first();
+
+            if ($existingFamily) {
+                return redirect()->route('families.edit', $existingFamily)
+                    ->with('info', __('Ya existe una familia con estos conyuges. Puedes editarla aqui.'));
+            }
         }
 
         // Validar que los hijos no sean los mismos que los padres
@@ -184,11 +210,28 @@ class FamilyController extends Controller
 
         $user = auth()->user();
 
-        $persons = Person::where(function ($q) use ($user) {
+        // Incluir personas que ya estan en la familia (para que no desaparezcan del selector)
+        $existingFamilyPersonIds = collect([$family->husband_id, $family->wife_id])
+            ->filter()
+            ->toArray();
+
+        $familyPersonIds = [];
+        if ($user->person_id && $user->person) {
+            $familyPersonIds = $user->person->extendedFamilyIds;
+        }
+
+        $persons = Person::where(function ($q) use ($user, $familyPersonIds, $existingFamilyPersonIds) {
             $q->where('created_by', $user->id)
               ->orWhere('privacy_level', 'community');
             if ($user->person_id) {
                 $q->orWhere('id', $user->person_id);
+            }
+            if (!empty($familyPersonIds)) {
+                $q->orWhereIn('id', $familyPersonIds);
+            }
+            // Siempre incluir los conyuges actuales de la familia
+            if (!empty($existingFamilyPersonIds)) {
+                $q->orWhereIn('id', $existingFamilyPersonIds);
             }
         })->orderBy('first_name')->get();
 
@@ -363,7 +406,13 @@ class FamilyController extends Controller
             }
         }
 
-        abort(403, __('No tienes permiso para ver esta familia.'));
+        $previousUrl = url()->previous();
+        $currentUrl = url()->current();
+        $redirectUrl = ($previousUrl && $previousUrl !== $currentUrl)
+            ? $previousUrl
+            : route('families.index');
+
+        abort(redirect($redirectUrl)->with('error', __('No tienes permiso para ver esta familia.')));
     }
 
     /**

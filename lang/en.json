@@ -82,10 +82,10 @@
 
     "Privacidad": "Privacy",
     "Quien puede ver esta persona": "Who can see this person",
-    "Solo yo (privado)": "Only me (private)",
-    "Mi familia": "My family",
+    "Solo familia directa": "Direct family only",
+    "Familia extendida": "Extended family",
+    "Familia + usuarios seleccionados": "Family + selected users",
     "Toda la comunidad": "Entire community",
-    "Publico": "Public",
     "Controla quien puede ver los datos de esta persona en la plataforma.": "Control who can see this person's data on the platform.",
 
     "Familia": "Family",

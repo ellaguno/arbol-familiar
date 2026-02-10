@@ -32,7 +32,7 @@ class TreeController extends Controller
         // Incluye: creadas por el usuario y nivel community/public
         $persons = Person::where(function ($q) use ($user) {
             $q->where('created_by', $user->id)
-              ->orWhereIn('privacy_level', ['community', 'public']);
+              ->orWhereIn('privacy_level', ['community', 'selected_users']);
         })->orderBy('first_name')->get();
 
         return view('tree.index', compact('persons'));
@@ -190,7 +190,13 @@ class TreeController extends Controller
         $user = auth()->user();
 
         if (!$person->canBeViewedBy($user)) {
-            abort(403, __('No tienes permiso para ver este arbol.'));
+            $previousUrl = url()->previous();
+            $currentUrl = url()->current();
+            $redirectUrl = ($previousUrl && $previousUrl !== $currentUrl)
+                ? $previousUrl
+                : route('persons.index');
+
+            abort(redirect($redirectUrl)->with('error', __('No tienes permiso para ver este arbol.')));
         }
     }
 }

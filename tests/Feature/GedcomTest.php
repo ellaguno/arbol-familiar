@@ -119,7 +119,7 @@ GEDCOM;
 
         $parser = new GedcomParser();
         $result = $parser->import($this->sampleGedcom, [
-            'privacy_level' => 'family',
+            'privacy_level' => 'extended_family',
         ]);
 
         $this->assertTrue($result['success']);

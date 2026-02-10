@@ -241,8 +241,8 @@ class Person extends Model
 
     /**
      * Verifica si se deben proteger los datos de este menor.
-     * Los datos se protegen si es menor Y el usuario actual no es el creador.
-     * Política estricta: solo el creador puede ver todos los datos del menor.
+     * Los datos se protegen si es menor Y el usuario actual no es padre/creador.
+     * Los padres registrados en el arbol siempre pueden ver los datos de sus hijos menores.
      */
     public function shouldProtectMinorData(): bool
     {
@@ -256,7 +256,7 @@ class Person extends Model
             return true; // Sin usuario autenticado, siempre proteger
         }
 
-        // Solo el creador puede ver todos los datos del menor
+        // El creador puede ver todos los datos del menor
         if ($this->created_by === $user->id) {
             return false;
         }
@@ -266,8 +266,18 @@ class Person extends Model
             return false;
         }
 
-        // Para todos los demás (incluso familiares), proteger los datos
-        // Solo verán el nombre, no fechas, lugares ni otros datos sensibles
+        // Los padres registrados pueden ver datos de sus hijos menores
+        if ($user->person_id) {
+            $family = $this->familiesAsChild()->first();
+            if ($family) {
+                // Si el usuario es el padre o la madre en la familia del menor
+                if ($family->husband_id === $user->person_id || $family->wife_id === $user->person_id) {
+                    return false;
+                }
+            }
+        }
+
+        // Para todos los demás, proteger los datos
         return true;
     }
 
@@ -687,20 +697,19 @@ class Person extends Model
     /**
      * Verifica si un usuario tiene permiso para VER esta persona.
      * Implementa los 4 niveles de privacidad:
-     * - private: Solo el creador y el usuario vinculado
-     * - family: Familia directa (padres, hijos, cónyuges, hermanos)
+     * - direct_family: Solo familia directa (ascendentes, descendientes, conyuge, hermanos)
+     * - extended_family: Familia extendida (directa + politica, cunados, tios, sobrinos)
+     * - selected_users: Familia extendida + visible en lista de comunidad (permite solicitudes)
      * - community: Todos los usuarios registrados
-     * - public: Todos (incluido usuarios no autenticados, si aplica)
      *
      * @param User|null $user
      * @return bool
      */
     public function canBeViewedBy(?User $user): bool
     {
-        // Si no hay usuario autenticado
+        // Si no hay usuario autenticado, no se permite ver ningun perfil
         if (!$user) {
-            // Solo permitir si es nivel público
-            return $this->privacy_level === 'public';
+            return false;
         }
 
         // El creador siempre puede ver
@@ -715,17 +724,28 @@ class Person extends Model
 
         // Verificar según nivel de privacidad
         switch ($this->privacy_level) {
-            case 'private':
-                // Solo creador y usuario vinculado (ya verificados arriba)
-                return false;
-
-            case 'family':
-                // Verificar si el usuario es familia directa
+            case 'direct_family':
+                // Solo familia directa del usuario
                 return $this->isDirectFamilyOf($user);
 
+            case 'extended_family':
+                // Familia extendida del usuario
+                return $this->isExtendedFamilyOf($user);
+
+            case 'selected_users':
+                // Familia extendida + visible en lista (pero sin acceso completo al perfil para otros)
+                return $this->isExtendedFamilyOf($user);
+
             case 'community':
-            case 'public':
                 // Cualquier usuario registrado puede ver
+                return true;
+
+            // Valores legacy (por si quedan en BD antes de migrar)
+            case 'private':
+                return $this->isDirectFamilyOf($user);
+            case 'family':
+                return $this->isExtendedFamilyOf($user);
+            case 'public':
                 return true;
 
             default:
@@ -736,7 +756,7 @@ class Person extends Model
     /**
      * Verifica si un usuario es familia directa de esta persona.
      * Familia directa incluye: padres, hijos, cónyuges, hermanos.
-     * También incluye familiares extendidos si el usuario tiene una persona asociada.
+     * Verificacion bidireccional para evitar asimetrias.
      *
      * @param User $user
      * @return bool
@@ -764,11 +784,6 @@ class Person extends Model
         // Verificar también al revés: si YO estoy en la familia directa del usuario
         $userFamilyIds = $userPerson->directFamilyIds;
         if (in_array($this->id, $userFamilyIds)) {
-            return true;
-        }
-
-        // Verificar si compartimos el mismo creador (árbol familiar del mismo usuario)
-        if ($this->created_by === $userPerson->created_by) {
             return true;
         }
 
@@ -831,6 +846,7 @@ class Person extends Model
 
     /**
      * Verifica si un usuario es familia extendida de esta persona.
+     * Verificacion bidireccional para evitar asimetrias.
      *
      * @param User $user
      * @return bool
@@ -852,8 +868,9 @@ class Person extends Model
             return true;
         }
 
-        // Verificar si compartimos el mismo creador
-        if ($this->created_by === $userPerson->created_by) {
+        // Verificar al revés: si YO estoy en la familia extendida del usuario
+        $userExtendedIds = $userPerson->extendedFamilyIds;
+        if (in_array($this->id, $userExtendedIds)) {
             return true;
         }
 

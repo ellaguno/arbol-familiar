@@ -65,14 +65,17 @@
                         <div>
                             <label for="privacy_level" class="form-label">{{ __('Nivel de privacidad') }}</label>
                             <select name="privacy_level" id="privacy_level" class="form-input">
-                                <option value="public" {{ old('privacy_level', $user->privacy_level) === 'public' ? 'selected' : '' }}>
-                                    {{ __('Publico') }}
+                                <option value="direct_family" {{ old('privacy_level', $user->privacy_level) === 'direct_family' ? 'selected' : '' }}>
+                                    {{ __('Solo familia directa') }}
                                 </option>
-                                <option value="registered" {{ old('privacy_level', $user->privacy_level) === 'registered' ? 'selected' : '' }}>
-                                    {{ __('Solo registrados') }}
+                                <option value="extended_family" {{ old('privacy_level', $user->privacy_level) === 'extended_family' ? 'selected' : '' }}>
+                                    {{ __('Familia extendida') }}
                                 </option>
-                                <option value="private" {{ old('privacy_level', $user->privacy_level) === 'private' ? 'selected' : '' }}>
-                                    {{ __('Privado') }}
+                                <option value="selected_users" {{ old('privacy_level', $user->privacy_level) === 'selected_users' ? 'selected' : '' }}>
+                                    {{ __('Familia + usuarios seleccionados') }}
+                                </option>
+                                <option value="community" {{ old('privacy_level', $user->privacy_level) === 'community' ? 'selected' : '' }}>
+                                    {{ __('Toda la comunidad') }}
                                 </option>
                             </select>
                         </div>

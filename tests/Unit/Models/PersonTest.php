@@ -347,24 +347,20 @@ class PersonTest extends TestCase
         $creator = User::factory()->create();
         $other = User::factory()->create();
 
-        $private = Person::factory()->create(['privacy_level' => 'private', 'created_by' => $creator->id]);
+        $directFamily = Person::factory()->create(['privacy_level' => 'direct_family', 'created_by' => $creator->id]);
         $community = Person::factory()->create(['privacy_level' => 'community', 'created_by' => $creator->id]);
-        $public = Person::factory()->create(['privacy_level' => 'public', 'created_by' => $creator->id]);
 
         // Creator can always see
-        $this->assertTrue($private->canBeViewedBy($creator));
+        $this->assertTrue($directFamily->canBeViewedBy($creator));
         $this->assertTrue($community->canBeViewedBy($creator));
-        $this->assertTrue($public->canBeViewedBy($creator));
 
-        // Other user: private=no, community=yes, public=yes
-        $this->assertFalse($private->canBeViewedBy($other));
+        // Other user: direct_family=no (not family), community=yes
+        $this->assertFalse($directFamily->canBeViewedBy($other));
         $this->assertTrue($community->canBeViewedBy($other));
-        $this->assertTrue($public->canBeViewedBy($other));
 
-        // No user: only public
-        $this->assertFalse($private->canBeViewedBy(null));
+        // No user: nobody can see (no public level anymore)
+        $this->assertFalse($directFamily->canBeViewedBy(null));
         $this->assertFalse($community->canBeViewedBy(null));
-        $this->assertTrue($public->canBeViewedBy(null));
     }
 
     public function test_is_minor_calculated_attribute(): void

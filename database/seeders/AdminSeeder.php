@@ -31,7 +31,7 @@ class AdminSeeder extends Seeder
             'patronymic' => 'Sistema',
             'gender' => 'U',
             'is_living' => true,
-            'privacy_level' => 'private',
+            'privacy_level' => 'direct_family',
             'consent_status' => 'not_required',
         ]);
 
