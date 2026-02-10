@@ -12,7 +12,7 @@
     "MENSAJES": "MESSAGES",
     "PERFIL": "PROFILE",
     "BÚSQUEDA": "SEARCH",
-    "COMUNIDAD": "PERSONS",
+    "PERSONAS": "PERSONS",
     "INVESTIGACIÓN": "RESEARCH",
     "¿CÓMO USAR MI FAMILIA?": "HOW TO USE MI FAMILIA?",
     "ADMIN": "ADMIN",
@@ -116,6 +116,7 @@
     "Ver todos": "View all",
 
     "Editar": "Edit",
+    "Editar mi perfil": "Edit my profile",
     "Relaciones": "Relationships",
     "Ver en arbol": "View in tree",
 
@@ -528,7 +529,6 @@
     "Trastatarabuelo(a)": "Great-great-great-grandparent",
     "Debes aceptar los terminos y condiciones para continuar": "You must accept the terms and conditions to continue",
 
-    "Comunidad": "People",
     "Investigación": "Research",
     "Árbol": "Tree",
     "Salir": "Logout",

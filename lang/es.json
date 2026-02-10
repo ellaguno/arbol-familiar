@@ -12,7 +12,7 @@
     "MENSAJES": "MENSAJES",
     "PERFIL": "PERFIL",
     "BÚSQUEDA": "BÚSQUEDA",
-    "COMUNIDAD": "PERSONAS",
+    "PERSONAS": "PERSONAS",
     "INVESTIGACIÓN": "INVESTIGACIÓN",
     "¿CÓMO USAR MI FAMILIA?": "¿CÓMO USAR MI FAMILIA?",
     "ADMIN": "ADMIN",
@@ -116,6 +116,7 @@
     "Ver todos": "Ver todos",
 
     "Editar": "Editar",
+    "Editar mi perfil": "Editar mi perfil",
     "Relaciones": "Relaciones",
     "Ver en arbol": "Ver en árbol",
 
@@ -409,7 +410,6 @@
 
     "Anulado": "Anulado",
 
-    "Comunidad": "Personas",
     "Investigación": "Investigación",
     "Árbol": "Árbol",
     "Salir": "Salir",
