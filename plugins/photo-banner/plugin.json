@@ -1,0 +1,29 @@
+{
+    "name": "Photo Banner",
+    "name_es": "Cintillo de Fotos",
+    "slug": "photo-banner",
+    "version": "1.0.0",
+    "type": "general",
+    "description": "Displays an animated photo ribbon on the dashboard with images linked to family members",
+    "description_es": "Muestra un cintillo animado de fotos en el dashboard con imagenes vinculadas a familiares",
+    "author": "Mi Familia",
+    "provider": "PhotoBannerPlugin",
+    "requires": {
+        "php": ">=8.1",
+        "mi-familia": ">=2.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Plugin\\PhotoBanner\\": "src/"
+        }
+    },
+    "hooks": [
+        "dashboard.banner"
+    ],
+    "settings": {
+        "banner_height": 120,
+        "scroll_speed": 30,
+        "max_images": 50,
+        "image_gap": 4
+    }
+}

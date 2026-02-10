@@ -1345,6 +1345,36 @@
                     <a href="${baseTreeUrl}/${person.id}" class="block w-full py-2.5 px-4 border-2 border-[#2563eb] text-[#2563eb] text-center font-medium rounded-lg hover:bg-[#2563eb] hover:text-white transition-colors">
                         {{ __('Ver su arbol') }}
                     </a>
+
+                    ${person.hasUser
+                        ? `<span class="block w-full py-2.5 px-4 border-2 border-green-500 text-green-600 text-center text-sm font-medium rounded-lg">
+                            <span class="flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                {{ __('Ya es miembro') }}
+                            </span>
+                           </span>`
+                        : person.hasEmail && person.consentStatus !== 'approved'
+                            ? `<button onclick="sendInvitation(${person.id})" id="btn-invite-${person.id}" class="block w-full py-2.5 px-4 border-2 border-green-600 text-green-600 text-center font-medium rounded-lg hover:bg-green-600 hover:text-white transition-colors">
+                                <span class="flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                    {{ __('Invitar a unirse') }}
+                                </span>
+                               </button>`
+                            : person.hasEmail && person.consentStatus === 'approved'
+                                ? `<span class="block w-full py-2.5 px-4 border-2 border-yellow-500 text-yellow-600 text-center text-sm font-medium rounded-lg">{{ __('Invitacion aceptada') }}</span>`
+                                : `<a href="${person.url}/edit" class="block w-full py-2.5 px-4 border-2 border-gray-400 text-gray-500 text-center text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <span class="flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                        </svg>
+                                        {{ __('Agregar email para invitar') }}
+                                    </span>
+                                   </a>`
+                    }
                 </div>
 
                 <div class="mt-6 pt-4 border-t border-theme">
@@ -1429,6 +1459,52 @@
         svg.on('click', () => {
             closePanel();
         });
+
+        // Send invitation function
+        function sendInvitation(personId) {
+            const btn = document.getElementById(`btn-invite-${personId}`);
+            if (!btn) return;
+
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>{{ __("Enviando...") }}</span>';
+
+            fetch(`{{ url('/persons') }}/${personId}/send-invitation`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    // Success redirect - show success
+                    btn.className = btn.className.replace('border-green-600 text-green-600 hover:bg-green-600', 'border-green-600 text-white bg-green-600');
+                    btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ __("Invitacion enviada") }}</span>';
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data === null) return; // Already handled redirect
+
+                if (data && data.success === false) {
+                    alert(data.message || '{{ __("Error al enviar la invitacion") }}');
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                } else {
+                    btn.className = btn.className.replace('border-green-600 text-green-600 hover:bg-green-600', 'border-green-600 text-white bg-green-600');
+                    btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{{ __("Invitacion enviada") }}</span>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('{{ __("Error al enviar la invitacion") }}');
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            });
+        }
 
         // Upload photo function
         function uploadPhoto(personId, input) {

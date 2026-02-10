@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="title">{{ __('Dashboard') }} - {{ config('app.name') }}</x-slot>
 
+    {{-- Cintillo de fotos (plugin) --}}
+    {!! $hooks->render('dashboard.banner', ['user' => auth()->user()]) !!}
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Saludo -->
         <div class="mb-8">

@@ -368,10 +368,14 @@ class InvitationController extends Controller
     public function resend(Person $person)
     {
         $user = Auth::user();
+        $isAjax = request()->ajax();
 
         // Validar permisos
         if ($person->created_by !== $user->id && !$person->canBeEditedBy($user->id)) {
-            return back()->with('error', __('No tienes permiso para reenviar esta invitacion.'));
+            $msg = __('No tienes permiso para reenviar esta invitacion.');
+            return $isAjax
+                ? response()->json(['success' => false, 'message' => $msg])
+                : back()->with('error', $msg);
         }
 
         // Buscar invitación existente
@@ -383,10 +387,11 @@ class InvitationController extends Controller
         if (!$invitation) {
             // Crear nueva invitación
             $result = $this->sendConsentInvitation($person);
-            if ($result['success']) {
-                return back()->with('success', $result['message']);
-            }
-            return back()->with('error', $result['message']);
+            return $isAjax
+                ? response()->json($result)
+                : ($result['success']
+                    ? back()->with('success', $result['message'])
+                    : back()->with('error', $result['message']));
         }
 
         // Si está expirada, crear una nueva
@@ -403,9 +408,15 @@ class InvitationController extends Controller
             try {
                 Mail::to($person->email)->send(new DataConsentInvitation($newInvitation));
                 $newInvitation->markAsSent();
-                return back()->with('success', __('Nueva invitacion enviada a :email.', ['email' => $person->email]));
+                $msg = __('Nueva invitacion enviada a :email.', ['email' => $person->email]);
+                return $isAjax
+                    ? response()->json(['success' => true, 'message' => $msg])
+                    : back()->with('success', $msg);
             } catch (\Exception $e) {
-                return back()->with('warning', __('Invitacion creada pero hubo un problema al enviar el correo.'));
+                $msg = __('Invitacion creada pero hubo un problema al enviar el correo.');
+                return $isAjax
+                    ? response()->json(['success' => false, 'message' => $msg])
+                    : back()->with('warning', $msg);
             }
         }
 
@@ -414,12 +425,21 @@ class InvitationController extends Controller
             try {
                 Mail::to($person->email)->send(new DataConsentInvitation($invitation));
                 $invitation->markAsSent();
-                return back()->with('success', __('Invitacion reenviada a :email.', ['email' => $person->email]));
+                $msg = __('Invitacion reenviada a :email.', ['email' => $person->email]);
+                return $isAjax
+                    ? response()->json(['success' => true, 'message' => $msg])
+                    : back()->with('success', $msg);
             } catch (\Exception $e) {
-                return back()->with('error', __('Error al enviar el correo: :error', ['error' => $e->getMessage()]));
+                $msg = __('Error al enviar el correo: :error', ['error' => $e->getMessage()]);
+                return $isAjax
+                    ? response()->json(['success' => false, 'message' => $msg])
+                    : back()->with('error', $msg);
             }
         }
 
-        return back()->with('info', __('La invitacion ya fue respondida.'));
+        $msg = __('La invitacion ya fue respondida.');
+        return $isAjax
+            ? response()->json(['success' => false, 'message' => $msg])
+            : back()->with('info', $msg);
     }
 }

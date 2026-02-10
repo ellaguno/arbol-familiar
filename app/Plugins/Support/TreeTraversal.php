@@ -56,6 +56,9 @@ class TreeTraversal
             'hasSpouse' => $hasSpouse,
             'siblingsCount' => $siblingsCount,
             'siblings' => $siblingsInfo,
+            'hasEmail' => !empty($person->email),
+            'hasUser' => !empty($person->user_id),
+            'consentStatus' => $person->consent_status,
         ];
     }
 
