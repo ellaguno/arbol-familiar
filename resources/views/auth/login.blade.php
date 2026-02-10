@@ -88,6 +88,8 @@
                 </x-button>
             </form>
 
+            {!! $hooks->render('auth.login.social', []) !!}
+
             <div class="mt-6 pt-6 border-t border-theme text-center">
                 <p class="text-theme-secondary">{{ $sc ? $sc->content('login', 'register_text', __('No tienes cuenta?')) : __('No tienes cuenta?') }}</p>
                 <a href="{{ route('register') }}" class="btn-outline w-full mt-3">

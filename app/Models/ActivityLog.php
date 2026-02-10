@@ -50,6 +50,9 @@ class ActivityLog extends Model
         'update_profile' => 'Actualizar perfil',
         'grant_access' => 'Otorgar acceso',
         'revoke_access' => 'Revocar acceso',
+        'oauth_login' => 'Login con OAuth',
+        'oauth_register' => 'Registro con OAuth',
+        'oauth_failed' => 'Login OAuth fallido',
     ];
 
     /**
