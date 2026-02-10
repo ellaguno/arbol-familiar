@@ -145,6 +145,10 @@ class TreeTraversal
             $family = $person->familiesAsChild()->with(['husband', 'wife'])->first();
 
             if ($family) {
+                // Incluir fecha de matrimonio de los padres
+                $data['marriageDate'] = $family->marriage_date?->format('Y');
+                $data['marriagePlace'] = $family->marriage_place;
+
                 $children = [];
 
                 if ($family->husband) {

@@ -627,5 +627,22 @@
     "Agregar email para invitar": "Add email to invite",
     "Enviando...": "Sending...",
     "Error al enviar la invitacion": "Error sending invitation",
-    "Invitacion creada pero hubo un problema al enviar el correo.": "Invitation created but there was a problem sending the email."
+    "Invitacion creada pero hubo un problema al enviar el correo.": "Invitation created but there was a problem sending the email.",
+
+    "Usa Ctrl+Scroll para acercar la vista": "Use Ctrl+Scroll to zoom in",
+    "Angulo del abanico": "Fan angle",
+    "Ocultar segmentos vacios": "Hide empty segments",
+    "Mostrar degradados de color": "Show color gradients",
+    "Mostrar fecha de bodas de padres": "Show parents' marriage dates",
+    "Niveles internos": "Inner levels",
+    "Especifica el numero de niveles en los que se escribe el texto a lo largo de un arco": "Specifies the number of levels where text is written along an arc",
+    "Tamano de tipografia": "Font size",
+    "Opciones": "Options",
+    "Ocultar opciones": "Hide options",
+    "Mostrar opciones": "Show options",
+    "Ver perfil": "View profile",
+    "Volver a centrar": "Recenter",
+    "Exportar como PNG": "Export as PNG",
+    "Exportar como SVG": "Export as SVG",
+    "casados": "married"
 }

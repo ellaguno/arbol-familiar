@@ -626,5 +626,22 @@
     "Agregar email para invitar": "Agregar email para invitar",
     "Enviando...": "Enviando...",
     "Error al enviar la invitacion": "Error al enviar la invitación",
-    "Invitacion creada pero hubo un problema al enviar el correo.": "Invitación creada pero hubo un problema al enviar el correo."
+    "Invitacion creada pero hubo un problema al enviar el correo.": "Invitación creada pero hubo un problema al enviar el correo.",
+
+    "Usa Ctrl+Scroll para acercar la vista": "Usa Ctrl+Scroll para acercar la vista",
+    "Angulo del abanico": "Ángulo del abanico",
+    "Ocultar segmentos vacios": "Ocultar segmentos vacíos",
+    "Mostrar degradados de color": "Mostrar degradados de color",
+    "Mostrar fecha de bodas de padres": "Mostrar fecha de bodas de padres",
+    "Niveles internos": "Niveles internos",
+    "Especifica el numero de niveles en los que se escribe el texto a lo largo de un arco": "Especifica el número de niveles en los que se escribe el texto a lo largo de un arco",
+    "Tamano de tipografia": "Tamaño de tipografía",
+    "Opciones": "Opciones",
+    "Ocultar opciones": "Ocultar opciones",
+    "Mostrar opciones": "Mostrar opciones",
+    "Ver perfil": "Ver perfil",
+    "Volver a centrar": "Volver a centrar",
+    "Exportar como PNG": "Exportar como PNG",
+    "Exportar como SVG": "Exportar como SVG",
+    "casados": "casados"
 }
