@@ -155,6 +155,115 @@
                                             <p class="text-sm text-theme-muted mt-1" x-text="result.snippet"></p>
                                         </div>
                                     </template>
+                                    <template x-if="result.type === 'person_record'">
+                                        <div>
+                                            <div class="flex items-start justify-between gap-2">
+                                                <a :href="result.url" target="_blank" rel="noopener"
+                                                   class="font-medium text-mf-primary hover:underline" x-text="result.title"></a>
+                                                <template x-if="result.score">
+                                                    <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 whitespace-nowrap"
+                                                          x-text="'Score: ' + Math.round(result.score)"></span>
+                                                </template>
+                                            </div>
+                                            <div class="text-sm text-theme-muted mt-1 space-y-0.5">
+                                                <template x-if="result.birth_date || result.death_date">
+                                                    <p>
+                                                        <span x-text="(result.birth_date || '?') + ' - ' + (result.death_date || '')"></span>
+                                                    </p>
+                                                </template>
+                                                <template x-if="result.birth_place">
+                                                    <p><span class="font-medium">{{ __('Nacimiento') }}:</span> <span x-text="result.birth_place"></span></p>
+                                                </template>
+                                                <template x-if="result.death_place">
+                                                    <p><span class="font-medium">{{ __('Defuncion') }}:</span> <span x-text="result.death_place"></span></p>
+                                                </template>
+                                                <template x-if="result.father || result.mother || result.spouse">
+                                                    <div class="flex flex-wrap gap-x-4 gap-y-0.5">
+                                                        <template x-if="result.father">
+                                                            <span><span class="font-medium">{{ __('Padre') }}:</span> <span x-text="result.father"></span></span>
+                                                        </template>
+                                                        <template x-if="result.mother">
+                                                            <span><span class="font-medium">{{ __('Madre') }}:</span> <span x-text="result.mother"></span></span>
+                                                        </template>
+                                                        <template x-if="result.spouse">
+                                                            <span><span class="font-medium">{{ __('Conyuge') }}:</span> <span x-text="result.spouse"></span></span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template x-if="result.type === 'wikidata_person'">
+                                        <div class="flex gap-3">
+                                            <template x-if="result.image">
+                                                <img :src="result.image" :alt="result.title"
+                                                     class="w-12 h-12 rounded-full object-cover flex-shrink-0 mt-0.5"
+                                                     onerror="this.style.display='none'">
+                                            </template>
+                                            <div class="flex-1">
+                                                <a :href="result.url" target="_blank" rel="noopener"
+                                                   class="font-medium text-mf-primary hover:underline" x-text="result.title"></a>
+                                                <div class="text-sm text-theme-muted mt-1 space-y-0.5">
+                                                    <template x-if="result.birth_date || result.death_date">
+                                                        <p>
+                                                            <span x-text="(result.birth_date || '?') + ' - ' + (result.death_date || '')"></span>
+                                                        </p>
+                                                    </template>
+                                                    <template x-if="result.birth_place">
+                                                        <p><span class="font-medium">{{ __('Nacimiento') }}:</span> <span x-text="result.birth_place"></span></p>
+                                                    </template>
+                                                    <template x-if="result.death_place">
+                                                        <p><span class="font-medium">{{ __('Defuncion') }}:</span> <span x-text="result.death_place"></span></p>
+                                                    </template>
+                                                    <template x-if="result.occupation">
+                                                        <p><span class="font-medium">{{ __('Ocupacion') }}:</span> <span x-text="result.occupation"></span></p>
+                                                    </template>
+                                                    <template x-if="result.father || result.mother || result.spouse">
+                                                        <div class="flex flex-wrap gap-x-4 gap-y-0.5">
+                                                            <template x-if="result.father">
+                                                                <span><span class="font-medium">{{ __('Padre') }}:</span> <span x-text="result.father"></span></span>
+                                                            </template>
+                                                            <template x-if="result.mother">
+                                                                <span><span class="font-medium">{{ __('Madre') }}:</span> <span x-text="result.mother"></span></span>
+                                                            </template>
+                                                            <template x-if="result.spouse">
+                                                                <span><span class="font-medium">{{ __('Conyuge') }}:</span> <span x-text="result.spouse"></span></span>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template x-if="result.type === 'wikitree_profile'">
+                                        <div class="flex gap-3">
+                                            <template x-if="result.photo">
+                                                <img :src="result.photo" :alt="result.title"
+                                                     class="w-12 h-12 rounded-full object-cover flex-shrink-0 mt-0.5"
+                                                     onerror="this.style.display='none'">
+                                            </template>
+                                            <div class="flex-1">
+                                                <a :href="result.url" target="_blank" rel="noopener"
+                                                   class="font-medium text-mf-primary hover:underline" x-text="result.title"></a>
+                                                <div class="text-sm text-theme-muted mt-1 space-y-0.5">
+                                                    <template x-if="result.birth_date || result.death_date">
+                                                        <p>
+                                                            <span x-text="(result.birth_date || '?') + ' - ' + (result.death_date || '')"></span>
+                                                        </p>
+                                                    </template>
+                                                    <template x-if="result.birth_place">
+                                                        <p><span class="font-medium">{{ __('Nacimiento') }}:</span> <span x-text="result.birth_place"></span></p>
+                                                    </template>
+                                                    <template x-if="result.death_place">
+                                                        <p><span class="font-medium">{{ __('Defuncion') }}:</span> <span x-text="result.death_place"></span></p>
+                                                    </template>
+                                                    <template x-if="result.wikitree_id">
+                                                        <p class="text-xs"><span class="font-medium">WikiTree ID:</span> <span x-text="result.wikitree_id"></span></p>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
                                     <template x-if="result.type === 'error'">
                                         <div class="text-red-600 dark:text-red-400">
                                             <span class="font-medium" x-text="result.title"></span>
@@ -382,8 +491,9 @@
     @endpush
 
     @push('scripts')
-    <!-- Marked.js for Markdown rendering -->
+    <!-- Marked.js for Markdown rendering + DOMPurify for XSS protection -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
     <script>
         // Configure marked for safe rendering
         marked.setOptions({
@@ -436,7 +546,7 @@
                 get loadingSubmessage() {
                     const messages = {
                         'pending': '{{ __("Iniciando conexion con las fuentes de datos") }}',
-                        'searching': '{{ __("Consultando FamilySearch, Wikipedia y otras fuentes...") }}',
+                        'searching': '{{ __("Consultando FamilySearch, Wikipedia, Wikidata y WikiTree...") }}',
                         'analyzing': '{{ __("Esto puede tomar unos segundos dependiendo del modelo") }}',
                     };
                     let msg = messages[this.status] || '';
@@ -501,9 +611,10 @@
                 formatAnalysis(content) {
                     if (!content) return '';
 
-                    // Use marked.js to parse markdown
+                    // Use marked.js to parse markdown, sanitize with DOMPurify
                     try {
-                        return marked.parse(content);
+                        const html = marked.parse(content);
+                        return typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
                     } catch (e) {
                         console.error('Error parsing markdown:', e);
                         // Fallback: basic HTML escape and line breaks

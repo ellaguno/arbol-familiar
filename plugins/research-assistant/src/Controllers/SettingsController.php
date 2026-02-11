@@ -43,8 +43,12 @@ class SettingsController extends Controller
             'deepseek_api_key' => 'nullable|string|max:255',
             'openai_api_key' => 'nullable|string|max:255',
             'anthropic_api_key' => 'nullable|string|max:255',
-            'familysearch_enabled' => 'boolean',
-            'wikipedia_enabled' => 'boolean',
+            'familysearch_enabled' => 'nullable|boolean',
+            'familysearch_app_key' => 'nullable|string|max:255',
+            'wikipedia_enabled' => 'nullable|boolean',
+            'wikidata_enabled' => 'nullable|boolean',
+            'wikitree_enabled' => 'nullable|boolean',
+            'wikitree_app_id' => 'nullable|string|max:255',
             'max_results_per_source' => 'integer|min:1|max:50',
         ];
 
@@ -73,6 +77,8 @@ class SettingsController extends Controller
         $settings['ai_model'] = $aiModel;
         $settings['familysearch_enabled'] = $request->boolean('familysearch_enabled');
         $settings['wikipedia_enabled'] = $request->boolean('wikipedia_enabled');
+        $settings['wikidata_enabled'] = $request->boolean('wikidata_enabled');
+        $settings['wikitree_enabled'] = $request->boolean('wikitree_enabled');
         $settings['max_results_per_source'] = $request->integer('max_results_per_source', 10);
 
         // Update API keys (encrypt if provided, keep existing if empty)
@@ -83,7 +89,14 @@ class SettingsController extends Controller
             if (!empty($value)) {
                 $settings[$key] = encrypt($value);
             }
-            // If empty and not explicitly clearing, keep existing value
+        }
+
+        // Update source-specific keys
+        foreach (['familysearch_app_key', 'wikitree_app_id'] as $key) {
+            $value = $request->input($key);
+            if (!empty($value)) {
+                $settings[$key] = encrypt($value);
+            }
         }
 
         $plugin->settings = $settings;

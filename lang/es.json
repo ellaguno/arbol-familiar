@@ -643,5 +643,21 @@
     "Volver a centrar": "Volver a centrar",
     "Exportar como PNG": "Exportar como PNG",
     "Exportar como SVG": "Exportar como SVG",
-    "casados": "casados"
+    "casados": "casados",
+
+    "Busca registros historicos via API de FamilySearch": "Busca registros históricos vía API de FamilySearch",
+    "Busca personas historicas con datos estructurados en Wikidata": "Busca personas históricas con datos estructurados en Wikidata",
+    "Busca perfiles genealogicos en la comunidad WikiTree": "Busca perfiles genealógicos en la comunidad WikiTree",
+    "Obtener en developer.familysearch.org. Sin clave, solo genera URLs de busqueda.": "Obtener en developer.familysearch.org. Sin clave, solo genera URLs de búsqueda.",
+    "Opcional. Mejora los limites de consultas a WikiTree.": "Opcional. Mejora los límites de consultas a WikiTree.",
+    "Opcional": "Opcional",
+    "Error al buscar en Wikidata": "Error al buscar en Wikidata",
+    "Error al buscar en WikiTree": "Error al buscar en WikiTree",
+    "Nacimiento": "Nacimiento",
+    "Defuncion": "Defunción",
+    "Padre": "Padre",
+    "Madre": "Madre",
+    "Conyuge": "Cónyuge",
+    "Ocupacion": "Ocupación",
+    "Consultando FamilySearch, Wikipedia, Wikidata y WikiTree...": "Consultando FamilySearch, Wikipedia, Wikidata y WikiTree..."
 }

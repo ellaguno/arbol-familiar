@@ -122,9 +122,23 @@
                                {{ ($settings['familysearch_enabled'] ?? true) ? 'checked' : '' }}>
                         <div>
                             <span class="text-theme font-medium">FamilySearch</span>
-                            <p class="text-sm text-theme-muted">{{ __('Genera URLs de busqueda para registros historicos') }}</p>
+                            <p class="text-sm text-theme-muted">{{ __('Busca registros historicos via API de FamilySearch') }}</p>
                         </div>
                     </label>
+                    <div class="ml-8">
+                        <label class="block text-sm font-medium text-theme mb-1">
+                            FamilySearch App Key
+                            <span class="text-theme-muted font-normal">({{ __('Opcional') }})</span>
+                            @if(!empty($settings['familysearch_app_key']))
+                                <span class="text-green-600 dark:text-green-400 text-xs ml-2">{{ __('Configurado') }}</span>
+                            @endif
+                        </label>
+                        <input type="password" name="familysearch_app_key"
+                               class="form-input w-full max-w-md"
+                               placeholder="{{ !empty($settings['familysearch_app_key']) ? '••••••••••••••••' : __('No configurado') }}"
+                               autocomplete="off">
+                        <p class="text-xs text-theme-muted mt-1">{{ __('Obtener en developer.familysearch.org. Sin clave, solo genera URLs de busqueda.') }}</p>
+                    </div>
 
                     <label class="flex items-center gap-3">
                         <input type="checkbox" name="wikipedia_enabled" value="1" class="form-checkbox"
@@ -134,6 +148,38 @@
                             <p class="text-sm text-theme-muted">{{ __('Busca articulos relacionados en Wikipedia') }}</p>
                         </div>
                     </label>
+
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" name="wikidata_enabled" value="1" class="form-checkbox"
+                               {{ ($settings['wikidata_enabled'] ?? true) ? 'checked' : '' }}>
+                        <div>
+                            <span class="text-theme font-medium">Wikidata</span>
+                            <p class="text-sm text-theme-muted">{{ __('Busca personas historicas con datos estructurados en Wikidata') }}</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" name="wikitree_enabled" value="1" class="form-checkbox"
+                               {{ ($settings['wikitree_enabled'] ?? true) ? 'checked' : '' }}>
+                        <div>
+                            <span class="text-theme font-medium">WikiTree</span>
+                            <p class="text-sm text-theme-muted">{{ __('Busca perfiles genealogicos en la comunidad WikiTree') }}</p>
+                        </div>
+                    </label>
+                    <div class="ml-8">
+                        <label class="block text-sm font-medium text-theme mb-1">
+                            WikiTree App ID
+                            <span class="text-theme-muted font-normal">({{ __('Opcional') }})</span>
+                            @if(!empty($settings['wikitree_app_id']))
+                                <span class="text-green-600 dark:text-green-400 text-xs ml-2">{{ __('Configurado') }}</span>
+                            @endif
+                        </label>
+                        <input type="text" name="wikitree_app_id"
+                               class="form-input w-full max-w-md"
+                               placeholder="{{ !empty($settings['wikitree_app_id']) ? '••••••••' : __('No configurado') }}"
+                               value="">
+                        <p class="text-xs text-theme-muted mt-1">{{ __('Opcional. Mejora los limites de consultas a WikiTree.') }}</p>
+                    </div>
 
                     <div class="pt-4 border-t border-theme">
                         <label class="block text-sm font-medium text-theme mb-2">{{ __('Resultados maximos por fuente') }}</label>

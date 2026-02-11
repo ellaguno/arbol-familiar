@@ -10,7 +10,9 @@ use Illuminate\Queue\SerializesModels;
 use Plugin\ResearchAssistant\Models\ResearchSession;
 use Plugin\ResearchAssistant\Services\AIService;
 use Plugin\ResearchAssistant\Sources\FamilySearchSource;
+use Plugin\ResearchAssistant\Sources\WikidataSource;
 use Plugin\ResearchAssistant\Sources\WikipediaSource;
+use Plugin\ResearchAssistant\Sources\WikiTreeSource;
 
 class ProcessResearchJob implements ShouldQueue
 {
@@ -57,15 +59,7 @@ class ProcessResearchJob implements ShouldQueue
             ]);
 
         } catch (\Exception $e) {
-            $this->session->update([
-                'status' => ResearchSession::STATUS_FAILED,
-                'ai_analysis' => [
-                    'error' => true,
-                    'message' => $e->getMessage(),
-                ],
-            ]);
-
-            // Re-throw to mark job as failed
+            // Re-throw to allow queue retry. STATUS_FAILED is set in failed() after all retries.
             throw $e;
         }
     }
@@ -156,16 +150,45 @@ class ProcessResearchJob implements ShouldQueue
      */
     protected function getSourceInstances(): array
     {
+        $maxResults = $this->pluginSettings['max_results_per_source'] ?? 10;
+
         $familySearch = new FamilySearchSource();
         $familySearch->setEnabled($this->pluginSettings['familysearch_enabled'] ?? true);
+        $familySearch->setMaxResults($maxResults);
+        $appKey = $this->pluginSettings['familysearch_app_key'] ?? '';
+        if (!empty($appKey)) {
+            try {
+                $familySearch->setAppKey(decrypt($appKey));
+            } catch (\Exception $e) {
+                $familySearch->setAppKey($appKey);
+            }
+        }
 
         $wikipedia = new WikipediaSource();
         $wikipedia->setEnabled($this->pluginSettings['wikipedia_enabled'] ?? true);
-        $wikipedia->setMaxResults($this->pluginSettings['max_results_per_source'] ?? 10);
+        $wikipedia->setMaxResults($maxResults);
+
+        $wikidata = new WikidataSource();
+        $wikidata->setEnabled($this->pluginSettings['wikidata_enabled'] ?? true);
+        $wikidata->setMaxResults($maxResults);
+
+        $wikiTree = new WikiTreeSource();
+        $wikiTree->setEnabled($this->pluginSettings['wikitree_enabled'] ?? true);
+        $wikiTree->setMaxResults($maxResults);
+        $wikiTreeAppId = $this->pluginSettings['wikitree_app_id'] ?? '';
+        if (!empty($wikiTreeAppId)) {
+            try {
+                $wikiTree->setAppId(decrypt($wikiTreeAppId));
+            } catch (\Exception $e) {
+                $wikiTree->setAppId($wikiTreeAppId);
+            }
+        }
 
         return [
             'familysearch' => $familySearch,
             'wikipedia' => $wikipedia,
+            'wikidata' => $wikidata,
+            'wikitree' => $wikiTree,
         ];
     }
 

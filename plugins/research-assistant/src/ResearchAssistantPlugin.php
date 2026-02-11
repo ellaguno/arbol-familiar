@@ -19,7 +19,11 @@ class ResearchAssistantPlugin extends PluginServiceProvider
             'openai_api_key' => '',
             'anthropic_api_key' => '',
             'familysearch_enabled' => true,
+            'familysearch_app_key' => '',
             'wikipedia_enabled' => true,
+            'wikidata_enabled' => true,
+            'wikitree_enabled' => true,
+            'wikitree_app_id' => '',
             'max_results_per_source' => 10,
         ];
     }

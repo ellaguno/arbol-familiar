@@ -10,7 +10,9 @@ use Plugin\ResearchAssistant\Jobs\ProcessResearchJob;
 use Plugin\ResearchAssistant\Models\ResearchSession;
 use Plugin\ResearchAssistant\Services\AIService;
 use Plugin\ResearchAssistant\Sources\FamilySearchSource;
+use Plugin\ResearchAssistant\Sources\WikidataSource;
 use Plugin\ResearchAssistant\Sources\WikipediaSource;
+use Plugin\ResearchAssistant\Sources\WikiTreeSource;
 
 class ResearchController extends Controller
 {
@@ -83,7 +85,7 @@ class ResearchController extends Controller
             'person_id' => 'nullable|exists:persons,id',
             'query' => 'required|string|max:1000',
             'sources' => 'required|array|min:1',
-            'sources.*' => 'string|in:familysearch,wikipedia',
+            'sources.*' => 'string|in:familysearch,wikipedia,wikidata,wikitree',
         ]);
 
         // Use admin-configured provider and model
@@ -192,9 +194,17 @@ class ResearchController extends Controller
         $wikipedia = new WikipediaSource();
         $wikipedia->setEnabled($this->pluginSettings['wikipedia_enabled'] ?? true);
 
+        $wikidata = new WikidataSource();
+        $wikidata->setEnabled($this->pluginSettings['wikidata_enabled'] ?? true);
+
+        $wikiTree = new WikiTreeSource();
+        $wikiTree->setEnabled($this->pluginSettings['wikitree_enabled'] ?? true);
+
         return [
             $familySearch,
             $wikipedia,
+            $wikidata,
+            $wikiTree,
         ];
     }
 }

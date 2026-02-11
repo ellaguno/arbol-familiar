@@ -183,6 +183,12 @@ class AIService
                 } elseif ($type === 'article' || $type === 'person_search') {
                     $snippet = $result['snippet'] ?? '';
                     $prompt .= "- **{$title}**: {$snippet}\n";
+                } elseif ($type === 'person_record') {
+                    $prompt .= $this->formatPersonRecord($result);
+                } elseif ($type === 'wikidata_person') {
+                    $prompt .= $this->formatWikidataPerson($result);
+                } elseif ($type === 'wikitree_profile') {
+                    $prompt .= $this->formatWikiTreeProfile($result);
                 } elseif ($type === 'error') {
                     $prompt .= "- Error: {$result['snippet']}\n";
                 }
@@ -199,6 +205,119 @@ class AIService
         $prompt .= "4. Advertencias sobre datos que necesitan verificacion\n";
 
         return $prompt;
+    }
+
+    /**
+     * Format a FamilySearch person record for the AI prompt.
+     */
+    protected function formatPersonRecord(array $result): string
+    {
+        $line = "- **{$result['title']}**";
+        $details = [];
+
+        if (!empty($result['birth_date']) || !empty($result['death_date'])) {
+            $details[] = ($result['birth_date'] ?? '?') . '-' . ($result['death_date'] ?? '');
+        }
+        if (!empty($result['birth_place'])) {
+            $details[] = "nac. {$result['birth_place']}";
+        }
+        if (!empty($result['death_place'])) {
+            $details[] = "def. {$result['death_place']}";
+        }
+        if (!empty($result['father'])) {
+            $details[] = "Padre: {$result['father']}";
+        }
+        if (!empty($result['mother'])) {
+            $details[] = "Madre: {$result['mother']}";
+        }
+        if (!empty($result['spouse'])) {
+            $details[] = "Conyuge: {$result['spouse']}";
+        }
+        if (!empty($result['score'])) {
+            $details[] = "score: " . round($result['score']);
+        }
+
+        if (!empty($details)) {
+            $line .= ' (' . implode(', ', $details) . ')';
+        }
+        $line .= " [FamilySearch]\n";
+
+        return $line;
+    }
+
+    /**
+     * Format a Wikidata person for the AI prompt.
+     */
+    protected function formatWikidataPerson(array $result): string
+    {
+        $line = "- **{$result['title']}**";
+        $details = [];
+
+        if (!empty($result['birth_date']) || !empty($result['death_date'])) {
+            $details[] = ($result['birth_date'] ?? '?') . '-' . ($result['death_date'] ?? '');
+        }
+        if (!empty($result['birth_place'])) {
+            $details[] = "nac. {$result['birth_place']}";
+        }
+        if (!empty($result['death_place'])) {
+            $details[] = "def. {$result['death_place']}";
+        }
+        if (!empty($result['occupation'])) {
+            $details[] = "ocupacion: {$result['occupation']}";
+        }
+        if (!empty($result['father'])) {
+            $details[] = "Padre: {$result['father']}";
+        }
+        if (!empty($result['mother'])) {
+            $details[] = "Madre: {$result['mother']}";
+        }
+        if (!empty($result['spouse'])) {
+            $details[] = "Conyuge: {$result['spouse']}";
+        }
+
+        if (!empty($details)) {
+            $line .= ' (' . implode(', ', $details) . ')';
+        }
+
+        $snippet = $result['snippet'] ?? '';
+        if (!empty($snippet) && !empty($details)) {
+            $line .= " - {$snippet}";
+        }
+        $line .= " [Wikidata]\n";
+
+        return $line;
+    }
+
+    /**
+     * Format a WikiTree profile for the AI prompt.
+     */
+    protected function formatWikiTreeProfile(array $result): string
+    {
+        $line = "- **{$result['title']}**";
+        $details = [];
+
+        if (!empty($result['birth_date']) || !empty($result['death_date'])) {
+            $details[] = ($result['birth_date'] ?? '?') . '-' . ($result['death_date'] ?? '');
+        }
+        if (!empty($result['birth_place'])) {
+            $details[] = "nac. {$result['birth_place']}";
+        }
+        if (!empty($result['death_place'])) {
+            $details[] = "def. {$result['death_place']}";
+        }
+
+        if (!empty($details)) {
+            $line .= ' (' . implode(', ', $details) . ')';
+        }
+
+        if (!empty($result['wikitree_id'])) {
+            $line .= " [WikiTree: {$result['wikitree_id']}]";
+        } else {
+            $line .= " [WikiTree]";
+        }
+        $line .= "\n";
+
+        return $line;
     }
 
     /**
