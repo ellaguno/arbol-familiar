@@ -26,4 +26,9 @@ Route::middleware(['web', 'auth', 'verified'])->group(function () {
     Route::post('/call/signal', [WebRTCController::class, 'signal'])->name('call.signal');
     Route::get('/call/poll', [WebRTCController::class, 'pollSignals'])->name('call.poll');
     Route::post('/call/end', [WebRTCController::class, 'endCall'])->name('call.end');
+
+    // Group calling (rooms)
+    Route::post('/call/room/add', [WebRTCController::class, 'addParticipant'])->name('call.room.add');
+    Route::post('/call/room/respond', [WebRTCController::class, 'respondRoomInvite'])->name('call.room.respond');
+    Route::get('/call/room/info', [WebRTCController::class, 'getRoomInfo'])->name('call.room.info');
 });

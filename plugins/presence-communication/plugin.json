@@ -2,9 +2,9 @@
     "slug": "presence-communication",
     "name": "Presence & Communication",
     "name_es": "Presencia y Comunicacion",
-    "version": "1.0.0",
-    "description": "Track online users, text chat, and video calls between family members",
-    "description_es": "Seguimiento de usuarios en linea, chat de texto y videollamadas entre familiares",
+    "version": "1.1.0",
+    "description": "Track online users, text chat, video/voice calls, and group calls (up to 4 participants) between family members",
+    "description_es": "Seguimiento de usuarios en linea, chat de texto, videollamadas y llamadas grupales (hasta 4 participantes) entre familiares",
     "author": "Mi Familia",
     "type": "communication",
     "requires": {

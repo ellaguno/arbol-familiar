@@ -659,5 +659,22 @@
     "Madre": "Madre",
     "Conyuge": "Cónyuge",
     "Ocupacion": "Ocupación",
-    "Consultando FamilySearch, Wikipedia, Wikidata y WikiTree...": "Consultando FamilySearch, Wikipedia, Wikidata y WikiTree..."
+    "Consultando FamilySearch, Wikipedia, Wikidata y WikiTree...": "Consultando FamilySearch, Wikipedia, Wikidata y WikiTree...",
+
+    "te invita a una videollamada grupal": "te invita a una videollamada grupal",
+    "te invita a una llamada de voz grupal": "te invita a una llamada de voz grupal",
+    "Participantes": "Participantes",
+    "participantes": "participantes",
+    "Agregar participante": "Agregar participante",
+    "No hay usuarios disponibles": "No hay usuarios disponibles",
+    "La sala no esta activa.": "La sala no está activa.",
+    "No perteneces a esta llamada.": "No perteneces a esta llamada.",
+    "La sala esta llena (maximo :max participantes).": "La sala está llena (máximo :max participantes).",
+    "El usuario ya esta en la llamada.": "El usuario ya está en la llamada.",
+    "No puedes invitarte a ti mismo.": "No puedes invitarte a ti mismo.",
+    "Sala no encontrada.": "Sala no encontrada.",
+    "Error al unirse a la llamada": "Error al unirse a la llamada",
+    "Error al agregar participante": "Error al agregar participante",
+    "No tienes invitacion a esta sala.": "No tienes invitación a esta sala.",
+    "Ya se envio una invitacion a este usuario.": "Ya se envió una invitación a este usuario."
 }

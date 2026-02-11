@@ -301,16 +301,84 @@
                 </div>
             </template>
 
-            {{-- Overlay: Llamada activa --}}
+            {{-- Overlay: Invitacion a llamada grupal --}}
+            <template x-teleport="body">
+                <div x-show="callState === 'room-invite'" x-cloak
+                     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center max-w-sm mx-4 shadow-2xl">
+                        <div class="mb-4">
+                            <div class="w-20 h-20 mx-auto rounded-full overflow-hidden animate-pulse ring-4 ring-purple-400">
+                                <div class="w-full h-full bg-purple-500 text-white flex items-center justify-center">
+                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-theme mb-1" x-text="roomInviterName"></h3>
+                        <p class="text-theme-secondary mb-3">
+                            <span x-show="callType === 'video'">{{ __('te invita a una videollamada grupal') }}</span>
+                            <span x-show="callType === 'voice'">{{ __('te invita a una llamada de voz grupal') }}</span>
+                        </p>
+                        {{-- Participantes actuales --}}
+                        <div class="mb-4" x-show="roomInviteParticipants.length > 0">
+                            <p class="text-xs text-theme-muted mb-2">{{ __('Participantes') }}:</p>
+                            <div class="flex justify-center gap-2 flex-wrap">
+                                <template x-for="p in roomInviteParticipants" :key="p.id">
+                                    <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1">
+                                        <template x-if="p.photo">
+                                            <img :src="p.photo" class="w-5 h-5 rounded-full object-cover">
+                                        </template>
+                                        <template x-if="!p.photo">
+                                            <div class="w-5 h-5 rounded-full bg-mf-primary text-white flex items-center justify-center text-xs font-bold"
+                                                 x-text="p.name.charAt(0).toUpperCase()"></div>
+                                        </template>
+                                        <span class="text-xs text-theme" x-text="p.name.split(' ')[0]"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-6">
+                            <button @click="respondToRoomInvite(false)"
+                                    class="w-14 h-14 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-colors">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                            <button @click="respondToRoomInvite(true)"
+                                    class="w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center shadow-lg animate-bounce transition-colors">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            {{-- Overlay: Llamada activa (multi-peer) --}}
             <template x-teleport="body">
                 <div x-show="callState === 'active'" x-cloak
                      class="fixed inset-0 z-50 flex flex-col bg-gray-900">
-                    {{-- Video remoto (fullscreen) --}}
+
+                    {{-- Video grid --}}
                     <div class="flex-1 relative" x-show="callType === 'video'">
-                        <video x-ref="remoteVideo" autoplay playsinline
-                               class="w-full h-full object-cover"></video>
+                        <div class="w-full h-full grid gap-1 p-1"
+                             :class="videoGridClass()">
+                            <template x-for="peerId in Object.keys(peers)" :key="'vid-' + peerId">
+                                <div class="relative bg-gray-800 rounded-lg overflow-hidden">
+                                    <video :x-ref="'remoteVideo_' + peerId" autoplay playsinline
+                                           class="w-full h-full object-cover"
+                                           x-effect="attachRemoteStream(peerId, $el)"></video>
+                                    <div class="absolute bottom-2 left-2 bg-black/50 rounded px-2 py-0.5">
+                                        <span class="text-white text-xs" x-text="peers[peerId]?.name || ''"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
                         {{-- Video local (mini esquina) --}}
-                        <div class="absolute top-4 right-4 w-32 h-24 rounded-lg overflow-hidden shadow-lg border-2 border-white/20">
+                        <div class="absolute top-4 right-4 w-32 h-24 rounded-lg overflow-hidden shadow-lg border-2 border-white/20 z-10">
                             <video x-ref="localVideo" autoplay playsinline muted
                                    class="w-full h-full object-cover"
                                    :class="isCameraOff ? 'hidden' : ''"></video>
@@ -322,27 +390,42 @@
                         </div>
                     </div>
 
-                    {{-- Solo voz: avatar grande --}}
+                    {{-- Solo voz: avatares --}}
                     <div class="flex-1 flex items-center justify-center" x-show="callType === 'voice'">
-                        <div class="text-center">
-                            <div class="w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-green-400 mb-4">
-                                <template x-if="callPeerPhoto">
-                                    <img :src="callPeerPhoto" class="w-full h-full object-cover">
-                                </template>
-                                <template x-if="!callPeerPhoto">
-                                    <div class="w-full h-full bg-mf-primary text-white flex items-center justify-center text-5xl font-bold"
-                                         x-text="callPeerName ? callPeerName.charAt(0).toUpperCase() : '?'"></div>
-                                </template>
+                        <div class="flex flex-wrap justify-center gap-8">
+                            <template x-for="peerId in Object.keys(peers)" :key="'aud-' + peerId">
+                                <div class="text-center">
+                                    <div class="w-24 h-24 mx-auto rounded-full overflow-hidden ring-4 ring-green-400 mb-2">
+                                        <template x-if="peers[peerId]?.photo">
+                                            <img :src="peers[peerId].photo" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!peers[peerId]?.photo">
+                                            <div class="w-full h-full bg-mf-primary text-white flex items-center justify-center text-3xl font-bold"
+                                                 x-text="peers[peerId]?.name ? peers[peerId].name.charAt(0).toUpperCase() : '?'"></div>
+                                        </template>
+                                    </div>
+                                    <p class="text-white text-sm" x-text="peers[peerId]?.name || ''"></p>
+                                    {{-- Audio element para cada peer --}}
+                                    <audio :x-ref="'remoteAudio_' + peerId" autoplay
+                                           x-effect="attachRemoteStream(peerId, $el)"></audio>
+                                </div>
+                            </template>
+                            {{-- Timer central si solo hay 1 peer --}}
+                            <div class="absolute bottom-24 left-1/2 -translate-x-1/2">
+                                <p class="text-gray-300 text-lg" x-text="formatDuration(callDuration)"></p>
                             </div>
-                            <h3 class="text-2xl font-bold text-white mb-1" x-text="callPeerName"></h3>
-                            <p class="text-gray-300 text-lg" x-text="formatDuration(callDuration)"></p>
                         </div>
                     </div>
 
                     {{-- Controles de llamada --}}
                     <div class="bg-gray-800/90 px-6 py-4">
-                        {{-- Timer para video --}}
-                        <p class="text-center text-gray-300 text-sm mb-3" x-show="callType === 'video'" x-text="formatDuration(callDuration)"></p>
+                        {{-- Participantes y timer --}}
+                        <div class="flex items-center justify-center gap-4 mb-3">
+                            <p class="text-gray-300 text-sm" x-text="formatDuration(callDuration)"></p>
+                            <span class="text-gray-500">|</span>
+                            <p class="text-gray-400 text-sm"
+                               x-text="Object.keys(peers).length + 1 + ' {{ __('participantes') }}'"></p>
+                        </div>
                         <div class="flex items-center justify-center gap-4">
                             <button @click="toggleMute()"
                                     class="w-12 h-12 rounded-full flex items-center justify-center transition-colors"
@@ -365,12 +448,56 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                 </svg>
                             </button>
+                            {{-- Agregar participante --}}
+                            <button x-show="Object.keys(peers).length < 3"
+                                    @click="showAddParticipant = !showAddParticipant"
+                                    class="w-12 h-12 rounded-full flex items-center justify-center transition-colors"
+                                    :class="showAddParticipant ? 'bg-purple-500 text-white' : 'bg-gray-600 text-white hover:bg-gray-500'"
+                                    title="{{ __('Agregar participante') }}">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                </svg>
+                            </button>
                             <button @click="endCall()"
                                     class="w-14 h-14 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-colors">
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.516l2.257-1.13a1 1 0 00.502-1.21L8.228 3.684A1 1 0 007.28 3H5z"/>
                                 </svg>
                             </button>
+                        </div>
+                    </div>
+
+                    {{-- Panel: Agregar participante --}}
+                    <div x-show="showAddParticipant" x-cloak
+                         class="absolute top-4 left-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-4 w-72 max-h-80 overflow-y-auto z-20">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-theme text-sm">{{ __('Agregar participante') }}</h4>
+                            <button @click="showAddParticipant = false" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="space-y-1">
+                            <template x-for="user in availableUsersForRoom" :key="'add-' + user.id">
+                                <button @click="addParticipantToCall(user.id)"
+                                        class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-theme-secondary/20 transition-colors text-left">
+                                    <div class="relative">
+                                        <template x-if="user.photo">
+                                            <img :src="user.photo" class="w-8 h-8 rounded-full object-cover">
+                                        </template>
+                                        <template x-if="!user.photo">
+                                            <div class="w-8 h-8 rounded-full bg-mf-primary text-white flex items-center justify-center text-sm font-bold"
+                                                 x-text="user.name.charAt(0).toUpperCase()"></div>
+                                        </template>
+                                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
+                                    </div>
+                                    <span class="text-sm text-theme" x-text="user.name"></span>
+                                </button>
+                            </template>
+                            <p x-show="availableUsersForRoom.length === 0" class="text-xs text-theme-secondary text-center py-2">
+                                {{ __('No hay usuarios disponibles') }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -400,7 +527,7 @@
             messagePollInterval: null,
 
             // WebRTC
-            callState: 'idle', // idle, calling, incoming, active
+            callState: 'idle', // idle, calling, incoming, room-invite, active
             callType: 'video', // voice, video
             callPeerId: null,
             callPeerName: '',
@@ -408,15 +535,22 @@
             callDuration: 0,
             callDurationInterval: null,
             callTimeoutHandle: null,
-            peerConnection: null,
             localStream: null,
-            remoteStream: null,
             isMuted: false,
             isCameraOff: false,
             signalPollInterval: null,
             _ringtoneOscillators: [],
-            _pendingIceCandidates: [],
-            _hasRemoteDescription: false,
+
+            // Multi-peer
+            peers: {},          // Map<peerId, {pc, remoteStream, name, photo, _pendingIce, _hasRemoteDesc}>
+            roomId: null,
+            showAddParticipant: false,
+            _globalPendingIce: {},
+
+            // Room invite state
+            roomInviterName: '',
+            roomInviteRoomId: null,
+            roomInviteParticipants: [],
 
             async init() {
                 await Promise.all([this.fetchOnline(), this.fetchConversations()]);
@@ -463,8 +597,18 @@
 
                 // Enviar offline al cerrar pagina
                 window.addEventListener('beforeunload', () => {
-                    if (this.callState !== 'idle') {
-                        this.endCall();
+                    if (this.callState !== 'idle' && this.callState !== 'room-invite') {
+                        // Usar sendBeacon para garantizar que la senal se envie al cerrar
+                        const peerIds = Object.keys(this.peers);
+                        const peerId = peerIds.length > 0 ? parseInt(peerIds[0]) : this.callPeerId;
+                        if (peerId) {
+                            navigator.sendBeacon('{{ route("call.end") }}', new URLSearchParams({
+                                _token: '{{ csrf_token() }}',
+                                peer_id: String(peerId),
+                                room_id: this.roomId ? String(this.roomId) : '',
+                            }));
+                        }
+                        this.cleanupWebRTC();
                     }
                     navigator.sendBeacon('{{ route("presence.offline") }}', new URLSearchParams({
                         _token: '{{ csrf_token() }}'
@@ -616,6 +760,28 @@
                 return all.find(u => u.id === userId) || null;
             },
 
+            get availableUsersForRoom() {
+                const peerIds = Object.keys(this.peers).map(id => parseInt(id));
+                const currentUserId = {{ Auth::id() }};
+                return this.onlineUsers.filter(u =>
+                    u.id !== currentUserId && !peerIds.includes(u.id)
+                );
+            },
+
+            videoGridClass() {
+                const count = Object.keys(this.peers).length;
+                if (count <= 1) return 'grid-cols-1';
+                if (count === 2) return 'grid-cols-2';
+                return 'grid-cols-2 grid-rows-2';
+            },
+
+            getVideoConstraints() {
+                const peerCount = Object.keys(this.peers).length + 1; // incluye local
+                if (peerCount <= 2) return { width: { ideal: 640 }, height: { ideal: 480 } };
+                if (peerCount === 3) return { width: { ideal: 480 }, height: { ideal: 360 } };
+                return { width: { ideal: 320 }, height: { ideal: 240 } };
+            },
+
             async initiateCall(mediaType) {
                 if (this.callState !== 'idle' || !this.selectedUserId) return;
 
@@ -639,6 +805,7 @@
                         return;
                     }
 
+                    this.roomId = data.room_id;
                     this.playRingtone('outgoing');
 
                     // Timeout 30s
@@ -668,7 +835,7 @@
 
                     // Obtener media y preparar PeerConnection (callee side)
                     await this.getLocalMedia();
-                    await this.setupWebRTC(false);
+                    await this.setupPeerConnection(this.callPeerId, false);
 
                     // Acelerar polling para recibir offer/ICE candidates rapido
                     this.setSignalPollingSpeed(true);
@@ -698,12 +865,20 @@
             async endCall() {
                 this.stopRingtone();
 
-                if (this.callPeerId) {
+                // Necesitamos un peer_id para el endpoint (el backend usa room_id para logica grupal)
+                const peerIds = Object.keys(this.peers);
+                // Usar el callPeerId original (el primer peer de la llamada) como referencia
+                const refPeerId = this.callPeerId || (peerIds.length > 0 ? parseInt(peerIds[0]) : null);
+
+                if (refPeerId) {
                     try {
                         await fetch('{{ route("call.end") }}', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                            body: JSON.stringify({ peer_id: this.callPeerId }),
+                            body: JSON.stringify({
+                                peer_id: refPeerId,
+                                room_id: this.roomId,
+                            }),
                         });
                     } catch (e) {}
                 }
@@ -715,7 +890,7 @@
             async getLocalMedia() {
                 const constraints = {
                     audio: true,
-                    video: this.callType === 'video' ? { width: { ideal: 640 }, height: { ideal: 480 } } : false,
+                    video: this.callType === 'video' ? this.getVideoConstraints() : false,
                 };
 
                 try {
@@ -731,7 +906,14 @@
                 }
             },
 
-            async setupWebRTC(isCaller) {
+            /**
+             * Crea una PeerConnection para un peer especifico.
+             * Si isCaller=true, crea y envia offer.
+             */
+            async setupPeerConnection(peerId, isCaller) {
+                peerId = parseInt(peerId);
+                const peerIdStr = String(peerId);
+
                 const config = {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -741,170 +923,241 @@
                     ]
                 };
 
-                // Resetear buffer de candidates pendientes
-                this._pendingIceCandidates = [];
-                this._hasRemoteDescription = false;
+                const pc = new RTCPeerConnection(config);
+                const remoteStream = new MediaStream();
 
-                this.peerConnection = new RTCPeerConnection(config);
-                console.log('[WebRTC] PeerConnection creado, rol:', isCaller ? 'caller' : 'callee');
+                // Obtener info del peer
+                const peerInfo = this.getUserInfo(peerId);
+                const peerName = peerInfo?.name || this.callPeerName || '{{ __("Usuario") }}';
+                const peerPhoto = peerInfo?.photo || this.callPeerPhoto || null;
+
+                // Inicializar peer entry
+                this.peers[peerIdStr] = {
+                    pc: pc,
+                    remoteStream: remoteStream,
+                    name: peerName,
+                    photo: peerPhoto,
+                    _pendingIce: [],
+                    _hasRemoteDesc: false,
+                };
+
+                // Force reactivity
+                this.peers = {...this.peers};
+
+                console.log('[WebRTC] PeerConnection creado para peer', peerId, 'rol:', isCaller ? 'caller' : 'callee');
 
                 // Agregar tracks locales
                 if (this.localStream) {
                     this.localStream.getTracks().forEach(track => {
-                        this.peerConnection.addTrack(track, this.localStream);
+                        pc.addTrack(track, this.localStream);
                     });
                 }
 
                 // Recibir tracks remotos
-                this.remoteStream = new MediaStream();
-                this.peerConnection.ontrack = (event) => {
+                pc.ontrack = (event) => {
                     event.streams[0].getTracks().forEach(track => {
-                        this.remoteStream.addTrack(track);
+                        remoteStream.addTrack(track);
                     });
-                    if (this.callType === 'video' && this.$refs.remoteVideo) {
-                        this.$refs.remoteVideo.srcObject = this.remoteStream;
-                    }
-                    // Para voz: conectar audio remoto
-                    if (this.callType === 'voice') {
-                        const audio = new Audio();
-                        audio.srcObject = this.remoteStream;
-                        audio.play().catch(e => console.warn('[WebRTC] Audio autoplay blocked:', e));
+                    // Update the peer's remoteStream reference
+                    if (this.peers[peerIdStr]) {
+                        this.peers[peerIdStr].remoteStream = remoteStream;
+                        this.peers = {...this.peers};
                     }
                 };
 
-                // ICE candidates — enviar al peer
-                this.peerConnection.onicecandidate = async (event) => {
+                // ICE candidates — enviar al peer especifico
+                pc.onicecandidate = async (event) => {
                     if (event.candidate) {
-                        console.log('[WebRTC] ICE candidate local:', event.candidate.type, event.candidate.protocol);
-                        await this.sendSignal('ice-candidate', JSON.stringify(event.candidate));
+                        console.log('[WebRTC] ICE candidate local para peer', peerId);
+                        await this.sendSignal('ice-candidate', JSON.stringify(event.candidate), peerId);
                     }
                 };
 
-                // ICE connection state (clave para diagnosticar problemas)
-                this.peerConnection.oniceconnectionstatechange = () => {
-                    const state = this.peerConnection?.iceConnectionState;
-                    console.log('[WebRTC] ICE connection state:', state);
+                // ICE connection state
+                pc.oniceconnectionstatechange = () => {
+                    const state = pc.iceConnectionState;
+                    console.log('[WebRTC] ICE connection state peer', peerId, ':', state);
                     if (state === 'connected' || state === 'completed') {
-                        this.callState = 'active';
-                        this.stopRingtone();
-                        this.startCallTimer();
+                        if (this.callState !== 'active') {
+                            this.callState = 'active';
+                            this.stopRingtone();
+                            this.startCallTimer();
+                        }
                         this.setSignalPollingSpeed(false);
                     } else if (state === 'failed') {
-                        console.error('[WebRTC] ICE connection failed');
-                        this.cleanupWebRTC();
-                        this.resetCall();
+                        console.error('[WebRTC] ICE connection failed for peer', peerId);
+                        this.removePeer(peerId);
                     }
                 };
 
-                // ICE gathering state
-                this.peerConnection.onicegatheringstatechange = () => {
-                    console.log('[WebRTC] ICE gathering state:', this.peerConnection?.iceGatheringState);
-                };
-
-                // Connection state (DTLS + ICE)
-                this.peerConnection.onconnectionstatechange = () => {
-                    const state = this.peerConnection?.connectionState;
-                    console.log('[WebRTC] Connection state:', state);
+                // Connection state
+                pc.onconnectionstatechange = () => {
+                    const state = pc.connectionState;
+                    console.log('[WebRTC] Connection state peer', peerId, ':', state);
                     if (state === 'connected') {
-                        this.callState = 'active';
-                        this.stopRingtone();
-                        this.startCallTimer();
+                        if (this.callState !== 'active') {
+                            this.callState = 'active';
+                            this.stopRingtone();
+                            this.startCallTimer();
+                        }
                         this.setSignalPollingSpeed(false);
                     } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
-                        this.cleanupWebRTC();
-                        this.resetCall();
+                        this.removePeer(peerId);
                     }
                 };
 
                 // Signaling state
-                this.peerConnection.onsignalingstatechange = () => {
-                    console.log('[WebRTC] Signaling state:', this.peerConnection?.signalingState);
+                pc.onsignalingstatechange = () => {
+                    console.log('[WebRTC] Signaling state peer', peerId, ':', pc.signalingState);
                 };
 
                 if (isCaller) {
-                    const offer = await this.peerConnection.createOffer();
-                    await this.peerConnection.setLocalDescription(offer);
-                    console.log('[WebRTC] Offer creado y enviado');
-                    await this.sendSignal('offer', JSON.stringify(offer));
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    console.log('[WebRTC] Offer creado y enviado a peer', peerId);
+                    await this.sendSignal('offer', JSON.stringify(offer), peerId);
+                }
+            },
+
+            /**
+             * Elimina un peer y cierra su conexion.
+             */
+            removePeer(peerId) {
+                const peerIdStr = String(peerId);
+                const peer = this.peers[peerIdStr];
+                if (peer) {
+                    if (peer.pc) {
+                        peer.pc.close();
+                    }
+                    delete this.peers[peerIdStr];
+                    this.peers = {...this.peers};
+                    console.log('[WebRTC] Peer removido:', peerId);
+                }
+
+                // Si no quedan peers, terminar llamada
+                if (Object.keys(this.peers).length === 0 && this.callState === 'active') {
+                    this.cleanupWebRTC();
+                    this.resetCall();
+                }
+            },
+
+            /**
+             * Attach remoteStream a un elemento de video/audio.
+             */
+            attachRemoteStream(peerId, el) {
+                const peerIdStr = String(peerId);
+                const peer = this.peers[peerIdStr];
+                if (peer && peer.remoteStream && el && el.srcObject !== peer.remoteStream) {
+                    el.srcObject = peer.remoteStream;
                 }
             },
 
             async processSignal(signal) {
-                // Si no hay PeerConnection y recibimos offer, crear uno (fallback)
-                if (!this.peerConnection && signal.type === 'offer') {
-                    console.log('[WebRTC] PeerConnection no existe, creando para offer...');
-                    await this.getLocalMedia();
-                    await this.setupWebRTC(false);
+                const senderId = signal.sent_by;
+                const senderIdStr = String(senderId);
+
+                // Si no hay peer para este sender y recibimos offer, crear uno
+                if (!this.peers[senderIdStr] && signal.type === 'offer') {
+                    console.log('[WebRTC] PeerConnection no existe para', senderId, ', creando para offer...');
+                    if (!this.localStream) {
+                        await this.getLocalMedia();
+                    }
+                    await this.setupPeerConnection(senderId, false);
                 }
 
-                if (!this.peerConnection) {
-                    // Si llega ICE candidate sin PeerConnection, bufferearlo
+                const peer = this.peers[senderIdStr];
+                if (!peer || !peer.pc) {
+                    // Buffer ICE candidates si aun no hay peer
                     if (signal.type === 'ice-candidate') {
-                        console.log('[WebRTC] Buffering ICE candidate (no PeerConnection aun)');
-                        this._pendingIceCandidates.push(JSON.parse(signal.payload));
+                        console.log('[WebRTC] Buffering ICE candidate (no peer aun) de', senderId);
+                        if (!this._globalPendingIce) this._globalPendingIce = {};
+                        if (!this._globalPendingIce[senderIdStr]) this._globalPendingIce[senderIdStr] = [];
+                        this._globalPendingIce[senderIdStr].push(JSON.parse(signal.payload));
                     }
                     return;
                 }
 
                 try {
                     if (signal.type === 'offer') {
-                        console.log('[WebRTC] Procesando offer remoto');
-                        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.payload)));
-                        this._hasRemoteDescription = true;
+                        console.log('[WebRTC] Procesando offer de', senderId);
+                        await peer.pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.payload)));
+                        peer._hasRemoteDesc = true;
 
                         // Crear y enviar answer
-                        const answer = await this.peerConnection.createAnswer();
-                        await this.peerConnection.setLocalDescription(answer);
-                        console.log('[WebRTC] Answer creado y enviado');
-                        await this.sendSignal('answer', JSON.stringify(answer));
+                        const answer = await peer.pc.createAnswer();
+                        await peer.pc.setLocalDescription(answer);
+                        console.log('[WebRTC] Answer creado y enviado a', senderId);
+                        await this.sendSignal('answer', JSON.stringify(answer), senderId);
 
                         // Procesar ICE candidates pendientes
-                        await this._drainPendingCandidates();
+                        await this._drainPendingCandidates(senderId);
 
                     } else if (signal.type === 'answer') {
-                        console.log('[WebRTC] Procesando answer remoto');
-                        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.payload)));
-                        this._hasRemoteDescription = true;
+                        console.log('[WebRTC] Procesando answer de', senderId);
+                        await peer.pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(signal.payload)));
+                        peer._hasRemoteDesc = true;
 
                         // Procesar ICE candidates pendientes
-                        await this._drainPendingCandidates();
+                        await this._drainPendingCandidates(senderId);
 
                     } else if (signal.type === 'ice-candidate') {
                         const candidate = JSON.parse(signal.payload);
-                        if (this._hasRemoteDescription) {
-                            console.log('[WebRTC] Agregando ICE candidate remoto');
-                            await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                        if (peer._hasRemoteDesc) {
+                            console.log('[WebRTC] Agregando ICE candidate de', senderId);
+                            await peer.pc.addIceCandidate(new RTCIceCandidate(candidate));
                         } else {
-                            console.log('[WebRTC] Buffering ICE candidate (esperando remoteDescription)');
-                            this._pendingIceCandidates.push(candidate);
+                            console.log('[WebRTC] Buffering ICE candidate (esperando remoteDescription) de', senderId);
+                            peer._pendingIce.push(candidate);
                         }
                     }
                 } catch (e) {
-                    console.error('[WebRTC] Error processing signal:', signal.type, e);
+                    console.error('[WebRTC] Error processing signal from', senderId, ':', signal.type, e);
                 }
             },
 
-            async _drainPendingCandidates() {
-                if (this._pendingIceCandidates.length === 0) return;
-                console.log('[WebRTC] Procesando', this._pendingIceCandidates.length, 'ICE candidates pendientes');
-                const candidates = [...this._pendingIceCandidates];
-                this._pendingIceCandidates = [];
-                for (const candidate of candidates) {
-                    try {
-                        await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                    } catch (e) {
-                        console.warn('[WebRTC] Error agregando ICE candidate pendiente:', e);
+            async _drainPendingCandidates(peerId) {
+                const peerIdStr = String(peerId);
+                const peer = this.peers[peerIdStr];
+                if (!peer) return;
+
+                // Drain per-peer pending
+                if (peer._pendingIce && peer._pendingIce.length > 0) {
+                    console.log('[WebRTC] Procesando', peer._pendingIce.length, 'ICE candidates pendientes de', peerId);
+                    const candidates = [...peer._pendingIce];
+                    peer._pendingIce = [];
+                    for (const candidate of candidates) {
+                        try {
+                            await peer.pc.addIceCandidate(new RTCIceCandidate(candidate));
+                        } catch (e) {
+                            console.warn('[WebRTC] Error agregando ICE candidate pendiente:', e);
+                        }
+                    }
+                }
+
+                // Drain global pending (from before peer was created)
+                if (this._globalPendingIce && this._globalPendingIce[peerIdStr]) {
+                    const globalCandidates = [...this._globalPendingIce[peerIdStr]];
+                    delete this._globalPendingIce[peerIdStr];
+                    console.log('[WebRTC] Procesando', globalCandidates.length, 'ICE candidates globales de', peerId);
+                    for (const candidate of globalCandidates) {
+                        try {
+                            await peer.pc.addIceCandidate(new RTCIceCandidate(candidate));
+                        } catch (e) {
+                            console.warn('[WebRTC] Error agregando ICE candidate global:', e);
+                        }
                     }
                 }
             },
 
-            async sendSignal(type, payload) {
+            async sendSignal(type, payload, targetId) {
                 try {
                     await fetch('{{ route("call.signal") }}', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                         body: JSON.stringify({
-                            peer_id: this.callPeerId,
+                            peer_id: targetId || this.callPeerId,
+                            target_id: targetId || this.callPeerId,
+                            room_id: this.roomId,
                             type: type,
                             payload: payload,
                         }),
@@ -935,9 +1188,8 @@
                     const signals = data.signals || [];
 
                     // Ordenar: offer/answer primero, luego ice-candidates
-                    // Esto asegura que remoteDescription se establezca antes de ICE
                     const sorted = signals.sort((a, b) => {
-                        const priority = { 'call-request': 0, 'call-accept': 1, 'call-reject': 1, 'call-end': 1, 'offer': 2, 'answer': 2, 'ice-candidate': 3 };
+                        const priority = { 'call-request': 0, 'call-accept': 1, 'call-reject': 1, 'call-end': 1, 'room-invite': 0, 'room-accept': 1, 'room-leave': 1, 'offer': 2, 'answer': 2, 'ice-candidate': 3 };
                         return (priority[a.type] ?? 5) - (priority[b.type] ?? 5);
                     });
 
@@ -957,6 +1209,7 @@
                             this.callType = signal.media_type;
                             this.callPeerId = signal.caller_id;
                             this.callPeerName = signal.caller_name || '{{ __("Usuario") }}';
+                            this.roomId = signal.room_id;
                             // Buscar foto del caller
                             const callerInfo = this.getUserInfo(signal.caller_id);
                             this.callPeerPhoto = callerInfo ? callerInfo.photo : null;
@@ -973,7 +1226,7 @@
                             }
                             // Caller: obtener media, crear peer connection, enviar offer
                             await this.getLocalMedia();
-                            await this.setupWebRTC(true);
+                            await this.setupPeerConnection(this.callPeerId, true);
                             // Acelerar polling para recibir answer/ICE rapido
                             this.setSignalPollingSpeed(true);
                         }
@@ -992,36 +1245,157 @@
                     case 'call-end':
                         if (this.callState !== 'idle') {
                             this.stopRingtone();
-                            this.cleanupWebRTC();
-                            this.resetCall();
+                            // En llamada grupal, solo remover ese peer
+                            if (signal.sent_by && this.peers[String(signal.sent_by)]) {
+                                this.removePeer(signal.sent_by);
+                            } else {
+                                this.cleanupWebRTC();
+                                this.resetCall();
+                            }
+                        }
+                        break;
+
+                    case 'room-invite':
+                        if (signal.target_id === currentUserId && (this.callState === 'idle')) {
+                            this.callState = 'room-invite';
+                            this.callType = signal.media_type;
+                            this.roomInviterName = signal.sender_name || '{{ __("Usuario") }}';
+                            this.roomInviteRoomId = signal.room_id;
+                            this.roomInviteParticipants = signal.room_participants || [];
+                            this.playRingtone('incoming');
+                        }
+                        break;
+
+                    case 'room-accept':
+                        // Alguien nuevo se unio al room — crear peer connection con ellos
+                        if (this.callState === 'active' && signal.sent_by !== currentUserId) {
+                            const newPeerId = signal.sent_by;
+                            if (!this.peers[String(newPeerId)]) {
+                                console.log('[WebRTC] Nuevo participante en room:', newPeerId, signal.sender_name);
+                                // Nosotros somos "caller" para el nuevo
+                                await this.setupPeerConnection(newPeerId, true);
+                                // Actualizar nombre/foto si disponible
+                                if (signal.sender_name && this.peers[String(newPeerId)]) {
+                                    this.peers[String(newPeerId)].name = signal.sender_name;
+                                    this.peers[String(newPeerId)].photo = signal.sender_photo || null;
+                                    this.peers = {...this.peers};
+                                }
+                                this.setSignalPollingSpeed(true);
+                            }
+                        }
+                        break;
+
+                    case 'room-leave':
+                        if (signal.sent_by && this.peers[String(signal.sent_by)]) {
+                            this.removePeer(signal.sent_by);
                         }
                         break;
 
                     case 'offer':
                     case 'answer':
                     case 'ice-candidate':
-                        if (this.callState !== 'idle') {
+                        if (this.callState !== 'idle' && this.callState !== 'room-invite') {
                             await this.processSignal(signal);
                         }
                         break;
                 }
             },
 
+            /**
+             * Responder a invitacion de room grupal.
+             */
+            async respondToRoomInvite(accept) {
+                this.stopRingtone();
+
+                if (!accept) {
+                    try {
+                        await fetch('{{ route("call.room.respond") }}', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                            body: JSON.stringify({ room_id: this.roomInviteRoomId, response: 'reject' }),
+                        });
+                    } catch (e) {}
+                    this.resetCall();
+                    return;
+                }
+
+                // Aceptar
+                try {
+                    const res = await fetch('{{ route("call.room.respond") }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: JSON.stringify({ room_id: this.roomInviteRoomId, response: 'accept' }),
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        alert(data.error || '{{ __("Error al unirse a la llamada") }}');
+                        this.resetCall();
+                        return;
+                    }
+
+                    this.roomId = this.roomInviteRoomId;
+                    this.callType = data.media_type || 'video';
+                    this.callState = 'active';
+
+                    // Obtener media
+                    await this.getLocalMedia();
+
+                    // Crear peer connections con cada participante existente
+                    // Nosotros somos "callee" — esperamos offers de ellos (ellos recibirán room-accept)
+                    // No necesitamos crear peer connections aqui — los existentes enviaran offers via room-accept handler
+                    // Pero hacemos polling rapido
+                    this.startCallTimer();
+                    this.setSignalPollingSpeed(true);
+
+                } catch (e) {
+                    console.error('Error joining room:', e);
+                    this.resetCall();
+                }
+            },
+
+            /**
+             * Agregar participante a la llamada activa.
+             */
+            async addParticipantToCall(userId) {
+                if (!this.roomId) return;
+
+                try {
+                    const res = await fetch('{{ route("call.room.add") }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: JSON.stringify({ room_id: this.roomId, user_id: userId }),
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        alert(data.error || '{{ __("Error al agregar participante") }}');
+                        return;
+                    }
+
+                    this.showAddParticipant = false;
+                } catch (e) {
+                    console.error('Error adding participant:', e);
+                }
+            },
+
             cleanupWebRTC() {
+                // Cerrar local stream
                 if (this.localStream) {
                     this.localStream.getTracks().forEach(t => t.stop());
                     this.localStream = null;
                 }
-                if (this.peerConnection) {
-                    this.peerConnection.close();
-                    this.peerConnection = null;
+
+                // Cerrar todas las peer connections
+                for (const [peerId, peer] of Object.entries(this.peers)) {
+                    if (peer.pc) {
+                        peer.pc.close();
+                    }
                 }
-                this.remoteStream = null;
-                this._pendingIceCandidates = [];
-                this._hasRemoteDescription = false;
+                this.peers = {};
+                this._globalPendingIce = {};
 
                 if (this.$refs.localVideo) this.$refs.localVideo.srcObject = null;
-                if (this.$refs.remoteVideo) this.$refs.remoteVideo.srcObject = null;
 
                 // Restaurar polling normal
                 this.setSignalPollingSpeed(false);
@@ -1035,6 +1409,11 @@
                 this.callDuration = 0;
                 this.isMuted = false;
                 this.isCameraOff = false;
+                this.roomId = null;
+                this.showAddParticipant = false;
+                this.roomInviterName = '';
+                this.roomInviteRoomId = null;
+                this.roomInviteParticipants = [];
 
                 if (this.callDurationInterval) {
                     clearInterval(this.callDurationInterval);
@@ -1047,6 +1426,7 @@
             },
 
             startCallTimer() {
+                if (this.callDurationInterval) return; // Ya esta corriendo
                 this.callDuration = 0;
                 this.callDurationInterval = setInterval(() => {
                     this.callDuration++;
@@ -1083,7 +1463,7 @@
                 if (ctx.state === 'suspended') ctx.resume();
 
                 const playTone = () => {
-                    if (this.callState !== 'calling' && this.callState !== 'incoming') return;
+                    if (this.callState !== 'calling' && this.callState !== 'incoming' && this.callState !== 'room-invite') return;
 
                     try {
                         const t = ctx.currentTime;

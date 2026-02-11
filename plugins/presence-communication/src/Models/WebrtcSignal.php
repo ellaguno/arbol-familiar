@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class WebrtcSignal extends Model
 {
     protected $fillable = [
+        'room_id',
         'caller_id',
         'callee_id',
         'sent_by',
+        'target_id',
         'type',
         'media_type',
         'payload',
@@ -31,9 +33,24 @@ class WebrtcSignal extends Model
         return $this->belongsTo(User::class, 'callee_id');
     }
 
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sent_by');
+    }
+
+    public function target()
+    {
+        return $this->belongsTo(User::class, 'target_id');
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(WebrtcRoom::class, 'room_id');
+    }
+
     /**
      * Senales pendientes para un usuario.
-     * Retorna senales donde el usuario participa (caller o callee)
+     * Retorna senales donde el usuario participa (caller o callee o target)
      * pero NO fue quien la envio (sent_by != userId).
      */
     public function scopeForUser($query, int $userId)
@@ -42,7 +59,8 @@ class WebrtcSignal extends Model
             ->where('sent_by', '!=', $userId)
             ->where(function ($q) use ($userId) {
                 $q->where('callee_id', $userId)
-                  ->orWhere('caller_id', $userId);
+                  ->orWhere('caller_id', $userId)
+                  ->orWhere('target_id', $userId);
             });
     }
 
