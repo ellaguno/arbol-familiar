@@ -1204,7 +1204,7 @@
                     .attr('y', config.nodeHeight / 2 + 6)
                     .attr('font-size', '11px')
                     .attr('fill', '#4b5563')
-                    .text(truncateText(person.lastName || '', 14));
+                    .text(truncateText(person.lastName || '', 20));
             }
 
             // Dates (solo si no está protegido)

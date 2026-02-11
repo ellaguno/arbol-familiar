@@ -41,7 +41,7 @@ class TreeTraversal
             'id' => $person->id,
             'name' => $isProtectedMinor ? $person->first_name : $person->full_name,
             'firstName' => $person->first_name,
-            'lastName' => $isProtectedMinor ? '' : $person->patronymic,
+            'lastName' => $isProtectedMinor ? '' : trim($person->patronymic . ' ' . ($person->matronymic ?? '')),
             'gender' => $person->gender,
             'birthDate' => $isProtectedMinor ? null : ($person->birth_year ?? ($person->birth_date?->format('Y'))),
             'deathDate' => $isProtectedMinor ? null : ($person->death_year ?? ($person->death_date?->format('Y'))),
