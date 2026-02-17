@@ -11,7 +11,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -97,7 +96,7 @@ class RegisterController extends Controller
             // Crear usuario
             $user = User::create([
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => $request->password,
                 'language' => app()->getLocale(),
                 'privacy_level' => 'direct_family',
                 'confirmation_code' => Str::random(6),

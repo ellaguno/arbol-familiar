@@ -9,10 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class Person extends Model
 {
     use HasFactory;
+
+    /**
+     * Cache en memoria para evitar recalcular el BFS múltiples veces por request.
+     */
+    protected ?array $_cachedConnectedIds = null;
 
     /**
      * The table associated with the model.
@@ -670,6 +677,107 @@ class Person extends Model
     }
 
     /**
+     * Obtiene los IDs de todos los ancestros en línea directa (padres, abuelos, bisabuelos, etc.).
+     * Recorrido recursivo con límite de profundidad para evitar loops.
+     *
+     * @param int $maxDepth Profundidad máxima (default 15 generaciones)
+     * @param array $visited IDs ya visitados para evitar ciclos
+     * @return array
+     */
+    public function getAllAncestorIds(int $maxDepth = 15, array $visited = []): array
+    {
+        if ($maxDepth <= 0) {
+            return [];
+        }
+
+        $ids = [];
+        $family = $this->familiesAsChild()->first();
+
+        if (!$family) {
+            return [];
+        }
+
+        if ($family->husband_id && !in_array($family->husband_id, $visited)) {
+            $ids[] = $family->husband_id;
+            $father = $family->husband;
+            if ($father) {
+                $ids = array_merge($ids, $father->getAllAncestorIds($maxDepth - 1, array_merge($visited, $ids)));
+            }
+        }
+
+        if ($family->wife_id && !in_array($family->wife_id, $visited)) {
+            $ids[] = $family->wife_id;
+            $mother = $family->wife;
+            if ($mother) {
+                $ids = array_merge($ids, $mother->getAllAncestorIds($maxDepth - 1, array_merge($visited, $ids)));
+            }
+        }
+
+        return array_unique($ids);
+    }
+
+    /**
+     * Obtiene los IDs de todos los descendientes en línea directa (hijos, nietos, bisnietos, etc.).
+     * Recorrido recursivo con límite de profundidad para evitar loops.
+     *
+     * @param int $maxDepth Profundidad máxima (default 15 generaciones)
+     * @param array $visited IDs ya visitados para evitar ciclos
+     * @return array
+     */
+    public function getAllDescendantIds(int $maxDepth = 15, array $visited = []): array
+    {
+        if ($maxDepth <= 0) {
+            return [];
+        }
+
+        $ids = [];
+        $familyIds = $this->familiesAsSpouse()->pluck('id');
+        $children = Person::whereHas('familiesAsChild', function ($query) use ($familyIds) {
+            $query->whereIn('family_id', $familyIds);
+        })->get();
+
+        foreach ($children as $child) {
+            if (!in_array($child->id, $visited)) {
+                $ids[] = $child->id;
+                $ids = array_merge($ids, $child->getAllDescendantIds($maxDepth - 1, array_merge($visited, $ids)));
+            }
+        }
+
+        return array_unique($ids);
+    }
+
+    /**
+     * Verifica si esta persona y el usuario están en la misma línea directa
+     * (ascendente o descendente). Esto permite que abuelos, bisabuelos, nietos, etc.
+     * siempre puedan verse mutuamente independientemente del nivel de privacidad.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isLineageOf(User $user): bool
+    {
+        if (!$user->person_id) {
+            return false;
+        }
+
+        $userPersonId = $user->person_id;
+
+        // Verificar si el usuario es ancestro de esta persona
+        $myAncestors = $this->getAllAncestorIds();
+        if (in_array($userPersonId, $myAncestors)) {
+            return true;
+        }
+
+        // Verificar si el usuario es descendiente de esta persona
+        $myDescendants = $this->getAllDescendantIds();
+        if (in_array($userPersonId, $myDescendants)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Verifica si un usuario tiene permiso de edición para esta persona.
      *
      * @param int $userId
@@ -722,6 +830,14 @@ class Person extends Model
             return true;
         }
 
+        // Los ascendentes y descendientes directos SIEMPRE pueden verse mutuamente,
+        // independientemente del nivel de privacidad (excepto perfil completo de menores).
+        // Requerimiento del cliente: "Todos los usuarios deben tener acceso a los perfiles
+        // de todos sus ascendentes y descendientes directos."
+        if ($this->isLineageOf($user)) {
+            return true;
+        }
+
         // Verificar según nivel de privacidad
         switch ($this->privacy_level) {
             case 'direct_family':
@@ -755,7 +871,8 @@ class Person extends Model
 
     /**
      * Verifica si un usuario es familia directa de esta persona.
-     * Familia directa incluye: padres, hijos, cónyuges, hermanos.
+     * Familia directa incluye: padres, hijos, cónyuges, hermanos,
+     * y toda la línea de ascendentes y descendientes directos.
      * Verificacion bidireccional para evitar asimetrias.
      *
      * @param User $user
@@ -773,11 +890,13 @@ class Person extends Model
             return false;
         }
 
-        // Obtener los IDs de familia directa de ESTA persona
+        $userPersonId = $userPerson->id;
+
+        // Obtener los IDs de familia directa de ESTA persona (1 nivel)
         $myFamilyIds = $this->directFamilyIds;
 
         // Si el usuario (su persona) está en mi familia directa
-        if (in_array($userPerson->id, $myFamilyIds)) {
+        if (in_array($userPersonId, $myFamilyIds)) {
             return true;
         }
 
@@ -787,66 +906,148 @@ class Person extends Model
             return true;
         }
 
+        // Verificar línea directa completa (abuelos, bisabuelos, nietos, etc.)
+        // isLineageOf ya cubre esto, pero lo dejamos aquí por si se llama
+        // isDirectFamilyOf directamente sin pasar por canBeViewedBy
+        if ($this->isLineageOf($user)) {
+            return true;
+        }
+
         return false;
     }
 
     /**
-     * Obtiene los IDs de familia extendida (incluye familia política, tíos, primos, sobrinos).
-     * Nivel 2 de privacidad según requerimientos del cliente.
+     * Obtiene los IDs de TODAS las personas conectadas en el árbol familiar.
+     * Nivel 2 de privacidad según requerimientos del cliente:
+     * "todos los ligados sin ninguna restricción".
+     *
+     * Usa un recorrido BFS (Breadth-First Search) sobre el grafo de relaciones
+     * familiares cargado en memoria con solo 2 queries a la BD.
+     *
+     * @param int $maxNodes Límite de seguridad para evitar recorridos infinitos
+     * @return array
+     */
+    public function getAllConnectedPersonIds(int $maxNodes = 5000): array
+    {
+        // Memoización: evitar recalcular el BFS múltiples veces en la misma request
+        if (isset($this->_cachedConnectedIds)) {
+            return $this->_cachedConnectedIds;
+        }
+
+        // Cargar todo el grafo familiar en 2 queries
+        $families = DB::table('families')
+            ->select('id', 'husband_id', 'wife_id')
+            ->get();
+
+        $familyChildren = DB::table('family_children')
+            ->select('family_id', 'person_id')
+            ->get();
+
+        // Construir índices en memoria para recorrido eficiente
+        // personToFamilies: person_id => [family_ids] (familias donde es cónyuge)
+        $personToSpouseFamilies = [];
+        // familyToSpouses: family_id => [person_ids] (cónyuges de la familia)
+        $familyToSpouses = [];
+        foreach ($families as $family) {
+            if ($family->husband_id) {
+                $personToSpouseFamilies[$family->husband_id][] = $family->id;
+                $familyToSpouses[$family->id][] = $family->husband_id;
+            }
+            if ($family->wife_id) {
+                $personToSpouseFamilies[$family->wife_id][] = $family->id;
+                $familyToSpouses[$family->id][] = $family->wife_id;
+            }
+        }
+
+        // personToChildFamilies: person_id => [family_ids] (familias donde es hijo)
+        $personToChildFamilies = [];
+        // familyToChildren: family_id => [person_ids] (hijos de la familia)
+        $familyToChildren = [];
+        foreach ($familyChildren as $fc) {
+            $personToChildFamilies[$fc->person_id][] = $fc->family_id;
+            $familyToChildren[$fc->family_id][] = $fc->person_id;
+        }
+
+        // BFS desde esta persona
+        $visited = [$this->id => true];
+        $queue = [$this->id];
+        $result = [];
+
+        while (!empty($queue) && count($visited) < $maxNodes) {
+            $currentId = array_shift($queue);
+
+            // 1. Familias donde esta persona es cónyuge → obtener otro cónyuge + hijos
+            if (isset($personToSpouseFamilies[$currentId])) {
+                foreach ($personToSpouseFamilies[$currentId] as $familyId) {
+                    // Cónyuges de esta familia
+                    if (isset($familyToSpouses[$familyId])) {
+                        foreach ($familyToSpouses[$familyId] as $spouseId) {
+                            if (!isset($visited[$spouseId])) {
+                                $visited[$spouseId] = true;
+                                $result[] = $spouseId;
+                                $queue[] = $spouseId;
+                            }
+                        }
+                    }
+                    // Hijos de esta familia
+                    if (isset($familyToChildren[$familyId])) {
+                        foreach ($familyToChildren[$familyId] as $childId) {
+                            if (!isset($visited[$childId])) {
+                                $visited[$childId] = true;
+                                $result[] = $childId;
+                                $queue[] = $childId;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 2. Familias donde esta persona es hijo → obtener padres + hermanos
+            if (isset($personToChildFamilies[$currentId])) {
+                foreach ($personToChildFamilies[$currentId] as $familyId) {
+                    // Padres (cónyuges de esta familia)
+                    if (isset($familyToSpouses[$familyId])) {
+                        foreach ($familyToSpouses[$familyId] as $parentId) {
+                            if (!isset($visited[$parentId])) {
+                                $visited[$parentId] = true;
+                                $result[] = $parentId;
+                                $queue[] = $parentId;
+                            }
+                        }
+                    }
+                    // Hermanos (otros hijos de esta familia)
+                    if (isset($familyToChildren[$familyId])) {
+                        foreach ($familyToChildren[$familyId] as $siblingId) {
+                            if (!isset($visited[$siblingId])) {
+                                $visited[$siblingId] = true;
+                                $result[] = $siblingId;
+                                $queue[] = $siblingId;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->_cachedConnectedIds = $result;
+        return $result;
+    }
+
+    /**
+     * Obtiene los IDs de familia extendida.
+     * Nivel 2 de privacidad: todas las personas conectadas en el árbol.
      *
      * @return array
      */
     public function getExtendedFamilyIdsAttribute(): array
     {
-        $ids = $this->directFamilyIds;
-
-        // Agregar familia de los cónyuges (suegros, cuñados)
-        foreach ($this->spouses as $spouse) {
-            $ids = array_merge($ids, $spouse->directFamilyIds);
-        }
-
-        // Agregar tíos (hermanos de los padres)
-        if ($this->father) {
-            foreach ($this->father->siblings as $uncle) {
-                $ids[] = $uncle->id;
-            }
-        }
-        if ($this->mother) {
-            foreach ($this->mother->siblings as $aunt) {
-                $ids[] = $aunt->id;
-            }
-        }
-
-        // Agregar primos (hijos de tíos)
-        // Nota: esto puede ser costoso en términos de queries, considerar cachear
-        if ($this->father) {
-            foreach ($this->father->siblings as $uncle) {
-                foreach ($uncle->children as $cousin) {
-                    $ids[] = $cousin->id;
-                }
-            }
-        }
-        if ($this->mother) {
-            foreach ($this->mother->siblings as $aunt) {
-                foreach ($aunt->children as $cousin) {
-                    $ids[] = $cousin->id;
-                }
-            }
-        }
-
-        // Agregar sobrinos (hijos de hermanos)
-        foreach ($this->siblings as $sibling) {
-            foreach ($sibling->children as $nephew) {
-                $ids[] = $nephew->id;
-            }
-        }
-
-        return array_unique($ids);
+        return $this->getAllConnectedPersonIds();
     }
 
     /**
      * Verifica si un usuario es familia extendida de esta persona.
-     * Verificacion bidireccional para evitar asimetrias.
+     * El BFS es simétrico: si A alcanza B, B alcanza A a través del mismo grafo.
+     * Por lo tanto no se necesita verificación bidireccional.
      *
      * @param User $user
      * @return bool
@@ -857,23 +1058,7 @@ class Person extends Model
             return false;
         }
 
-        $userPerson = $user->person;
-        if (!$userPerson) {
-            return false;
-        }
-
-        // Verificar si el usuario está en mi familia extendida
-        $extendedIds = $this->extendedFamilyIds;
-        if (in_array($userPerson->id, $extendedIds)) {
-            return true;
-        }
-
-        // Verificar al revés: si YO estoy en la familia extendida del usuario
-        $userExtendedIds = $userPerson->extendedFamilyIds;
-        if (in_array($this->id, $userExtendedIds)) {
-            return true;
-        }
-
-        return false;
+        $connectedIds = $this->extendedFamilyIds;
+        return in_array($user->person_id, $connectedIds);
     }
 }

@@ -42,15 +42,22 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <div>
-                            <h3 class="font-medium text-blue-800 dark:text-blue-300">{{ __('Como funciona') }}</h3>
-                            <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
-                                {{ __('Al reclamar este perfil, enviaras una solicitud a') }}
-                                <strong>{{ $creator?->email ?? __('el creador') }}</strong>
-                                {{ __('quien debera aprobar que tu cuenta se vincule con esta persona.') }}
-                            </p>
-                            <p class="text-sm text-blue-700 dark:text-blue-400 mt-2">
-                                {{ __('Una vez aprobado, podras editar la informacion de este perfil y sera tu perfil principal en el sistema.') }}
-                            </p>
+                            @if(!empty($canRelink) && $canRelink)
+                                <h3 class="font-medium text-blue-800 dark:text-blue-300">{{ __('Vincular tu cuenta a este perfil') }}</h3>
+                                <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                                    {{ __('Tu cuenta se desvinculara de tu perfil actual y se vinculara a este perfil. Esta persona sera tu perfil principal en el sistema.') }}
+                                </p>
+                            @else
+                                <h3 class="font-medium text-blue-800 dark:text-blue-300">{{ __('Como funciona') }}</h3>
+                                <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                                    {{ __('Al reclamar este perfil, enviaras una solicitud a') }}
+                                    <strong>{{ $creator?->email ?? __('el creador') }}</strong>
+                                    {{ __('quien debera aprobar que tu cuenta se vincule con esta persona.') }}
+                                </p>
+                                <p class="text-sm text-blue-700 dark:text-blue-400 mt-2">
+                                    {{ __('Una vez aprobado, podras editar la informacion de este perfil y sera tu perfil principal en el sistema.') }}
+                                </p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -59,22 +66,28 @@
                 <form action="{{ route('persons.claim.send', $person) }}" method="POST" class="space-y-4">
                     @csrf
 
-                    <div>
-                        <label for="message" class="form-label">{{ __('Mensaje (opcional)') }}</label>
-                        <textarea name="message" id="message" rows="4" class="form-input"
-                                  placeholder="{{ __('Explica por que eres esta persona o agrega informacion que ayude a verificar tu identidad...') }}">{{ old('message') }}</textarea>
-                        <p class="form-help">{{ __('Puedes agregar detalles que ayuden a confirmar tu identidad.') }}</p>
-                        @error('message')
-                            <p class="form-error">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    @if(empty($canRelink) || !$canRelink)
+                        <div>
+                            <label for="message" class="form-label">{{ __('Mensaje (opcional)') }}</label>
+                            <textarea name="message" id="message" rows="4" class="form-input"
+                                      placeholder="{{ __('Explica por que eres esta persona o agrega informacion que ayude a verificar tu identidad...') }}">{{ old('message') }}</textarea>
+                            <p class="form-help">{{ __('Puedes agregar detalles que ayuden a confirmar tu identidad.') }}</p>
+                            @error('message')
+                                <p class="form-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
 
                     <div class="flex items-center gap-4 pt-4">
                         <button type="submit" class="btn-primary">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            {{ __('Enviar solicitud') }}
+                            @if(!empty($canRelink) && $canRelink)
+                                {{ __('Confirmar vinculacion') }}
+                            @else
+                                {{ __('Enviar solicitud') }}
+                            @endif
                         </button>
                         <a href="{{ route('persons.show', $person) }}" class="btn-outline">
                             {{ __('Cancelar') }}

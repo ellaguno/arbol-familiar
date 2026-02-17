@@ -13,7 +13,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
@@ -183,7 +182,7 @@ class AdminController extends Controller
         ]);
 
         $user->update([
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
         ]);
 
         $this->logActivity('password_reset', $user);

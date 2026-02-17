@@ -73,7 +73,7 @@ class TreeController extends Controller
 
         $cacheKey = "tree_data_{$person->id}_{$generations}_{$direction}";
 
-        $data = Cache::remember($cacheKey, 600, function () use ($person, $generations, $direction) {
+        $data = Cache::remember($cacheKey, 120, function () use ($person, $generations, $direction) {
             $data = [
                 'root' => $this->traversal->personToNode($person),
                 'ancestors' => [],
@@ -91,7 +91,8 @@ class TreeController extends Controller
             return $data;
         });
 
-        return response()->json($data);
+        return response()->json($data)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     /**
@@ -105,11 +106,12 @@ class TreeController extends Controller
 
         $cacheKey = "tree_fan_{$person->id}_{$generations}";
 
-        $data = Cache::remember($cacheKey, 600, function () use ($person, $generations) {
+        $data = Cache::remember($cacheKey, 120, function () use ($person, $generations) {
             return $this->traversal->buildFanData($person, $generations);
         });
 
-        return response()->json($data);
+        return response()->json($data)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 
     /**
@@ -183,7 +185,8 @@ class TreeController extends Controller
     /**
      * Verifica permiso de visualizacion.
      * Usa el método canBeViewedBy del modelo Person que implementa
-     * los 4 niveles de privacidad: private, family, community, public.
+     * los 4 niveles de privacidad.
+     * Usa HttpResponseException para redirigir sin destruir la sesión.
      */
     protected function authorizeView(Person $person): void
     {
@@ -196,7 +199,9 @@ class TreeController extends Controller
                 ? $previousUrl
                 : route('persons.index');
 
-            abort(redirect($redirectUrl)->with('error', __('No tienes permiso para ver este arbol.')));
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                redirect($redirectUrl)->with('error', __('No tienes permiso para ver este arbol.'))
+            );
         }
     }
 }

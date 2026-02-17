@@ -9,7 +9,6 @@ use App\Models\Person;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class InvitationController extends Controller
@@ -219,7 +218,7 @@ class InvitationController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $invitation->email,
-            'password' => Hash::make($validated['password']),
+            'password' => $validated['password'],
             'person_id' => $invitation->person_id,
             'email_verified_at' => now(), // Verificado porque viene del email
         ]);

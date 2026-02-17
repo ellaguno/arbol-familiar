@@ -21,22 +21,34 @@ class PersonController extends Controller
         $user = auth()->user();
         $query = Person::query();
 
-        // Obtener IDs de familia directa y extendida si el usuario tiene persona asociada
+        // Obtener IDs de familia directa, extendida y linaje si el usuario tiene persona asociada
         $directFamilyIds = [];
         $extendedFamilyIds = [];
+        $lineageIds = [];
         if ($user->person_id && $user->person) {
             $directFamilyIds = $user->person->directFamilyIds;
             $extendedFamilyIds = $user->person->extendedFamilyIds;
+            // Linaje directo: ascendentes y descendientes SIEMPRE visibles sin importar privacidad
+            $lineageIds = array_unique(array_merge(
+                $user->person->getAllAncestorIds(),
+                $user->person->getAllDescendantIds()
+            ));
         }
 
         // Filtrar por privacidad según los 4 niveles
-        $query->where(function ($q) use ($user, $directFamilyIds, $extendedFamilyIds) {
+        $query->where(function ($q) use ($user, $directFamilyIds, $extendedFamilyIds, $lineageIds) {
             // Personas creadas por el usuario (siempre visibles)
             $q->where('created_by', $user->id);
 
             // Usuario puede ver su propio perfil
             if ($user->person_id) {
                 $q->orWhere('id', $user->person_id);
+            }
+
+            // Linaje directo: ascendentes y descendientes SIEMPRE visibles
+            // independientemente del nivel de privacidad (requerimiento del cliente)
+            if (!empty($lineageIds)) {
+                $q->orWhereIn('id', $lineageIds);
             }
 
             // Personas con nivel 'community' (visibles para todos los registrados)
@@ -252,13 +264,22 @@ class PersonController extends Controller
                     'type' => $relation,
                 ]);
 
-                // Redirigir al arbol del familiar relacionado
+                // Redirigir al arbol del familiar relacionado si tiene permiso
                 $successMessage = __('Persona creada y agregada al arbol correctamente.');
                 if ($invitationMessage) {
                     $successMessage .= ' ' . $invitationMessage;
                 }
-                return redirect()->route('tree.view', $relatedPerson)
-                    ->with('success', $successMessage);
+
+                // Refrescar modelo para que las nuevas relaciones se reflejen en canBeViewedBy
+                $relatedPerson->refresh();
+
+                if ($relatedPerson->canBeViewedBy($user)) {
+                    return redirect()->route('tree.view', $relatedPerson)
+                        ->with('success', $successMessage);
+                } else {
+                    return redirect()->route('persons.show', $person)
+                        ->with('success', $successMessage);
+                }
             }
         }
 
@@ -711,9 +732,8 @@ class PersonController extends Controller
     /**
      * Verifica si el usuario puede ver la persona.
      * Usa el método canBeViewedBy del modelo Person que implementa
-     * los 4 niveles de privacidad: private, family, community, public.
-     * Usa redirect en lugar de abort(403) para evitar que el middleware
-     * de autenticacion redirija al login (bug de logout).
+     * los 4 niveles de privacidad.
+     * Usa HttpResponseException para redirigir sin destruir la sesión.
      */
     protected function authorizeView(Person $person): void
     {
@@ -726,16 +746,43 @@ class PersonController extends Controller
                 ? $previousUrl
                 : route('persons.index');
 
-            abort(redirect($redirectUrl)->with('error', __('No tienes permiso para ver esta persona.')));
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                redirect($redirectUrl)->with('error', __('No tienes permiso para ver esta persona.'))
+            );
         }
     }
 
     /**
      * Verifica si el usuario puede editar la persona.
+     * Para menores de edad con padres registrados en el sistema,
+     * solo los padres pueden editar (no el creador original).
      */
     protected function authorizeEdit(Person $person): void
     {
         $user = auth()->user();
+
+        // Si es menor de edad y tiene padres registrados con cuenta,
+        // solo los padres pueden editar (no el creador original)
+        if ($person->is_minor_calculated && $this->minorHasRegisteredParents($person)) {
+            // Los padres registrados pueden editar
+            if ($user->person_id && $this->isParentOf($user->person_id, $person)) {
+                return;
+            }
+
+            // El menor vinculado puede editar su propio perfil (si tiene cuenta)
+            if ($user->person_id === $person->id) {
+                return;
+            }
+
+            // Admin siempre puede
+            if ($user->is_admin) {
+                return;
+            }
+
+            abort(403, 'Solo los padres registrados pueden editar el perfil de un menor.');
+        }
+
+        // Para no-menores, lógica normal:
 
         // El creador puede editar
         if ($person->created_by === $user->id) {
@@ -758,6 +805,47 @@ class PersonController extends Controller
         }
 
         abort(403, 'No tienes permiso para editar esta persona.');
+    }
+
+    /**
+     * Verifica si un menor tiene al menos un padre con cuenta de usuario registrada.
+     */
+    protected function minorHasRegisteredParents(Person $minor): bool
+    {
+        $family = $minor->familiesAsChild()->first();
+        if (!$family) {
+            return false;
+        }
+
+        // Verificar si el padre o la madre tienen user_id (cuenta registrada)
+        if ($family->husband_id) {
+            $father = Person::find($family->husband_id);
+            if ($father && $father->user_id) {
+                return true;
+            }
+        }
+
+        if ($family->wife_id) {
+            $mother = Person::find($family->wife_id);
+            if ($mother && $mother->user_id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifica si un person_id es padre/madre de la persona dada.
+     */
+    protected function isParentOf(int $personId, Person $child): bool
+    {
+        $family = $child->familiesAsChild()->first();
+        if (!$family) {
+            return false;
+        }
+
+        return $family->husband_id === $personId || $family->wife_id === $personId;
     }
 
     /**
@@ -962,8 +1050,21 @@ class PersonController extends Controller
         // Verificar que el usuario puede ver la persona
         $this->authorizeView($person);
 
-        // No puede reclamar si ya tiene persona asociada
-        if ($user->person_id) {
+        // Admin o creador puede re-vincularse SOLO si su persona actual
+        // no tiene relaciones familiares (es la persona dummy del seeder)
+        $canRelink = false;
+        if ($user->person_id && !$person->user_id
+            && ($user->is_admin || $person->created_by === $user->id)) {
+            $currentPerson = $user->person;
+            if ($currentPerson) {
+                $hasFamily = $currentPerson->familiesAsChild()->exists()
+                    || $currentPerson->familiesAsSpouse()->exists();
+                $canRelink = !$hasFamily;
+            }
+        }
+
+        // No puede reclamar si ya tiene persona asociada (a menos que pueda re-vincularse)
+        if ($user->person_id && !$canRelink) {
             return back()->with('error', __('Ya tienes un perfil asociado a tu cuenta.'));
         }
 
@@ -986,7 +1087,7 @@ class PersonController extends Controller
         // Cargar el creador de la persona
         $creator = \App\Models\User::find($person->created_by);
 
-        return view('persons.claim', compact('person', 'creator'));
+        return view('persons.claim', compact('person', 'creator', 'canRelink'));
     }
 
     /**
@@ -996,13 +1097,46 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        // Validaciones
-        if ($user->person_id) {
-            return back()->with('error', __('Ya tienes un perfil asociado a tu cuenta.'));
-        }
-
+        // La persona no debe tener usuario vinculado
         if ($person->user_id) {
             return back()->with('error', __('Esta persona ya esta vinculada a otra cuenta.'));
+        }
+
+        // Admin o creador puede re-vincularse solo si su persona actual no tiene familia
+        $canRelink = false;
+        if ($user->person_id && ($user->is_admin || $person->created_by === $user->id)) {
+            $currentPerson = $user->person;
+            if ($currentPerson) {
+                $hasFamily = $currentPerson->familiesAsChild()->exists()
+                    || $currentPerson->familiesAsSpouse()->exists();
+                $canRelink = !$hasFamily;
+            }
+        }
+
+        if ($canRelink) {
+            // Desvincular persona anterior
+            $oldPerson = $user->person;
+            if ($oldPerson) {
+                $oldPerson->update(['user_id' => null]);
+            }
+
+            // Vincular nueva persona
+            $user->update(['person_id' => $person->id]);
+            $person->update([
+                'user_id' => $user->id,
+                'consent_status' => 'approved',
+                'consent_responded_at' => now(),
+            ]);
+
+            ActivityLog::log('person_claimed', $user, $person);
+
+            return redirect()->route('tree.view', $person)
+                ->with('success', __('Tu cuenta ha sido vinculada a este perfil correctamente.'));
+        }
+
+        // Usuario sin persona asociada: flujo normal de solicitud
+        if ($user->person_id) {
+            return back()->with('error', __('Ya tienes un perfil asociado a tu cuenta.'));
         }
 
         // Verificar si ya hay solicitud pendiente

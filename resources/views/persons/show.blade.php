@@ -100,6 +100,19 @@
                                 $isOwnPerson = $user->person_id === $person->id;
                                 $canClaim = !$user->person_id && !$person->user_id;
 
+                                // Admin o creador puede re-vincularse SOLO si su persona actual
+                                // no tiene relaciones familiares (es la persona dummy del seeder)
+                                $canRelink = false;
+                                if ($user->person_id && $user->person_id !== $person->id && !$person->user_id
+                                    && ($user->is_admin || $person->created_by === $user->id)) {
+                                    $currentPerson = $user->person;
+                                    if ($currentPerson) {
+                                        $hasFamily = $currentPerson->familiesAsChild()->exists()
+                                            || $currentPerson->familiesAsSpouse()->exists();
+                                        $canRelink = !$hasFamily;
+                                    }
+                                }
+
                                 // Verificar si la persona ya está en el árbol del usuario
                                 $isAlreadyInTree = false;
                                 if ($user->person_id && $user->person_id !== $person->id) {
@@ -156,6 +169,14 @@
                                         {{ __('En tu árbol') }}
                                     </span>
                                 </div>
+                                @if($canRelink)
+                                    <a href="{{ route('persons.claim', $person) }}" class="btn-primary w-full">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                        {{ __('Este soy yo') }}
+                                    </a>
+                                @endif
                             @elseif($canAddToTree)
                                 {{-- Usuario CON perfil puede agregar a su árbol --}}
                                 <a href="{{ route('persons.add-to-tree', $person) }}" class="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors" style="background-color: #DC2626; hover:background-color: #B91C1C;">
