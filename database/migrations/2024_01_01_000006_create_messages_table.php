@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('recipient_id');
 
             // Tipo y contenido
-            $table->enum('type', ['invitation', 'consent_request', 'relationship_found', 'general', 'system']);
+            $table->enum('type', ['invitation', 'consent_request', 'relationship_found', 'general', 'system', 'person_claim', 'person_merge', 'family_edit_request']);
             $table->string('subject');
             $table->text('body');
 

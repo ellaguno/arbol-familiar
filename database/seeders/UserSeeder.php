@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
         // Usuario administrador
         User::create([
             'email' => 'admin@mi-familia.org',
-            'password' => Hash::make('MiFamilia2025!'),
+            'password' => 'MiFamilia2025!',
             'is_admin' => true,
             'language' => 'es',
             'privacy_level' => 'community',
@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
         // Usuario de prueba con herencia
         User::create([
             'email' => 'ivan.horvat@example.com',
-            'password' => Hash::make('MiFamilia2025!'),
+            'password' => 'MiFamilia2025!',
             'language' => 'es',
             'privacy_level' => 'extended_family',
             'email_verified_at' => now(),
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
         // Usuario de prueba regular
         User::create([
             'email' => 'maria.garcia@example.com',
-            'password' => Hash::make('MiFamilia2025!'),
+            'password' => 'MiFamilia2025!',
             'language' => 'es',
             'privacy_level' => 'direct_family',
             'email_verified_at' => now(),
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
         // Usuario de prueba (nuevo, sin verificar)
         User::create([
             'email' => 'ana.kovac@example.com',
-            'password' => Hash::make('MiFamilia2025!'),
+            'password' => 'MiFamilia2025!',
             'language' => 'en',
             'privacy_level' => 'direct_family',
             'email_verified_at' => null,

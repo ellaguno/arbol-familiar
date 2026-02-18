@@ -22,15 +22,24 @@ return new class extends Migration
             $table->string('matronymic', 100)->nullable()->comment('Apellido materno');
             $table->string('nickname', 100)->nullable();
             $table->enum('gender', ['M', 'F', 'U'])->default('U')->comment('M=Masculino, F=Femenino, U=Desconocido');
+            $table->enum('marital_status', ['single', 'married', 'common_law', 'divorced', 'widowed'])
+                  ->nullable()
+                  ->comment('Estado civil');
 
             // Nacimiento
             $table->date('birth_date')->nullable();
+            $table->smallInteger('birth_year')->nullable();
+            $table->tinyInteger('birth_month')->nullable();
+            $table->tinyInteger('birth_day')->nullable();
             $table->boolean('birth_date_approx')->default(false)->comment('Fecha aproximada');
             $table->string('birth_place')->nullable();
             $table->string('birth_country', 100)->nullable();
 
             // Defuncion
             $table->date('death_date')->nullable();
+            $table->smallInteger('death_year')->nullable();
+            $table->tinyInteger('death_month')->nullable();
+            $table->tinyInteger('death_day')->nullable();
             $table->boolean('death_date_approx')->default(false);
             $table->string('death_place')->nullable();
             $table->string('death_country', 100)->nullable();
@@ -54,12 +63,16 @@ return new class extends Migration
             $table->string('origin_town')->nullable()->comment('Poblacion de origen');
             $table->string('migration_decade', 20)->nullable()->comment('Decada de migracion');
             $table->string('migration_destination', 100)->nullable()->comment('Primer pais de destino');
+            $table->string('heritage_family_member_name', 200)->nullable()
+                ->comment('Nombre del familiar con herencia etnica');
+            $table->string('heritage_family_relationship', 50)->nullable()
+                ->comment('Tipo de relacion con el familiar con herencia etnica');
 
             // Multimedia
             $table->string('photo_path', 500)->nullable();
 
             // Privacidad y consentimiento
-            $table->enum('privacy_level', ['private', 'family', 'community', 'public'])->default('family');
+            $table->string('privacy_level', 30)->default('extended_family');
             $table->enum('consent_status', ['pending', 'approved', 'denied', 'not_required'])->default('not_required');
             $table->timestamp('consent_requested_at')->nullable();
             $table->timestamp('consent_responded_at')->nullable();

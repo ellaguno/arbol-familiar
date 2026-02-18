@@ -35,7 +35,7 @@ class GedcomController extends Controller
     public function preview(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:51200', // 50MB max para GEDZIP
+            'file' => 'required|file|max:102400', // 100MB max para GEDZIP
         ]);
 
         $file = $request->file('file');
@@ -167,7 +167,7 @@ class GedcomController extends Controller
         $request->validate([
             'temp_path' => 'required|string',
             'temp_media_path' => 'nullable|string',
-            'privacy_level' => 'required|in:private,family,community,public',
+            'privacy_level' => 'required|in:direct_family,extended_family,selected_users,community',
             'check_duplicates' => 'boolean',
             'update_existing' => 'boolean',
             'import_media' => 'boolean',

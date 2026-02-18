@@ -16,9 +16,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->unsignedBigInteger('person_id')->nullable()->comment('Referencia a la persona que representa este usuario');
+            $table->boolean('is_admin')->default(false);
 
             // Configuracion
             $table->enum('language', ['es', 'en'])->default('es');
+            $table->string('theme_preference', 10)->default('default');
             $table->enum('privacy_level', ['direct_family', 'extended_family', 'selected_users', 'community'])->default('direct_family');
 
             // Verificacion

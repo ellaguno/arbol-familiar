@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\SiteSetting;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 /**
  * Seeder mínimo para producción.
@@ -21,12 +20,13 @@ class ProductionSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => 'admin@mi-familia.org'],
             [
-                'name' => 'Administrador',
-                'password' => Hash::make('MiFamilia2025!'),
-                'is_admin' => true,
+                'password' => 'MiFamilia2025!',
                 'email_verified_at' => now(),
             ]
         );
+
+        // is_admin no está en $fillable por seguridad, se establece aparte
+        $admin->setAdmin(true);
 
         $this->command->info('Usuario administrador creado:');
         $this->command->info('  Email: admin@mi-familia.org');

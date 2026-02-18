@@ -35,8 +35,6 @@ return new class extends Migration
             $table->foreign('granted_by')->references('id')->on('users')->cascadeOnDelete();
         });
 
-        // Agregar tipo de mensaje para solicitud de edición de familia
-        DB::statement("ALTER TABLE messages MODIFY COLUMN type ENUM('invitation', 'consent_request', 'relationship_found', 'general', 'system', 'person_claim', 'person_merge', 'family_edit_request') NOT NULL");
     }
 
     /**
@@ -44,12 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Eliminar mensajes con el nuevo tipo antes de revertir
-        DB::table('messages')->where('type', 'family_edit_request')->delete();
-
-        // Revertir el ENUM
-        DB::statement("ALTER TABLE messages MODIFY COLUMN type ENUM('invitation', 'consent_request', 'relationship_found', 'general', 'system', 'person_claim', 'person_merge') NOT NULL");
-
         Schema::dropIfExists('person_edit_permissions');
     }
 };

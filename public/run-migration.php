@@ -10,8 +10,8 @@ if (!isset($_GET['key']) || $_GET['key'] !== $secretKey) {
     die('Acceso denegado');
 }
 
-// Ruta al proyecto Laravel (hosting compartido cPanel)
-$laravelPath = '/home1/concurre/mi-familia';
+// Ruta al proyecto Laravel (relativa desde public_html)
+$laravelPath = __DIR__ . '/../mi-familia';
 
 require $laravelPath . '/vendor/autoload.php';
 

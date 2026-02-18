@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
 
             // Polimorfismo
-            $table->string('mediable_type', 100)->comment('App\\Models\\Person o App\\Models\\User');
-            $table->unsignedBigInteger('mediable_id');
+            $table->string('mediable_type', 100)->nullable()->comment('App\\Models\\Person o App\\Models\\User');
+            $table->unsignedBigInteger('mediable_id')->nullable();
 
             // Tipo de media
             $table->enum('type', ['image', 'document', 'link']);

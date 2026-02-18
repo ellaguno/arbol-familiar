@@ -24,7 +24,7 @@ return new class extends Migration
 
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('responded_at')->nullable();
-            $table->timestamp('expires_at');
+            $table->timestamp('expires_at')->nullable();
 
             $table->timestamp('created_at')->useCurrent();
 

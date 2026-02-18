@@ -38,7 +38,7 @@ class AdminSeeder extends Seeder
         // Crear usuario administrador
         $user = User::create([
             'email' => 'admin@mi-familia.org',
-            'password' => Hash::make('MiFamiliaAdmin2025!'),
+            'password' => 'MiFamiliaAdmin2025!',
             'person_id' => $person->id,
             'is_admin' => true,
             'email_verified_at' => now(),
