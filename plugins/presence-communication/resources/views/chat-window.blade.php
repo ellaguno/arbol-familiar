@@ -201,7 +201,21 @@
                                      :class="msg.is_mine
                                          ? 'bg-mf-primary text-white rounded-br-none'
                                          : 'bg-theme-secondary/20 text-theme rounded-bl-none'">
-                                    <p class="text-sm" x-text="msg.message"></p>
+                                    {{-- Imagen adjunta --}}
+                                    <template x-if="msg.attachment_url">
+                                        <div class="mb-1">
+                                            <a :href="msg.attachment_url" target="_blank" rel="noopener noreferrer">
+                                                <img :src="msg.attachment_url"
+                                                     class="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                                     style="max-height: 200px;"
+                                                     loading="lazy">
+                                            </a>
+                                        </div>
+                                    </template>
+                                    {{-- Texto con URLs clicables --}}
+                                    <template x-if="msg.message">
+                                        <p class="text-sm break-words" x-html="renderMessage(msg.message)"></p>
+                                    </template>
                                     <p class="text-xs mt-1 opacity-70"
                                        x-text="formatTime(msg.created_at)"></p>
                                 </div>
@@ -209,18 +223,82 @@
                         </template>
                     </div>
 
+                    {{-- Input oculto para adjuntar imagen --}}
+                    <input type="file" x-ref="attachmentInput"
+                           @change="handleAttachmentSelect($event)"
+                           accept="image/jpeg,image/png,image/gif,image/webp"
+                           class="hidden">
+
                     {{-- Input de mensaje --}}
                     <div x-show="selectedUserId" class="pt-4 border-t border-theme">
-                        <form @submit.prevent="sendMessage()" class="flex gap-2">
+                        {{-- Preview de adjunto --}}
+                        <div x-show="attachmentPreviewUrl" x-cloak class="pb-2 flex items-center gap-3">
+                            <div class="relative">
+                                <img :src="attachmentPreviewUrl"
+                                     class="w-16 h-16 object-cover rounded-lg border border-theme">
+                                <button type="button" @click="removeAttachment()"
+                                        class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">
+                                    &times;
+                                </button>
+                            </div>
+                            <span class="text-xs text-theme-secondary truncate" x-text="attachmentFile ? attachmentFile.name : ''"></span>
+                        </div>
+
+                        <form @submit.prevent="sendMessage()" class="flex items-end gap-1">
+                            {{-- Emoji picker --}}
+                            <div class="relative" @click.outside="showEmojiPicker = false">
+                                <button type="button"
+                                        @click="showEmojiPicker = !showEmojiPicker"
+                                        class="p-2 text-theme-secondary hover:text-theme transition-colors"
+                                        title="{{ __('Emoji') }}">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </button>
+                                <div x-show="showEmojiPicker" x-cloak x-transition
+                                     class="absolute bottom-full left-0 mb-2 w-72 max-h-64 overflow-y-auto bg-theme-card rounded-xl shadow-2xl border border-theme p-3 z-20">
+                                    <template x-for="cat in emojiCategories" :key="cat.name">
+                                        <div class="mb-2">
+                                            <p class="text-xs font-semibold text-theme-muted uppercase mb-1" x-text="cat.name"></p>
+                                            <div class="flex flex-wrap gap-1">
+                                                <template x-for="em in cat.emojis" :key="em">
+                                                    <button type="button"
+                                                            @click="insertEmoji(em)"
+                                                            class="w-8 h-8 flex items-center justify-center text-lg hover:bg-theme-hover rounded cursor-pointer transition-colors"
+                                                            x-text="em">
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- Boton adjuntar imagen --}}
+                            <button type="button"
+                                    @click="$refs.attachmentInput.click()"
+                                    class="p-2 text-theme-secondary hover:text-theme transition-colors"
+                                    title="{{ __('Adjuntar imagen') }}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </button>
+
+                            {{-- Input de texto --}}
                             <input type="text"
+                                   x-ref="messageInput"
                                    x-model="newMessage"
                                    :placeholder="'{{ __('Escribe un mensaje...') }}'"
                                    class="input-field flex-1"
                                    maxlength="2000"
                                    autocomplete="off">
+
+                            {{-- Boton enviar --}}
                             <button type="submit"
                                     class="btn-primary px-4"
-                                    :disabled="!newMessage.trim() || sending">
+                                    :disabled="(!newMessage.trim() && !attachmentFile) || sending">
                                 <svg x-show="!sending" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                 </svg>
@@ -526,6 +604,19 @@
             pollInterval: null,
             messagePollInterval: null,
 
+            // Emoji picker
+            showEmojiPicker: false,
+            emojiCategories: [
+                { name: '{{ __("Caras") }}', emojis: ['😀','😂','🥹','😊','😍','🥰','😘','😜','🤪','😎','🤩','🥳','😢','😭','😤','😡','🤯','😱','🥶','🤔','🤫','🤭','😏','😴','🤢','🤮','😷','🤒','🤕','🥴'] },
+                { name: '{{ __("Manos") }}', emojis: ['👍','👎','👏','🙌','🤝','✌️','🤞','🫶','❤️','💔','💕','💪','🙏','👋','✋','🫡','🤙'] },
+                { name: '{{ __("Objetos") }}', emojis: ['🎉','🎊','🎂','🎁','🔥','⭐','💡','📷','📸','🏠','🌳','🌺','🐶','🐱','☀️','🌙','⛅','🌈'] },
+                { name: '{{ __("Comida") }}', emojis: ['☕','🍺','🍷','🍕','🍔','🌮','🍰','🍎','🥑','🍳'] },
+            ],
+
+            // Adjunto de imagen
+            attachmentFile: null,
+            attachmentPreviewUrl: null,
+
             // WebRTC
             callState: 'idle', // idle, calling, incoming, room-invite, active
             callType: 'video', // voice, video
@@ -700,28 +791,38 @@
             },
 
             async sendMessage() {
-                if (!this.newMessage.trim() || this.sending) return;
+                if ((!this.newMessage.trim() && !this.attachmentFile) || this.sending) return;
 
                 this.sending = true;
                 try {
+                    const formData = new FormData();
+                    formData.append('recipient_id', this.selectedUserId);
+                    if (this.newMessage.trim()) {
+                        formData.append('message', this.newMessage.trim());
+                    }
+                    if (this.attachmentFile) {
+                        formData.append('attachment', this.attachmentFile);
+                    }
+
                     const response = await fetch('{{ route("chat.send") }}', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
                         },
-                        body: JSON.stringify({
-                            recipient_id: this.selectedUserId,
-                            message: this.newMessage.trim(),
-                        }),
+                        body: formData,
                     });
 
                     if (response.ok) {
                         const data = await response.json();
                         this.messages.push(data.message);
                         this.newMessage = '';
+                        this.removeAttachment();
                         this.$nextTick(() => this.scrollToBottom());
                         this.fetchConversations();
+                    } else {
+                        const errData = await response.json().catch(() => ({}));
+                        if (errData.error) alert(errData.error);
                     }
                 } catch (e) {
                     console.error('Error sending message:', e);
@@ -751,6 +852,67 @@
                 }
                 return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' +
                        date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            },
+
+            // ===================== EMOJI & ATTACHMENTS =====================
+
+            insertEmoji(emoji) {
+                this.newMessage += emoji;
+                this.showEmojiPicker = false;
+                this.$nextTick(() => {
+                    this.$refs.messageInput.focus();
+                });
+            },
+
+            renderMessage(text) {
+                if (!text) return '';
+                // 1. HTML-escape todo el texto
+                const escaped = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+                // 2. Detectar URLs y envolver en <a>
+                const urlRegex = /(https?:\/\/[^\s<>&"']+)/gi;
+                return escaped.replace(urlRegex, function(url) {
+                    const displayUrl = url.length > 50 ? url.substring(0, 47) + '...' : url;
+                    return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" '
+                         + 'class="underline break-all hover:opacity-80" '
+                         + 'onclick="event.stopPropagation()">'
+                         + displayUrl + '</a>';
+                });
+            },
+
+            handleAttachmentSelect(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('{{ __("Formato permitido: JPG, PNG, GIF o WebP.") }}');
+                    event.target.value = '';
+                    return;
+                }
+                if (file.size > 3 * 1024 * 1024) {
+                    alert('{{ __("La imagen no debe superar 3 MB.") }}');
+                    event.target.value = '';
+                    return;
+                }
+
+                this.attachmentFile = file;
+                this.attachmentPreviewUrl = URL.createObjectURL(file);
+            },
+
+            removeAttachment() {
+                if (this.attachmentPreviewUrl) {
+                    URL.revokeObjectURL(this.attachmentPreviewUrl);
+                }
+                this.attachmentFile = null;
+                this.attachmentPreviewUrl = null;
+                if (this.$refs.attachmentInput) {
+                    this.$refs.attachmentInput.value = '';
+                }
             },
 
             // ===================== WEBRTC =====================

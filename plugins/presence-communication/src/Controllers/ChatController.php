@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Plugin\PresenceCommunication\Events\ChatMessageSent;
 use Plugin\PresenceCommunication\Models\ChatMessage;
 
@@ -66,7 +67,9 @@ class ChatController extends Controller
                 'photo' => $photoUrl,
                 'sex' => $otherPerson->sex ?? null,
                 'last_message' => $lastMessage ? [
-                    'message' => \Illuminate\Support\Str::limit($lastMessage->message, 50),
+                    'message' => $lastMessage->message
+                        ? Str::limit($lastMessage->message, 50)
+                        : ($lastMessage->hasAttachment() ? __('[Imagen]') : ''),
                     'created_at' => $lastMessage->created_at->toISOString(),
                     'is_mine' => $lastMessage->sender_id === $userId,
                 ] : null,
@@ -100,6 +103,8 @@ class ChatController extends Controller
                     'sender_id' => $msg->sender_id,
                     'recipient_id' => $msg->recipient_id,
                     'message' => $msg->message,
+                    'attachment_url' => $msg->attachment_url,
+                    'attachment_type' => $msg->attachment_type,
                     'is_mine' => $msg->sender_id === $currentUserId,
                     'read_at' => $msg->read_at?->toISOString(),
                     'created_at' => $msg->created_at->toISOString(),
@@ -124,8 +129,18 @@ class ChatController extends Controller
     {
         $request->validate([
             'recipient_id' => 'required|integer|exists:users,id',
-            'message' => 'required|string|max:2000',
+            'message' => 'nullable|string|max:2000',
+            'attachment' => 'nullable|file|image|mimes:jpg,jpeg,png,gif,webp|max:3072',
+        ], [
+            'attachment.image' => __('El archivo debe ser una imagen.'),
+            'attachment.mimes' => __('Formato permitido: JPG, PNG, GIF o WebP.'),
+            'attachment.max' => __('La imagen no debe superar 3 MB.'),
         ]);
+
+        // Al menos mensaje o adjunto requerido
+        if (!$request->filled('message') && !$request->hasFile('attachment')) {
+            return response()->json(['error' => __('Escribe un mensaje o adjunta una imagen.')], 422);
+        }
 
         $senderId = Auth::id();
         $recipientId = (int) $request->input('recipient_id');
@@ -135,10 +150,21 @@ class ChatController extends Controller
             return response()->json(['error' => __('No puedes enviarte mensajes a ti mismo')], 422);
         }
 
+        $attachmentPath = null;
+        $attachmentType = null;
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $attachmentPath = $file->store('chat-attachments', 'public');
+            $attachmentType = $file->getMimeType();
+        }
+
         $chatMessage = ChatMessage::create([
             'sender_id' => $senderId,
             'recipient_id' => $recipientId,
             'message' => $request->input('message'),
+            'attachment_path' => $attachmentPath,
+            'attachment_type' => $attachmentType,
         ]);
 
         $chatMessage->load('sender.person');
@@ -158,6 +184,8 @@ class ChatController extends Controller
                 'sender_id' => $chatMessage->sender_id,
                 'recipient_id' => $chatMessage->recipient_id,
                 'message' => $chatMessage->message,
+                'attachment_url' => $chatMessage->attachment_url,
+                'attachment_type' => $chatMessage->attachment_type,
                 'is_mine' => true,
                 'read_at' => null,
                 'created_at' => $chatMessage->created_at->toISOString(),
@@ -215,7 +243,9 @@ class ChatController extends Controller
                 return [
                     'id' => $msg->id,
                     'sender_id' => $msg->sender_id,
-                    'message' => \Illuminate\Support\Str::limit($msg->message, 80),
+                    'message' => $msg->message
+                        ? Str::limit($msg->message, 80)
+                        : ($msg->hasAttachment() ? __('[Imagen]') : ''),
                     'sender_name' => $senderPerson ? $senderPerson->full_name : ($msg->sender->email ?? ''),
                     'sender_photo' => $senderPhoto,
                     'created_at' => $msg->created_at->toISOString(),

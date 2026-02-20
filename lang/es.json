@@ -689,5 +689,16 @@
     "destinatarios": "destinatarios",
     "Destinatario no valido.": "Destinatario no válido.",
     "Modo oscuro": "Modo oscuro",
-    "Modo claro": "Modo claro"
+    "Modo claro": "Modo claro",
+    "Emoji": "Emoji",
+    "Adjuntar imagen": "Adjuntar imagen",
+    "[Imagen]": "[Imagen]",
+    "Caras": "Caras",
+    "Manos": "Manos",
+    "Objetos": "Objetos",
+    "Comida": "Comida",
+    "El archivo debe ser una imagen.": "El archivo debe ser una imagen.",
+    "Formato permitido: JPG, PNG, GIF o WebP.": "Formato permitido: JPG, PNG, GIF o WebP.",
+    "La imagen no debe superar 3 MB.": "La imagen no debe superar 3 MB.",
+    "Escribe un mensaje o adjunta una imagen.": "Escribe un mensaje o adjunta una imagen."
 }

@@ -57,7 +57,7 @@
                             </template>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-semibold text-theme" x-text="msg.sender_name"></p>
-                                <p class="text-xs text-theme-secondary truncate" x-text="msg.message"></p>
+                                <p class="text-xs text-theme-secondary truncate" x-text="msg.message || '{{ __('[Imagen]') }}'"></p>
                                 <p class="text-[10px] text-theme-muted mt-0.5" x-text="formatTimeAgo(msg.created_at)"></p>
                             </div>
                         </div>

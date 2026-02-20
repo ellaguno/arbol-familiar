@@ -690,5 +690,16 @@
     "destinatarios": "recipients",
     "Destinatario no valido.": "Invalid recipient.",
     "Modo oscuro": "Dark mode",
-    "Modo claro": "Light mode"
+    "Modo claro": "Light mode",
+    "Emoji": "Emoji",
+    "Adjuntar imagen": "Attach image",
+    "[Imagen]": "[Image]",
+    "Caras": "Faces",
+    "Manos": "Hands",
+    "Objetos": "Objects",
+    "Comida": "Food",
+    "El archivo debe ser una imagen.": "The file must be an image.",
+    "Formato permitido: JPG, PNG, GIF o WebP.": "Allowed formats: JPG, PNG, GIF or WebP.",
+    "La imagen no debe superar 3 MB.": "Image must not exceed 3 MB.",
+    "Escribe un mensaje o adjunta una imagen.": "Write a message or attach an image."
 }

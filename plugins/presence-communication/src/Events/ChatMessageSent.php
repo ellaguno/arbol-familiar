@@ -41,6 +41,8 @@ class ChatMessageSent implements ShouldBroadcast
             'sender_id' => $this->chatMessage->sender_id,
             'recipient_id' => $this->chatMessage->recipient_id,
             'message' => $this->chatMessage->message,
+            'attachment_url' => $this->chatMessage->attachment_url,
+            'attachment_type' => $this->chatMessage->attachment_type,
             'created_at' => $this->chatMessage->created_at->toISOString(),
             'sender_name' => $this->chatMessage->sender->full_name ?? '',
         ];
