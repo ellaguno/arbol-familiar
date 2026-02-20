@@ -10,8 +10,7 @@
             <section class="mb-8">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">1. {{ __('Aceptación de los Términos') }}</h2>
                 <p>
-                    {{ __('Al acceder y utilizar {{ config('app.name') }}, usted acepta estos términos y condiciones en su totalidad.
-                    Si no está de acuerdo con alguna parte de estos términos, no debe utilizar esta plataforma.') }}
+                    {{ __('Al acceder y utilizar :app, usted acepta estos términos y condiciones en su totalidad. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar esta plataforma.', ['app' => config('app.name')]) }}
                 </p>
             </section>
 
@@ -42,7 +41,7 @@
 
             <section class="mb-8">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">4. {{ __('Uso Aceptable') }}</h2>
-                <p>{{ __('Al utilizar {{ config('app.name') }}, usted se compromete a:') }}</p>
+                <p>{{ __('Al utilizar :app, usted se compromete a:', ['app' => config('app.name')]) }}</p>
                 <ul class="list-disc pl-6 mt-3 space-y-2">
                     <li>{{ __('Proporcionar información genealógica precisa y verificable.') }}</li>
                     <li>{{ __('Respetar la privacidad de otros usuarios y sus familias.') }}</li>
