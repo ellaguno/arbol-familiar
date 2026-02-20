@@ -78,7 +78,13 @@ class SocialAuthController extends Controller
             return redirect()->route('welcome.first');
         }
 
-        return redirect()->intended(route('dashboard'));
+        // Limpiar URLs de AJAX/polling que no deben ser destino post-login
+        $intended = session()->pull('url.intended', route('dashboard'));
+        if (str_contains($intended, '/call/') || str_contains($intended, '/api/') || str_contains($intended, '/poll')) {
+            $intended = route('dashboard');
+        }
+
+        return redirect($intended);
     }
 
     protected function getScopes(string $provider): array
@@ -86,7 +92,7 @@ class SocialAuthController extends Controller
         return match ($provider) {
             'google' => ['openid', 'profile', 'email'],
             'microsoft' => ['User.Read'],
-            'facebook' => ['email', 'public_profile'],
+            'facebook' => [],
             default => [],
         };
     }

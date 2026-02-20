@@ -108,7 +108,13 @@ class LoginController extends Controller
             return redirect()->route('welcome.first');
         }
 
-        return redirect()->intended(route('dashboard'));
+        // Limpiar URLs de AJAX/polling que no deben ser destino post-login
+        $intended = $request->session()->pull('url.intended', route('dashboard'));
+        if (str_contains($intended, '/call/') || str_contains($intended, '/api/') || str_contains($intended, '/poll')) {
+            $intended = route('dashboard');
+        }
+
+        return redirect($intended);
     }
 
     /**

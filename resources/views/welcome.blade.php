@@ -158,6 +158,8 @@
                                 {{ __('Ingresar') }}
                             </button>
                         </form>
+
+                        {!! $hooks->render('auth.login.social', []) !!}
                     </div>
 
                     <!-- Caja de Registro -->
