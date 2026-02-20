@@ -18,6 +18,7 @@ use App\Http\Controllers\GedcomController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PluginController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ToolsController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\EventController;
 
@@ -384,6 +385,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/plugins/{slug}/uninstall', [PluginController::class, 'uninstall'])->name('plugins.uninstall');
         Route::post('/plugins/{slug}/toggle', [PluginController::class, 'toggle'])->name('plugins.toggle');
         Route::delete('/plugins/{slug}', [PluginController::class, 'delete'])->name('plugins.delete');
+
+        // Herramientas
+        Route::get('/tools', [ToolsController::class, 'index'])->name('tools');
+        Route::get('/tools/fix-surnames', [ToolsController::class, 'fixSurnames'])->name('tools.fix-surnames');
+        Route::post('/tools/fix-surnames', [ToolsController::class, 'applyFixSurnames'])->name('tools.fix-surnames.apply');
 
         // Reportes
         Route::get('/reports', [ReportController::class, 'index'])->name('reports');

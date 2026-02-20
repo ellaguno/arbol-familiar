@@ -435,6 +435,26 @@ class GedcomParser
                 $this->createEvent($person, 'RESI', $residence);
             }
         }
+
+        // Entierro
+        if (isset($data['burial'])) {
+            $this->createEvent($person, 'BURI', $data['burial']);
+        }
+
+        // Naturalizacion
+        if (isset($data['naturalization'])) {
+            $this->createEvent($person, 'NATU', $data['naturalization']);
+        }
+
+        // Graduacion
+        if (isset($data['graduation'])) {
+            $this->createEvent($person, 'GRAD', $data['graduation']);
+        }
+
+        // Retiro
+        if (isset($data['retirement'])) {
+            $this->createEvent($person, 'RETI', $data['retirement']);
+        }
     }
 
     /**
@@ -661,6 +681,22 @@ class GedcomParser
 
             case 'RESI':
                 $record['residence'][] = $this->parseEventSubRecords();
+                break;
+
+            case 'BURI':
+                $record['burial'] = $this->parseEventSubRecords();
+                break;
+
+            case 'NATU':
+                $record['naturalization'] = $this->parseEventSubRecords();
+                break;
+
+            case 'GRAD':
+                $record['graduation'] = $this->parseEventSubRecords();
+                break;
+
+            case 'RETI':
+                $record['retirement'] = $this->parseEventSubRecords();
                 break;
 
             case 'NOTE':
