@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Auth;
 
 class Message extends Model
 {
@@ -14,6 +16,7 @@ class Message extends Model
         'sender_id',
         'recipient_id',
         'type',
+        'broadcast_scope',
         'subject',
         'body',
         'related_person_id',
@@ -56,11 +59,98 @@ class Message extends Model
     }
 
     /**
+     * Destinatarios de un mensaje broadcast.
+     */
+    public function recipients(): HasMany
+    {
+        return $this->hasMany(MessageRecipient::class);
+    }
+
+    /**
+     * Registro pivote del usuario actual (para broadcasts).
+     */
+    public function currentUserRecipient(): HasOne
+    {
+        return $this->hasOne(MessageRecipient::class)
+            ->where('user_id', Auth::id());
+    }
+
+    /**
+     * Verifica si es un mensaje de difusion.
+     */
+    public function isBroadcast(): bool
+    {
+        return $this->type === 'broadcast';
+    }
+
+    /**
+     * Etiqueta del alcance de difusion.
+     */
+    public function getBroadcastScopeLabel(): string
+    {
+        return match ($this->broadcast_scope) {
+            'all' => __('Todos los usuarios'),
+            'family' => __('Mi familia'),
+            default => '',
+        };
+    }
+
+    /**
+     * Obtener el registro pivote para un usuario especifico.
+     */
+    public function recipientPivot(int $userId): ?MessageRecipient
+    {
+        return $this->recipients()->where('user_id', $userId)->first();
+    }
+
+    /**
+     * Verificar si un usuario es destinatario de este mensaje.
+     */
+    public function isRecipientOf(int $userId): bool
+    {
+        if (!$this->isBroadcast()) {
+            return $this->recipient_id === $userId;
+        }
+
+        return $this->recipients()->where('user_id', $userId)->exists();
+    }
+
+    /**
+     * Verificar si el mensaje fue leido por el usuario actual.
+     */
+    public function isReadByCurrentUser(): bool
+    {
+        if (!$this->isBroadcast()) {
+            return $this->read_at !== null;
+        }
+
+        // Usar relacion eager-loaded si esta disponible
+        if ($this->relationLoaded('currentUserRecipient')) {
+            return $this->currentUserRecipient && $this->currentUserRecipient->read_at !== null;
+        }
+
+        $pivot = $this->recipientPivot(Auth::id());
+        return $pivot && $pivot->read_at !== null;
+    }
+
+    /**
+     * Conteo de destinatarios (para broadcasts).
+     */
+    public function getRecipientCountAttribute(): int
+    {
+        if (!$this->isBroadcast()) {
+            return 1;
+        }
+
+        return $this->recipients()->count();
+    }
+
+    /**
      * Verifica si es un mensaje del sistema.
      */
     public function isSystemMessage(): bool
     {
-        return $this->type === 'system' || $this->sender_id === null;
+        return $this->type === 'system' || ($this->sender_id === null && !$this->isBroadcast());
     }
 
     /**

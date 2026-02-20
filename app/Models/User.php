@@ -109,13 +109,28 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Mensajes no leidos.
+     * Mensajes directos no leidos.
      */
     public function unreadMessages(): HasMany
     {
         return $this->receivedMessages()
             ->whereNull('read_at')
             ->whereNull('deleted_at');
+    }
+
+    /**
+     * Conteo total de mensajes no leidos (directos + broadcasts).
+     */
+    public function getUnreadMessageCountAttribute(): int
+    {
+        $directCount = $this->unreadMessages()->count();
+
+        $broadcastCount = MessageRecipient::where('user_id', $this->id)
+            ->whereNull('read_at')
+            ->whereNull('deleted_at')
+            ->count();
+
+        return $directCount + $broadcastCount;
     }
 
     /**

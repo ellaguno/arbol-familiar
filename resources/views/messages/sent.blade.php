@@ -29,6 +29,18 @@
             </nav>
         </div>
 
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <p class="text-green-700 dark:text-green-300 font-medium">{{ session('success') }}</p>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p class="text-red-700 dark:text-red-300 font-medium">{{ session('error') }}</p>
+            </div>
+        @endif
+
         @if($messages->isEmpty())
             <div class="card">
                 <div class="card-body text-center py-12">
@@ -48,7 +60,13 @@
                         <div class="flex items-start gap-4">
                             <!-- Avatar -->
                             <div class="flex-shrink-0">
-                                @if($message->recipient && $message->recipient->photo)
+                                @if($message->isBroadcast())
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                                        </svg>
+                                    </div>
+                                @elseif($message->recipient && $message->recipient->photo)
                                     <img src="{{ Storage::url($message->recipient->photo) }}" class="w-10 h-10 rounded-full object-cover">
                                 @else
                                     <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-medium">
@@ -61,9 +79,18 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="text-sm text-gray-500">{{ __('Para:') }}</span>
-                                    <span class="font-medium text-gray-900">
-                                        {{ $message->recipient ? $message->recipient->name : __('Usuario eliminado') }}
-                                    </span>
+                                    @if($message->isBroadcast())
+                                        <span class="font-medium text-gray-900">
+                                            {{ $message->getBroadcastScopeLabel() }}
+                                        </span>
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                                            {{ $message->recipient_count }} {{ __('destinatarios') }}
+                                        </span>
+                                    @else
+                                        <span class="font-medium text-gray-900">
+                                            {{ $message->recipient ? $message->recipient->name : __('Usuario eliminado') }}
+                                        </span>
+                                    @endif
 
                                     @if($message->action_required)
                                         <span class="px-2 py-0.5 text-xs rounded-full

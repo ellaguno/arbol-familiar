@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use App\Models\MessageRecipient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -26,11 +27,30 @@ class DashboardController extends Controller
         });
 
         // Mensajes no leidos (sin cache, deben ser siempre actuales)
-        $unreadMessages = $user->unreadMessages()
+        // Directos
+        $directUnread = $user->unreadMessages()
             ->with('sender')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
+
+        // Broadcasts
+        $broadcastUnreadIds = MessageRecipient::where('user_id', $user->id)
+            ->whereNull('read_at')
+            ->whereNull('deleted_at')
+            ->pluck('message_id');
+
+        $broadcastUnread = $broadcastUnreadIds->isNotEmpty()
+            ? Message::whereIn('id', $broadcastUnreadIds)
+                ->with('sender')
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get()
+            : collect();
+
+        $unreadMessages = $directUnread->merge($broadcastUnread)
+            ->sortByDesc('created_at')
+            ->take(5);
 
         // Familia cercana (si tiene persona asociada)
         $family = null;

@@ -21,7 +21,13 @@
             <div class="card-header border-b">
                 <div class="flex items-start justify-between">
                     <div class="flex items-start gap-4">
-                        @if($message->isSystemMessage())
+                        @if($message->isBroadcast())
+                            <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                                </svg>
+                            </div>
+                        @elseif($message->isSystemMessage())
                             <div class="w-12 h-12 rounded-full bg-theme-secondary flex items-center justify-center">
                                 <svg class="w-6 h-6 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -38,7 +44,11 @@
                         <div>
                             <h1 class="text-xl font-bold text-theme">{{ $message->subject }}</h1>
                             <div class="flex items-center gap-2 mt-1 text-sm text-theme-muted">
-                                @if($message->sender_id === Auth::id())
+                                @if($message->isBroadcast())
+                                    <span>{{ __('De:') }} <strong>{{ $message->sender?->name ?? __('Sistema') }}</strong></span>
+                                    <span class="text-theme-muted">|</span>
+                                    <span>{{ __('Para:') }} <strong>{{ $message->getBroadcastScopeLabel() }}</strong></span>
+                                @elseif($message->sender_id === Auth::id())
                                     <span>{{ __('Para:') }} <strong>{{ $message->recipient?->name ?? __('Usuario eliminado') }}</strong></span>
                                 @else
                                     <span>{{ __('De:') }} <strong>{{ $message->sender?->name ?? __('Sistema') }}</strong></span>
@@ -50,22 +60,21 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        @if($message->type !== 'message')
-                            <span class="px-3 py-1 text-sm rounded-full
-                                {{ $message->type === 'invitation' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : '' }}
-                                {{ $message->type === 'consent_request' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300' : '' }}
-                                {{ $message->type === 'system' ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' : '' }}">
-                                @switch($message->type)
-                                    @case('invitation')
-                                        {{ __('Invitacion') }}
-                                        @break
-                                    @case('consent_request')
-                                        {{ __('Consentimiento') }}
-                                        @break
-                                    @case('system')
-                                        {{ __('Sistema') }}
-                                        @break
-                                @endswitch
+                        @if($message->isBroadcast())
+                            <span class="px-3 py-1 text-sm rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                                {{ __('Difusion') }}
+                            </span>
+                        @elseif($message->type === 'invitation')
+                            <span class="px-3 py-1 text-sm rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
+                                {{ __('Invitacion') }}
+                            </span>
+                        @elseif($message->type === 'consent_request')
+                            <span class="px-3 py-1 text-sm rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
+                                {{ __('Consentimiento') }}
+                            </span>
+                        @elseif($message->type === 'system')
+                            <span class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                {{ __('Sistema') }}
                             </span>
                         @endif
                     </div>
@@ -92,7 +101,7 @@
                 </div>
             </div>
 
-            <!-- Accion requerida -->
+            <!-- Accion requerida (solo mensajes directos) -->
             @if($message->action_required && $message->recipient_id === Auth::id())
                 <div class="px-6 py-4 bg-yellow-50 dark:bg-yellow-900/30 border-t border-yellow-200 dark:border-yellow-800">
                     @if($message->action_status === 'pending')
@@ -145,7 +154,17 @@
 
             <!-- Acciones -->
             <div class="card-body border-t flex flex-wrap gap-2">
-                @if($message->recipient_id === Auth::id() && $message->sender_id)
+                @if($message->isBroadcast())
+                    {{-- Broadcast: reply va al sender --}}
+                    @if($message->sender_id && $message->sender_id !== Auth::id())
+                        <a href="{{ route('messages.reply', $message) }}" class="btn-primary">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                            </svg>
+                            {{ __('Responder al remitente') }}
+                        </a>
+                    @endif
+                @elseif($message->recipient_id === Auth::id() && $message->sender_id)
                     <a href="{{ route('messages.reply', $message) }}" class="btn-primary">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
@@ -154,11 +173,11 @@
                     </a>
                 @endif
 
-                @if($message->recipient_id === Auth::id())
+                @if(($message->isBroadcast() && $message->isRecipientOf(Auth::id())) || (!$message->isBroadcast() && $message->recipient_id === Auth::id()))
                     <form action="{{ route('messages.toggleRead', $message) }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="btn-outline">
-                            @if($message->isRead())
+                            @if($message->isReadByCurrentUser())
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"/>
                                 </svg>

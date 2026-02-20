@@ -676,5 +676,16 @@
     "Error al unirse a la llamada": "Error al unirse a la llamada",
     "Error al agregar participante": "Error al agregar participante",
     "No tienes invitacion a esta sala.": "No tienes invitación a esta sala.",
-    "Ya se envio una invitacion a este usuario.": "Ya se envió una invitación a este usuario."
+    "Ya se envio una invitacion a este usuario.": "Ya se envió una invitación a este usuario.",
+    "Difusion": "Difusión",
+    "Todos los usuarios": "Todos los usuarios",
+    "Mi familia": "Mi familia",
+    "Usuarios": "Usuarios",
+    "Mensaje enviado a :count destinatarios.": "Mensaje enviado a :count destinatarios.",
+    "No hay destinatarios para este mensaje.": "No hay destinatarios para este mensaje.",
+    "Este mensaje sera enviado a todos los usuarios registrados.": "Este mensaje será enviado a todos los usuarios registrados.",
+    "Este mensaje sera enviado a todos los miembros de tu familia en el arbol.": "Este mensaje será enviado a todos los miembros de tu familia en el árbol.",
+    "Responder al remitente": "Responder al remitente",
+    "destinatarios": "destinatarios",
+    "Destinatario no valido.": "Destinatario no válido."
 }

@@ -43,7 +43,7 @@
             </div>
         @endisset
 
-        <form action="{{ route('messages.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('messages.store') }}" method="POST" class="space-y-6" x-data="{ recipientValue: '{{ old('recipient_id', $recipient?->id ?? '') }}' }">
             @csrf
 
             <div class="card">
@@ -51,21 +51,60 @@
                     <div>
                         <label for="recipient_id" class="form-label">{{ __('Para') }} *</label>
                         <select name="recipient_id" id="recipient_id" required
+                                x-model="recipientValue"
                                 class="form-input @error('recipient_id') border-red-500 @enderror">
                             <option value="">{{ __('Seleccionar destinatario') }}</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}"
-                                    {{ (old('recipient_id', $recipient?->id) == $user->id) ? 'selected' : '' }}>
-                                    {{ $user->name }}
-                                    @if($user->email)
-                                        ({{ $user->email }})
+
+                            @if(($canBroadcastAll ?? false) || ($canBroadcastFamily ?? false))
+                                <optgroup label="{{ __('Difusion') }}">
+                                    @if($canBroadcastAll ?? false)
+                                        <option value="broadcast_all" {{ old('recipient_id') === 'broadcast_all' ? 'selected' : '' }}>
+                                            {{ __('Todos los usuarios') }}
+                                        </option>
                                     @endif
-                                </option>
-                            @endforeach
+                                    @if($canBroadcastFamily ?? false)
+                                        <option value="broadcast_family" {{ old('recipient_id') === 'broadcast_family' ? 'selected' : '' }}>
+                                            {{ __('Mi familia') }}
+                                        </option>
+                                    @endif
+                                </optgroup>
+                            @endif
+
+                            <optgroup label="{{ __('Usuarios') }}">
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}"
+                                        {{ (old('recipient_id', $recipient?->id) == $user->id) ? 'selected' : '' }}>
+                                        {{ $user->name }}
+                                        @if($user->email)
+                                            ({{ $user->email }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </optgroup>
                         </select>
                         @error('recipient_id')
                             <p class="form-error">{{ $message }}</p>
                         @enderror
+
+                        {{-- Avisos de difusion --}}
+                        <div x-show="recipientValue === 'broadcast_all'" x-cloak
+                             class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-2">
+                            <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                            </svg>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">
+                                {{ __('Este mensaje sera enviado a todos los usuarios registrados.') }}
+                            </p>
+                        </div>
+                        <div x-show="recipientValue === 'broadcast_family'" x-cloak
+                             class="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-start gap-2">
+                            <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <p class="text-sm text-green-700 dark:text-green-300">
+                                {{ __('Este mensaje sera enviado a todos los miembros de tu familia en el arbol.') }}
+                            </p>
+                        </div>
                     </div>
 
                     <div>

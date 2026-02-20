@@ -677,5 +677,16 @@
     "Error al unirse a la llamada": "Error joining the call",
     "Error al agregar participante": "Error adding participant",
     "No tienes invitacion a esta sala.": "You don't have an invitation to this room.",
-    "Ya se envio una invitacion a este usuario.": "An invitation has already been sent to this user."
+    "Ya se envio una invitacion a este usuario.": "An invitation has already been sent to this user.",
+    "Difusion": "Broadcast",
+    "Todos los usuarios": "All users",
+    "Mi familia": "My family",
+    "Usuarios": "Users",
+    "Mensaje enviado a :count destinatarios.": "Message sent to :count recipients.",
+    "No hay destinatarios para este mensaje.": "No recipients for this message.",
+    "Este mensaje sera enviado a todos los usuarios registrados.": "This message will be sent to all registered users.",
+    "Este mensaje sera enviado a todos los miembros de tu familia en el arbol.": "This message will be sent to all members of your family tree.",
+    "Responder al remitente": "Reply to sender",
+    "destinatarios": "recipients",
+    "Destinatario no valido.": "Invalid recipient."
 }

@@ -45,7 +45,8 @@
                     <div>
                         <select name="type" class="form-input text-sm">
                             <option value="">{{ __('Todos los tipos') }}</option>
-                            <option value="message" {{ request('type') === 'message' ? 'selected' : '' }}>{{ __('Mensajes') }}</option>
+                            <option value="general" {{ request('type') === 'general' ? 'selected' : '' }}>{{ __('Mensajes') }}</option>
+                            <option value="broadcast" {{ request('type') === 'broadcast' ? 'selected' : '' }}>{{ __('Difusion') }}</option>
                             <option value="system" {{ request('type') === 'system' ? 'selected' : '' }}>{{ __('Sistema') }}</option>
                             <option value="invitation" {{ request('type') === 'invitation' ? 'selected' : '' }}>{{ __('Invitaciones') }}</option>
                             <option value="consent_request" {{ request('type') === 'consent_request' ? 'selected' : '' }}>{{ __('Consentimientos') }}</option>
@@ -103,12 +104,19 @@
 
             <div class="card divide-y divide-theme">
                 @foreach($messages as $message)
+                    @php $isRead = $message->isReadByCurrentUser(); @endphp
                     <a href="{{ route('messages.show', $message) }}"
-                       class="block p-4 hover:bg-theme-secondary transition-colors {{ !$message->isRead() ? 'bg-blue-50 dark:bg-blue-900/30' : '' }}">
+                       class="block p-4 hover:bg-theme-secondary transition-colors {{ !$isRead ? 'bg-blue-50 dark:bg-blue-900/30' : '' }}">
                         <div class="flex items-start gap-4">
                             <!-- Avatar -->
                             <div class="flex-shrink-0">
-                                @if($message->isSystemMessage())
+                                @if($message->isBroadcast())
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                                        </svg>
+                                    </div>
+                                @elseif($message->isSystemMessage())
                                     <div class="w-10 h-10 rounded-full bg-theme-secondary flex items-center justify-center">
                                         <svg class="w-5 h-5 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -126,29 +134,28 @@
                             <!-- Contenido -->
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
-                                    @if(!$message->isRead())
+                                    @if(!$isRead)
                                         <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
                                     @endif
-                                    <span class="font-medium text-theme {{ !$message->isRead() ? 'font-semibold' : '' }}">
+                                    <span class="font-medium text-theme {{ !$isRead ? 'font-semibold' : '' }}">
                                         {{ $message->sender ? $message->sender->name : __('Sistema') }}
                                     </span>
 
-                                    @if($message->type !== 'message')
-                                        <span class="px-2 py-0.5 text-xs rounded-full
-                                            {{ $message->type === 'invitation' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : '' }}
-                                            {{ $message->type === 'consent_request' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300' : '' }}
-                                            {{ $message->type === 'system' ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' : '' }}">
-                                            @switch($message->type)
-                                                @case('invitation')
-                                                    {{ __('Invitacion') }}
-                                                    @break
-                                                @case('consent_request')
-                                                    {{ __('Consentimiento') }}
-                                                    @break
-                                                @case('system')
-                                                    {{ __('Sistema') }}
-                                                    @break
-                                            @endswitch
+                                    @if($message->isBroadcast())
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                                            {{ $message->getBroadcastScopeLabel() }}
+                                        </span>
+                                    @elseif($message->type === 'invitation')
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
+                                            {{ __('Invitacion') }}
+                                        </span>
+                                    @elseif($message->type === 'consent_request')
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
+                                            {{ __('Consentimiento') }}
+                                        </span>
+                                    @elseif($message->type === 'system')
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                            {{ __('Sistema') }}
                                         </span>
                                     @endif
 
@@ -159,7 +166,7 @@
                                     @endif
                                 </div>
 
-                                <h3 class="text-theme truncate {{ !$message->isRead() ? 'font-semibold' : '' }}">
+                                <h3 class="text-theme truncate {{ !$isRead ? 'font-semibold' : '' }}">
                                     {{ $message->subject }}
                                 </h3>
 
