@@ -18,6 +18,20 @@
             <div class="desktop-menu">
                 <!-- Fila superior: Idioma + controles -->
                 <div class="flex items-center gap-1 text-xs">
+                    <!-- Toggle tema claro/oscuro -->
+                    <button @click="$dispatch('toggle-theme')"
+                            class="text-theme-muted hover:text-yellow-500 dark:hover:text-yellow-300 transition-colors p-0.5"
+                            :title="document.documentElement.classList.contains('dark') ? '{{ __('Modo claro') }}' : '{{ __('Modo oscuro') }}'">
+                        {{-- Sol (visible en dark) --}}
+                        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        {{-- Luna (visible en light) --}}
+                        <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                    <span class="text-theme-muted">|</span>
                     <!-- Selector de idioma -->
                     <nav class="flex items-center gap-1">
                         <a href="?lang=es" class="{{ app()->getLocale() == 'es' ? 'text-red-600 font-semibold' : 'text-theme-muted hover:text-red-600' }}">ESP</a>
@@ -101,8 +115,20 @@
                 @endauth
             </div>
 
-            <!-- Botón hamburguesa (SOLO móvil/tablet, SOLO usuarios autenticados) -->
+            <!-- Controles móvil (SOLO móvil/tablet, SOLO usuarios autenticados) -->
             @auth
+            <div class="mobile-hamburger flex items-center gap-1">
+                <!-- Toggle tema -->
+                <button @click="$dispatch('toggle-theme')"
+                        class="p-2 rounded-md text-theme-muted hover:text-yellow-500 dark:hover:text-yellow-300 transition-colors">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+                <!-- Hamburguesa -->
             <button @click="mobileMenuOpen = !mobileMenuOpen"
                     class="mobile-hamburger p-2 rounded-md text-theme-secondary hover:text-[#3b82f6] hover:bg-theme-secondary focus:outline-none focus:ring-2 focus:ring-[#3b82f6]"
                     :aria-expanded="mobileMenuOpen">
@@ -116,11 +142,23 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
+            </div>
             @endauth
 
             <!-- Idioma y login para invitados en móvil/tablet -->
             @guest
             <div class="mobile-hamburger flex items-center gap-2 text-xs">
+                <!-- Toggle tema -->
+                <button @click="$dispatch('toggle-theme')"
+                        class="text-theme-muted hover:text-yellow-500 dark:hover:text-yellow-300 transition-colors p-0.5">
+                    <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+                <span class="text-theme-muted">|</span>
                 <nav class="flex items-center gap-1">
                     <a href="?lang=es" class="{{ app()->getLocale() == 'es' ? 'text-red-600 font-semibold' : 'text-theme-muted hover:text-red-600' }}">ES</a>
                     <span class="text-theme-muted">|</span>
@@ -221,6 +259,21 @@
             <!-- Separador -->
             <div class="border-t border-theme my-2"></div>
 
+            <!-- Toggle tema claro/oscuro -->
+            <button @click="$dispatch('toggle-theme')"
+                    class="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-theme-secondary hover:bg-theme">
+                {{-- Sol (dark mode) --}}
+                <svg class="w-5 h-5 mr-3 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                {{-- Luna (light mode) --}}
+                <svg class="w-5 h-5 mr-3 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+                <span class="dark:hidden">{{ __('Modo oscuro') }}</span>
+                <span class="hidden dark:inline">{{ __('Modo claro') }}</span>
+            </button>
+
             <!-- Selector de idioma -->
             <div x-data="{ langOpen: false }" class="relative">
                 <button @click="langOpen = !langOpen"
@@ -292,3 +345,42 @@
 <style>
     [x-cloak] { display: none !important; }
 </style>
+
+<script>
+    document.addEventListener('toggle-theme', function() {
+        const html = document.documentElement;
+        const isDark = html.classList.contains('dark');
+        const newTheme = isDark ? 'light' : 'dark';
+
+        // Toggle inmediato
+        html.classList.toggle('dark');
+
+        @auth
+        // Guardar en servidor para usuarios autenticados
+        fetch('{{ route("profile.theme.update") }}', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ theme_preference: newTheme })
+        });
+        @else
+        // Guardar en localStorage para invitados
+        localStorage.setItem('mf-theme', newTheme);
+        @endauth
+    });
+
+    @guest
+    // Aplicar tema guardado para invitados al cargar
+    (function() {
+        const saved = localStorage.getItem('mf-theme');
+        if (saved === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else if (saved === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+    })();
+    @endguest
+</script>

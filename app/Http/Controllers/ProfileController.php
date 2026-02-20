@@ -201,6 +201,10 @@ class ProfileController extends Controller
 
         ActivityLog::log('theme_preference_updated', $user);
 
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'ok']);
+        }
+
         return back()->with('success', __('Preferencia de tema actualizada.'));
     }
 

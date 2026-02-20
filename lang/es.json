@@ -687,5 +687,7 @@
     "Este mensaje sera enviado a todos los miembros de tu familia en el arbol.": "Este mensaje será enviado a todos los miembros de tu familia en el árbol.",
     "Responder al remitente": "Responder al remitente",
     "destinatarios": "destinatarios",
-    "Destinatario no valido.": "Destinatario no válido."
+    "Destinatario no valido.": "Destinatario no válido.",
+    "Modo oscuro": "Modo oscuro",
+    "Modo claro": "Modo claro"
 }

@@ -383,6 +383,8 @@
     .bg-theme-secondary { background-color: var(--mf-bg-secondary); }
     .bg-theme-hover { background-color: var(--mf-bg-hover); }
     .hover\:bg-theme-hover:hover { background-color: var(--mf-bg-hover); }
+    .hover\:bg-theme-secondary:hover { background-color: var(--mf-bg-secondary); }
+    .hover\:bg-theme:hover { background-color: var(--mf-bg); }
     .border-theme { border-color: var(--mf-border); }
     .border-theme-light { border-color: var(--mf-border-light); }
     .divide-theme > :not([hidden]) ~ :not([hidden]) { border-color: var(--mf-border); }

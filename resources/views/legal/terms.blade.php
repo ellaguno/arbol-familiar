@@ -2,20 +2,20 @@
     <x-slot name="title">{{ __('Términos y Condiciones') }} - {{ config('app.name') }}</x-slot>
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 class="text-3xl font-bold text-gray-900 mb-8">{{ __('Términos y Condiciones') }}</h1>
+        <h1 class="text-3xl font-bold text-theme mb-8">{{ __('Términos y Condiciones') }}</h1>
 
-        <div class="prose prose-lg max-w-none text-gray-600">
-            <p class="text-sm text-gray-500 mb-6">{{ __('Última actualización') }}: {{ now()->format('d/m/Y') }}</p>
+        <div class="prose prose-lg dark:prose-invert max-w-none text-theme-secondary">
+            <p class="text-sm text-theme-muted mb-6">{{ __('Última actualización') }}: {{ now()->format('d/m/Y') }}</p>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">1. {{ __('Aceptación de los Términos') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">1. {{ __('Aceptación de los Términos') }}</h2>
                 <p>
                     {{ __('Al acceder y utilizar :app, usted acepta estos términos y condiciones en su totalidad. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar esta plataforma.', ['app' => config('app.name')]) }}
                 </p>
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">2. {{ __('Descripción del Servicio') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">2. {{ __('Descripción del Servicio') }}</h2>
                 <p>
                     {{ config('app.name') }} {{ __('es una plataforma genealógica de código abierto que permite a los usuarios:') }}
                 </p>
@@ -29,7 +29,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">3. {{ __('Registro de Usuario') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">3. {{ __('Registro de Usuario') }}</h2>
                 <p>{{ __('Para utilizar la plataforma, usted debe:') }}</p>
                 <ul class="list-disc pl-6 mt-3 space-y-2">
                     <li>{{ __('Ser mayor de 18 años o contar con autorización de un tutor legal.') }}</li>
@@ -40,7 +40,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">4. {{ __('Uso Aceptable') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">4. {{ __('Uso Aceptable') }}</h2>
                 <p>{{ __('Al utilizar :app, usted se compromete a:', ['app' => config('app.name')]) }}</p>
                 <ul class="list-disc pl-6 mt-3 space-y-2">
                     <li>{{ __('Proporcionar información genealógica precisa y verificable.') }}</li>
@@ -53,7 +53,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">5. {{ __('Contenido del Usuario') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">5. {{ __('Contenido del Usuario') }}</h2>
                 <p>
                     {{ __('Usted es responsable del contenido que publique en la plataforma, incluyendo:') }}
                 </p>
@@ -68,7 +68,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">6. {{ __('Propiedad Intelectual') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">6. {{ __('Propiedad Intelectual') }}</h2>
                 <p>
                     {{ __('La plataforma, incluyendo su diseño, código, logotipos y contenido original, es software de código abierto. Consulte la licencia del proyecto para más detalles.') }}
                 </p>
@@ -78,7 +78,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">7. {{ __('Privacidad de Terceros') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">7. {{ __('Privacidad de Terceros') }}</h2>
                 <p>
                     {{ __('Al registrar información de otras personas (familiares), usted debe:') }}
                 </p>
@@ -90,7 +90,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">8. {{ __('Limitación de Responsabilidad') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">8. {{ __('Limitación de Responsabilidad') }}</h2>
                 <p>
                     {{ __('La plataforma se proporciona "tal cual" sin garantías de ningún tipo. No nos hacemos responsables de:') }}
                 </p>
@@ -103,7 +103,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">9. {{ __('Suspensión y Terminación') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">9. {{ __('Suspensión y Terminación') }}</h2>
                 <p>
                     {{ __('Nos reservamos el derecho de suspender o terminar su cuenta si:') }}
                 </p>
@@ -118,7 +118,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">10. {{ __('Modificaciones') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">10. {{ __('Modificaciones') }}</h2>
                 <p>
                     {{ __('Nos reservamos el derecho de modificar estos términos en cualquier momento.
                     Los cambios entrarán en vigor al publicarse en la plataforma.
@@ -127,7 +127,7 @@
             </section>
 
             <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">11. {{ __('Ley Aplicable') }}</h2>
+                <h2 class="text-xl font-semibold text-theme mb-4">11. {{ __('Ley Aplicable') }}</h2>
                 <p>
                     {{ __('Estos términos se rigen por las leyes de los Estados Unidos Mexicanos.
                     Cualquier disputa será resuelta en los tribunales competentes de la Ciudad de México.') }}
@@ -136,7 +136,7 @@
 
         </div>
 
-        <div class="mt-8 pt-8 border-t border-gray-200">
+        <div class="mt-8 pt-8 border-t border-theme">
             <a href="{{ url()->previous() }}" class="text-mf-primary hover:underline">
                 &larr; {{ __('Volver') }}
             </a>

@@ -96,7 +96,7 @@
 
             <!-- Cuerpo del mensaje -->
             <div class="card-body">
-                <div class="prose max-w-none">
+                <div class="prose dark:prose-invert max-w-none">
                     {!! nl2br(e($message->body)) !!}
                 </div>
             </div>

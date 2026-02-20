@@ -5,19 +5,19 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('messages.inbox') }}" class="text-gray-500 hover:text-gray-700">{{ __('Mensajes') }}</a>
+                    <a href="{{ route('messages.inbox') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Mensajes') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Nuevo mensaje') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Nuevo mensaje') }}</span>
                 </li>
             </ol>
         </nav>
 
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">
+            <h1 class="text-3xl font-bold text-theme">
                 @isset($originalMessage)
                     {{ __('Responder mensaje') }}
                 @else
@@ -27,16 +27,16 @@
         </div>
 
         @isset($originalMessage)
-            <div class="card mb-6 bg-gray-50">
+            <div class="card mb-6 bg-theme-secondary">
                 <div class="card-header">
-                    <h3 class="text-sm font-medium text-gray-500">{{ __('Mensaje original') }}</h3>
+                    <h3 class="text-sm font-medium text-theme-muted">{{ __('Mensaje original') }}</h3>
                 </div>
                 <div class="card-body">
-                    <div class="text-sm text-gray-600 mb-2">
+                    <div class="text-sm text-theme-secondary mb-2">
                         <strong>{{ $originalMessage->sender->name }}</strong>
-                        <span class="text-gray-400">{{ $originalMessage->created_at->format('d/m/Y H:i') }}</span>
+                        <span class="text-theme-muted">{{ $originalMessage->created_at->format('d/m/Y H:i') }}</span>
                     </div>
-                    <div class="text-gray-700 prose prose-sm max-w-none">
+                    <div class="text-theme-secondary prose prose-sm max-w-none">
                         {!! nl2br(e($originalMessage->body)) !!}
                     </div>
                 </div>
