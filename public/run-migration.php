@@ -25,15 +25,24 @@ echo "=== Ejecutando migraciones ===\n";
 echo "Laravel path: $laravelPath\n\n";
 
 try {
-    // Ejecutar migraciones pendientes
+    // Ejecutar migraciones pendientes (directorio principal)
+    echo "--- database/migrations ---\n";
     $exitCode = Artisan::call('migrate', ['--force' => true]);
     echo Artisan::output();
 
-    if ($exitCode === 0) {
-        echo "\n=== Migraciones completadas exitosamente ===\n";
-    } else {
-        echo "\n=== Error en migraciones (código: $exitCode) ===\n";
+    // Ejecutar migraciones de plugins
+    $pluginMigrationPaths = glob($laravelPath . '/plugins/*/database/migrations');
+    foreach ($pluginMigrationPaths as $absPath) {
+        $relativePath = str_replace($laravelPath . '/', '', $absPath);
+        echo "\n--- $relativePath ---\n";
+        $exitCode2 = Artisan::call('migrate', [
+            '--path' => $relativePath,
+            '--force' => true,
+        ]);
+        echo Artisan::output();
     }
+
+    echo "\n=== Migraciones completadas ===\n";
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo "Trace: " . $e->getTraceAsString();

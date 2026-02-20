@@ -1,6 +1,60 @@
 <x-app-layout>
     <x-slot name="title">{{ $media->title }} - {{ config('app.name') }}</x-slot>
 
+    @if($media->isImage())
+    <style>
+        .media-viewer-fullscreen {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+        }
+        .media-viewer-fullscreen .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            flex-shrink: 0;
+        }
+        .media-viewer-fullscreen .viewer-toolbar button {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .media-viewer-fullscreen .viewer-toolbar button:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .media-viewer-canvas {
+            flex: 1;
+            overflow: hidden;
+            cursor: grab;
+            position: relative;
+        }
+        .media-viewer-canvas.dragging {
+            cursor: grabbing;
+        }
+        .media-viewer-canvas img {
+            position: absolute;
+            transform-origin: 0 0;
+            max-width: none;
+            max-height: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+    </style>
+    @endif
+
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
@@ -22,8 +76,79 @@
                 <div class="card">
                     <div class="card-body p-0">
                         @if($media->isImage())
-                            <img src="{{ $media->url }}" alt="{{ $media->title }}"
-                                 class="w-full h-auto rounded-lg">
+                            <div x-data="imageViewer('{{ $media->url }}', {{ json_encode($media->title) }})" class="relative">
+                                {{-- Inline preview --}}
+                                <img src="{{ $media->url }}" alt="{{ $media->title }}"
+                                     class="w-full h-auto rounded-lg cursor-zoom-in"
+                                     @click="openFullscreen()">
+
+                                {{-- Zoom hint --}}
+                                <div class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 pointer-events-none">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                    </svg>
+                                    {{ __('Clic para ampliar') }}
+                                </div>
+
+                                {{-- Fullscreen viewer --}}
+                                <template x-teleport="body">
+                                    <div x-show="isOpen" x-cloak
+                                         class="media-viewer-fullscreen"
+                                         @keydown.escape.window="closeFullscreen()"
+                                         @keydown.plus.window="zoomIn()"
+                                         @keydown.equal.window="zoomIn()"
+                                         @keydown.minus.window="zoomOut()"
+                                         @keydown.0.window="resetView()">
+
+                                        {{-- Toolbar --}}
+                                        <div class="viewer-toolbar">
+                                            <span class="text-sm truncate max-w-xs" x-text="title"></span>
+                                            <div class="flex items-center gap-2">
+                                                <button @click="zoomOut()" title="{{ __('Alejar') }}">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
+                                                    </svg>
+                                                </button>
+                                                <span class="text-sm min-w-[4rem] text-center" x-text="Math.round(scale * 100) + '%'"></span>
+                                                <button @click="zoomIn()" title="{{ __('Acercar') }}">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                                    </svg>
+                                                </button>
+                                                <button @click="resetView()" title="{{ __('Ajustar a pantalla') }}">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                                                    </svg>
+                                                </button>
+                                                <button @click="closeFullscreen()" title="{{ __('Cerrar') }} (Esc)">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {{-- Canvas --}}
+                                        <div class="media-viewer-canvas"
+                                             x-ref="canvas"
+                                             :class="{ 'dragging': isDragging }"
+                                             @mousedown="startDrag($event)"
+                                             @mousemove="drag($event)"
+                                             @mouseup="endDrag()"
+                                             @mouseleave="endDrag()"
+                                             @wheel.prevent="handleWheel($event)"
+                                             @touchstart.passive="startTouch($event)"
+                                             @touchmove.prevent="handleTouch($event)"
+                                             @touchend="endTouch($event)"
+                                             @dblclick="toggleFitActual($event)">
+                                            <img :src="src" :alt="title"
+                                                 x-ref="image"
+                                                 @load="onImageLoad()"
+                                                 :style="'transform: translate(' + panX + 'px, ' + panY + 'px) scale(' + scale + ')'">
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         @elseif($media->isDocument())
                             @if($media->isPdf())
                                 <div class="aspect-[4/3]">
@@ -170,4 +295,187 @@
             </div>
         </div>
     </div>
+
+    @if($media->isImage())
+    <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('imageViewer', (src, title) => ({
+            src: src,
+            title: title,
+            isOpen: false,
+            scale: 1,
+            panX: 0,
+            panY: 0,
+            isDragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            panStartX: 0,
+            panStartY: 0,
+            imgWidth: 0,
+            imgHeight: 0,
+            fitScale: 1,
+            minScale: 0.1,
+            maxScale: 10,
+            // Touch
+            lastTouchDist: 0,
+            lastTouchX: 0,
+            lastTouchY: 0,
+
+            openFullscreen() {
+                this.isOpen = true;
+                document.body.style.overflow = 'hidden';
+                this.$nextTick(() => {
+                    if (this.$refs.image && this.$refs.image.complete) {
+                        this.onImageLoad();
+                    }
+                });
+            },
+
+            closeFullscreen() {
+                this.isOpen = false;
+                document.body.style.overflow = '';
+            },
+
+            onImageLoad() {
+                const img = this.$refs.image;
+                if (!img) return;
+                this.imgWidth = img.naturalWidth;
+                this.imgHeight = img.naturalHeight;
+                this.fitToScreen();
+            },
+
+            fitToScreen() {
+                const canvas = this.$refs.canvas;
+                if (!canvas || !this.imgWidth) return;
+                const cw = canvas.clientWidth;
+                const ch = canvas.clientHeight;
+                this.fitScale = Math.min(cw / this.imgWidth, ch / this.imgHeight, 1);
+                this.scale = this.fitScale;
+                this.panX = (cw - this.imgWidth * this.scale) / 2;
+                this.panY = (ch - this.imgHeight * this.scale) / 2;
+            },
+
+            resetView() {
+                this.fitToScreen();
+            },
+
+            zoomIn() {
+                this.zoomTo(this.scale * 1.3);
+            },
+
+            zoomOut() {
+                this.zoomTo(this.scale / 1.3);
+            },
+
+            zoomTo(newScale, cx, cy) {
+                const canvas = this.$refs.canvas;
+                if (!canvas) return;
+                newScale = Math.max(this.minScale, Math.min(this.maxScale, newScale));
+                if (cx === undefined) {
+                    cx = canvas.clientWidth / 2;
+                    cy = canvas.clientHeight / 2;
+                }
+                // Zoom towards the point (cx, cy)
+                const ratio = newScale / this.scale;
+                this.panX = cx - (cx - this.panX) * ratio;
+                this.panY = cy - (cy - this.panY) * ratio;
+                this.scale = newScale;
+            },
+
+            toggleFitActual(e) {
+                const rect = this.$refs.canvas.getBoundingClientRect();
+                const cx = e.clientX - rect.left;
+                const cy = e.clientY - rect.top;
+                if (Math.abs(this.scale - this.fitScale) < 0.01) {
+                    this.zoomTo(1, cx, cy);
+                } else {
+                    this.fitToScreen();
+                }
+            },
+
+            handleWheel(e) {
+                if (!this.isOpen) return;
+                const rect = this.$refs.canvas.getBoundingClientRect();
+                const cx = e.clientX - rect.left;
+                const cy = e.clientY - rect.top;
+                const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+                this.zoomTo(this.scale * factor, cx, cy);
+            },
+
+            startDrag(e) {
+                if (e.button !== 0) return;
+                this.isDragging = true;
+                this.dragStartX = e.clientX;
+                this.dragStartY = e.clientY;
+                this.panStartX = this.panX;
+                this.panStartY = this.panY;
+            },
+
+            drag(e) {
+                if (!this.isDragging) return;
+                this.panX = this.panStartX + (e.clientX - this.dragStartX);
+                this.panY = this.panStartY + (e.clientY - this.dragStartY);
+            },
+
+            endDrag() {
+                this.isDragging = false;
+            },
+
+            // Touch support
+            getTouchDist(e) {
+                const t = e.touches;
+                return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+            },
+
+            getTouchCenter(e) {
+                const t = e.touches;
+                return {
+                    x: (t[0].clientX + t[1].clientX) / 2,
+                    y: (t[0].clientY + t[1].clientY) / 2
+                };
+            },
+
+            startTouch(e) {
+                if (e.touches.length === 1) {
+                    this.isDragging = true;
+                    this.dragStartX = e.touches[0].clientX;
+                    this.dragStartY = e.touches[0].clientY;
+                    this.panStartX = this.panX;
+                    this.panStartY = this.panY;
+                } else if (e.touches.length === 2) {
+                    this.isDragging = false;
+                    this.lastTouchDist = this.getTouchDist(e);
+                    const c = this.getTouchCenter(e);
+                    this.lastTouchX = c.x;
+                    this.lastTouchY = c.y;
+                }
+            },
+
+            handleTouch(e) {
+                if (e.touches.length === 1 && this.isDragging) {
+                    this.panX = this.panStartX + (e.touches[0].clientX - this.dragStartX);
+                    this.panY = this.panStartY + (e.touches[0].clientY - this.dragStartY);
+                } else if (e.touches.length === 2) {
+                    const dist = this.getTouchDist(e);
+                    const c = this.getTouchCenter(e);
+                    const rect = this.$refs.canvas.getBoundingClientRect();
+                    const cx = c.x - rect.left;
+                    const cy = c.y - rect.top;
+                    const factor = dist / this.lastTouchDist;
+                    this.zoomTo(this.scale * factor, cx, cy);
+                    this.lastTouchDist = dist;
+                    this.lastTouchX = c.x;
+                    this.lastTouchY = c.y;
+                }
+            },
+
+            endTouch(e) {
+                if (e.touches.length < 2) {
+                    this.isDragging = false;
+                }
+            }
+        }));
+    });
+    </script>
+    @endif
 </x-app-layout>
