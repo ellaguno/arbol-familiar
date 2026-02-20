@@ -136,7 +136,21 @@
             </div>
 
             {{-- Area de mensajes --}}
-            <div class="lg:col-span-2 card">
+            <div class="lg:col-span-2 card relative"
+                 @dragenter.prevent="if(selectedUserId){dragCounter++;isDraggingFile=true}"
+                 @dragleave.prevent="dragCounter--;if(dragCounter<=0){isDraggingFile=false;dragCounter=0}"
+                 @dragover.prevent
+                 @drop.prevent="handleFileDrop($event)">
+                {{-- Drop overlay --}}
+                <div x-show="isDraggingFile" x-cloak
+                     class="absolute inset-0 z-30 bg-mf-primary/10 border-2 border-dashed border-mf-primary rounded-xl flex items-center justify-center pointer-events-none">
+                    <div class="text-center">
+                        <svg class="w-12 h-12 mx-auto text-mf-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-mf-primary font-medium">{{ __('Suelta la imagen aqui') }}</p>
+                    </div>
+                </div>
                 <div class="card-body flex flex-col" style="min-height: 500px;">
                     {{-- Header del chat --}}
                     <div x-show="selectedUserId" class="flex items-center justify-between pb-4 border-b border-theme">
@@ -256,21 +270,31 @@
                                     </svg>
                                 </button>
                                 <div x-show="showEmojiPicker" x-cloak x-transition
-                                     class="absolute bottom-full left-0 mb-2 w-72 max-h-64 overflow-y-auto bg-theme-card rounded-xl shadow-2xl border border-theme p-3 z-20">
-                                    <template x-for="cat in emojiCategories" :key="cat.name">
-                                        <div class="mb-2">
-                                            <p class="text-xs font-semibold text-theme-muted uppercase mb-1" x-text="cat.name"></p>
-                                            <div class="flex flex-wrap gap-1">
-                                                <template x-for="em in cat.emojis" :key="em">
-                                                    <button type="button"
-                                                            @click="insertEmoji(em)"
-                                                            class="w-8 h-8 flex items-center justify-center text-lg hover:bg-theme-hover rounded cursor-pointer transition-colors"
-                                                            x-text="em">
-                                                    </button>
-                                                </template>
-                                            </div>
+                                     class="absolute bottom-full left-0 mb-2 bg-theme-card rounded-xl shadow-2xl border border-theme z-20"
+                                     style="width: 280px;">
+                                    {{-- Tabs de categorias --}}
+                                    <div class="flex border-b border-theme">
+                                        <template x-for="(cat, idx) in emojiCategories" :key="cat.name">
+                                            <button type="button"
+                                                    @click="emojiTab = idx"
+                                                    class="flex-1 py-2 text-center text-sm transition-colors"
+                                                    :class="emojiTab === idx ? 'text-mf-primary border-b-2 border-mf-primary font-semibold' : 'text-theme-muted hover:text-theme'">
+                                                <span x-text="cat.icon"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    {{-- Grid de emojis --}}
+                                    <div class="p-2 overflow-y-auto" style="height: 180px;">
+                                        <div class="grid grid-cols-8 gap-0.5">
+                                            <template x-for="em in emojiCategories[emojiTab].emojis" :key="em">
+                                                <button type="button"
+                                                        @click="insertEmoji(em)"
+                                                        class="w-8 h-8 flex items-center justify-center text-lg hover:bg-theme-hover rounded cursor-pointer transition-colors"
+                                                        x-text="em">
+                                                </button>
+                                            </template>
                                         </div>
-                                    </template>
+                                    </div>
                                 </div>
                             </div>
 
@@ -289,10 +313,11 @@
                             <input type="text"
                                    x-ref="messageInput"
                                    x-model="newMessage"
-                                   :placeholder="'{{ __('Escribe un mensaje...') }}'"
+                                   :placeholder="attachmentFile ? '{{ __('Agrega un mensaje (opcional)...') }}' : '{{ __('Escribe un mensaje...') }}'"
                                    class="input-field flex-1"
                                    maxlength="2000"
-                                   autocomplete="off">
+                                   autocomplete="off"
+                                   @paste="handlePaste($event)">
 
                             {{-- Boton enviar --}}
                             <button type="submit"
@@ -672,16 +697,19 @@
 
             // Emoji picker
             showEmojiPicker: false,
+            emojiTab: 0,
             emojiCategories: [
-                { name: '{{ __("Caras") }}', emojis: ['😀','😂','🥹','😊','😍','🥰','😘','😜','🤪','😎','🤩','🥳','😢','😭','😤','😡','🤯','😱','🥶','🤔','🤫','🤭','😏','😴','🤢','🤮','😷','🤒','🤕','🥴'] },
-                { name: '{{ __("Manos") }}', emojis: ['👍','👎','👏','🙌','🤝','✌️','🤞','🫶','❤️','💔','💕','💪','🙏','👋','✋','🫡','🤙'] },
-                { name: '{{ __("Objetos") }}', emojis: ['🎉','🎊','🎂','🎁','🔥','⭐','💡','📷','📸','🏠','🌳','🌺','🐶','🐱','☀️','🌙','⛅','🌈'] },
-                { name: '{{ __("Comida") }}', emojis: ['☕','🍺','🍷','🍕','🍔','🌮','🍰','🍎','🥑','🍳'] },
+                { name: '{{ __("Caras") }}', icon: '😀', emojis: ['😀','😂','🥹','😊','😍','🥰','😘','😜','🤪','😎','🤩','🥳','😢','😭','😤','😡','🤯','😱','🥶','🤔','🤫','🤭','😏','😴','🤢','🤮','😷','🤒','🤕','🥴'] },
+                { name: '{{ __("Manos") }}', icon: '👋', emojis: ['👍','👎','👏','🙌','🤝','✌️','🤞','🫶','❤️','💔','💕','💪','🙏','👋','✋','🫡','🤙'] },
+                { name: '{{ __("Objetos") }}', icon: '🎉', emojis: ['🎉','🎊','🎂','🎁','🔥','⭐','💡','📷','📸','🏠','🌳','🌺','🐶','🐱','☀️','🌙','⛅','🌈'] },
+                { name: '{{ __("Comida") }}', icon: '☕', emojis: ['☕','🍺','🍷','🍕','🍔','🌮','🍰','🍎','🥑','🍳'] },
             ],
 
             // Adjunto de imagen
             attachmentFile: null,
             attachmentPreviewUrl: null,
+            isDraggingFile: false,
+            dragCounter: 0,
 
             // Lightbox
             lightboxUrl: null,
@@ -961,24 +989,56 @@
                 });
             },
 
-            handleAttachmentSelect(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
+            validateAndAttachFile(file) {
+                if (!file) return false;
                 const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 if (!allowedTypes.includes(file.type)) {
                     alert('{{ __("Formato permitido: JPG, PNG, GIF o WebP.") }}');
-                    event.target.value = '';
-                    return;
+                    return false;
                 }
                 if (file.size > 3 * 1024 * 1024) {
                     alert('{{ __("La imagen no debe superar 3 MB.") }}');
-                    event.target.value = '';
-                    return;
+                    return false;
                 }
-
+                this.removeAttachment();
                 this.attachmentFile = file;
                 this.attachmentPreviewUrl = URL.createObjectURL(file);
+                return true;
+            },
+
+            handleAttachmentSelect(event) {
+                const file = event.target.files[0];
+                if (!this.validateAndAttachFile(file)) {
+                    event.target.value = '';
+                }
+            },
+
+            handleFileDrop(event) {
+                this.isDraggingFile = false;
+                this.dragCounter = 0;
+                if (!this.selectedUserId) return;
+
+                const file = event.dataTransfer.files[0];
+                if (file) {
+                    this.validateAndAttachFile(file);
+                    this.$nextTick(() => {
+                        if (this.$refs.messageInput) this.$refs.messageInput.focus();
+                    });
+                }
+            },
+
+            handlePaste(event) {
+                const items = event.clipboardData && event.clipboardData.items;
+                if (!items) return;
+
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.startsWith('image/')) {
+                        event.preventDefault();
+                        const file = items[i].getAsFile();
+                        this.validateAndAttachFile(file);
+                        return;
+                    }
+                }
             },
 
             removeAttachment() {
