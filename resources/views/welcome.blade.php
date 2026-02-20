@@ -56,17 +56,22 @@
     @endphp
 
     <!-- Hero con imagen -->
-    <section class="relative min-h-[300px] md:min-h-[350px] overflow-hidden">
-        <!-- Imagen de fondo -->
-        <img src="{{ asset($sc ? $sc->content('welcome', 'hero_image', 'images/hero-beach.jpg') : 'images/hero-beach.jpg') }}" alt="{{ __('Familia') }}"
-             class="absolute inset-0 w-full h-full object-cover">
-        <!-- Overlay con gradiente -->
-        <div class="absolute inset-0 bg-gradient-to-b from-sky-200/30 "></div>
-        <!-- Diagrama genealogico decorativo -->
-        <div class="genealogy-overlay relative z-10">
-            <img src="{{ asset('images/portada_diagrama.svg') }}" alt="{{ __('Diagrama genealogico') }}" class="w-48 md:w-64 opacity-80">
-        </div>
-    </section>
+    @php
+        $heroShow = $sc ? $sc->content('welcome', 'hero_show', '1') : '1';
+    @endphp
+    @if($heroShow)
+        <section class="relative overflow-hidden">
+            <!-- Imagen de fondo (usa su altura natural) -->
+            <img src="{{ asset($sc ? $sc->content('welcome', 'hero_image', 'images/hero-beach.jpg') : 'images/hero-beach.jpg') }}" alt="{{ __('Familia') }}"
+                 class="w-full h-auto object-cover max-h-[450px]">
+            <!-- Overlay con gradiente -->
+            <div class="absolute inset-0 bg-gradient-to-b from-sky-200/30 "></div>
+            <!-- Diagrama genealogico decorativo -->
+            <div class="genealogy-overlay relative z-10">
+                <img src="{{ asset('images/portada_diagrama.svg') }}" alt="{{ __('Diagrama genealogico') }}" class="w-48 md:w-64 opacity-80">
+            </div>
+        </section>
+    @endif
 
     <!-- Contenido principal -->
     <section class="bg-gradient-to-b from-theme to-theme-card py-12">

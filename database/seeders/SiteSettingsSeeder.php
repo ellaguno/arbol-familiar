@@ -13,6 +13,7 @@ class SiteSettingsSeeder extends Seeder
             // =============================================
             // Welcome page
             // =============================================
+            ['group' => 'welcome', 'key' => 'hero_show', 'value' => '1', 'type' => 'boolean'],
             ['group' => 'welcome', 'key' => 'hero_image', 'value' => 'images/hero-beach.jpg', 'type' => 'image'],
             ['group' => 'welcome', 'key' => 'logo_image', 'value' => 'images/logo.png', 'type' => 'image'],
             ['group' => 'welcome', 'key' => 'hero_title', 'value' => '¡Conecta con tu familia!', 'type' => 'text'],

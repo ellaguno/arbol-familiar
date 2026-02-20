@@ -34,7 +34,19 @@
                                 <span class="text-xs text-theme-muted ml-2">({{ $setting->type }})</span>
                             </label>
 
-                            @if($key === 'feature_images_shape')
+                            @if($setting->type === 'boolean')
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="hidden" name="settings_{{ $key }}" value="0">
+                                    <input type="checkbox"
+                                           name="settings_{{ $key }}"
+                                           id="settings_{{ $key }}"
+                                           value="1"
+                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
+                                           {{ old('settings_' . $key, $setting->value) ? 'checked' : '' }}>
+                                    <span class="text-theme-secondary">{{ __('Activado') }}</span>
+                                </label>
+
+                            @elseif($key === 'feature_images_shape')
                                 <select name="settings_{{ $key }}" id="settings_{{ $key }}" class="form-input">
                                     <option value="round" {{ old('settings_' . $key, $setting->value) === 'round' ? 'selected' : '' }}>{{ __('Redondas') }}</option>
                                     <option value="square" {{ old('settings_' . $key, $setting->value) === 'square' ? 'selected' : '' }}>{{ __('Cuadradas') }}</option>
