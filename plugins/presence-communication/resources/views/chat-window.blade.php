@@ -204,12 +204,11 @@
                                     {{-- Imagen adjunta --}}
                                     <template x-if="msg.attachment_url">
                                         <div class="mb-1">
-                                            <a :href="msg.attachment_url" target="_blank" rel="noopener noreferrer">
-                                                <img :src="msg.attachment_url"
-                                                     class="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                                                     style="max-height: 200px;"
-                                                     loading="lazy">
-                                            </a>
+                                            <img :src="msg.attachment_url"
+                                                 @click="openLightbox(msg.attachment_url)"
+                                                 class="max-w-full rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
+                                                 style="max-height: 200px;"
+                                                 loading="lazy">
                                         </div>
                                     </template>
                                     {{-- Texto con URLs clicables --}}
@@ -311,6 +310,73 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Lightbox de imagen --}}
+            <template x-teleport="body">
+                <div x-show="lightboxUrl" x-cloak
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     @keydown.escape.window="closeLightbox()"
+                     class="fixed inset-0 z-[60] flex items-center justify-center bg-black/85">
+
+                    {{-- Boton cerrar --}}
+                    <button @click="closeLightbox()"
+                            class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+
+                    {{-- Controles de zoom --}}
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-black/50 rounded-full px-4 py-2">
+                        <button @click="lightboxZoomOut()" class="w-8 h-8 flex items-center justify-center text-white hover:text-gray-300 transition-colors" title="{{ __('Alejar') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                            </svg>
+                        </button>
+                        <span class="text-white text-sm min-w-[3rem] text-center" x-text="Math.round(lightboxZoom * 100) + '%'"></span>
+                        <button @click="lightboxZoomIn()" class="w-8 h-8 flex items-center justify-center text-white hover:text-gray-300 transition-colors" title="{{ __('Acercar') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </button>
+                        <button @click="lightboxZoomReset()" class="w-8 h-8 flex items-center justify-center text-white hover:text-gray-300 transition-colors" title="{{ __('Restablecer') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                            </svg>
+                        </button>
+                        <a :href="lightboxUrl" target="_blank" rel="noopener noreferrer"
+                           class="w-8 h-8 flex items-center justify-center text-white hover:text-gray-300 transition-colors" title="{{ __('Abrir original') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                    {{-- Imagen con zoom y pan --}}
+                    <div class="w-full h-full flex items-center justify-center overflow-hidden"
+                         @click.self="closeLightbox()"
+                         @wheel.prevent="lightboxWheel($event)"
+                         @mousedown.prevent="lightboxStartPan($event)"
+                         @mousemove.prevent="lightboxMovePan($event)"
+                         @mouseup="lightboxEndPan()"
+                         @mouseleave="lightboxEndPan()"
+                         @touchstart.prevent="lightboxStartPan($event)"
+                         @touchmove.prevent="lightboxMovePan($event)"
+                         @touchend="lightboxEndPan()">
+                        <img :src="lightboxUrl"
+                             class="max-w-none select-none"
+                             :class="lightboxPanning ? 'cursor-grabbing' : (lightboxZoom > 1 ? 'cursor-grab' : 'cursor-zoom-in')"
+                             :style="'transform: scale(' + lightboxZoom + ') translate(' + lightboxPanX + 'px, ' + lightboxPanY + 'px)'"
+                             @click.stop="if (lightboxZoom === 1) { lightboxZoomIn(); } else if (!lightboxPanning) { lightboxZoomReset(); }"
+                             @dblclick.stop="lightboxZoom === 1 ? lightboxZoomTo(3) : lightboxZoomReset()">
+                    </div>
+                </div>
+            </template>
 
             {{-- Overlay: Llamada entrante --}}
             <template x-teleport="body">
@@ -617,6 +683,17 @@
             attachmentFile: null,
             attachmentPreviewUrl: null,
 
+            // Lightbox
+            lightboxUrl: null,
+            lightboxZoom: 1,
+            lightboxPanning: false,
+            lightboxPanX: 0,
+            lightboxPanY: 0,
+            _lbStartX: 0,
+            _lbStartY: 0,
+            _lbStartPanX: 0,
+            _lbStartPanY: 0,
+
             // WebRTC
             callState: 'idle', // idle, calling, incoming, room-invite, active
             callType: 'video', // voice, video
@@ -913,6 +990,70 @@
                 if (this.$refs.attachmentInput) {
                     this.$refs.attachmentInput.value = '';
                 }
+            },
+
+            // ===================== LIGHTBOX =====================
+
+            openLightbox(url) {
+                this.lightboxUrl = url;
+                this.lightboxZoom = 1;
+                this.lightboxPanX = 0;
+                this.lightboxPanY = 0;
+            },
+
+            closeLightbox() {
+                this.lightboxUrl = null;
+                this.lightboxPanning = false;
+            },
+
+            lightboxZoomIn() {
+                this.lightboxZoomTo(Math.min(this.lightboxZoom + 0.5, 5));
+            },
+
+            lightboxZoomOut() {
+                this.lightboxZoomTo(Math.max(this.lightboxZoom - 0.5, 0.5));
+            },
+
+            lightboxZoomTo(level) {
+                this.lightboxZoom = level;
+                if (level <= 1) {
+                    this.lightboxPanX = 0;
+                    this.lightboxPanY = 0;
+                }
+            },
+
+            lightboxZoomReset() {
+                this.lightboxZoom = 1;
+                this.lightboxPanX = 0;
+                this.lightboxPanY = 0;
+            },
+
+            lightboxWheel(e) {
+                const delta = e.deltaY > 0 ? -0.25 : 0.25;
+                this.lightboxZoomTo(Math.max(0.5, Math.min(5, this.lightboxZoom + delta)));
+            },
+
+            lightboxStartPan(e) {
+                if (this.lightboxZoom <= 1) return;
+                this.lightboxPanning = true;
+                const point = e.touches ? e.touches[0] : e;
+                this._lbStartX = point.clientX;
+                this._lbStartY = point.clientY;
+                this._lbStartPanX = this.lightboxPanX;
+                this._lbStartPanY = this.lightboxPanY;
+            },
+
+            lightboxMovePan(e) {
+                if (!this.lightboxPanning) return;
+                const point = e.touches ? e.touches[0] : e;
+                const dx = (point.clientX - this._lbStartX) / this.lightboxZoom;
+                const dy = (point.clientY - this._lbStartY) / this.lightboxZoom;
+                this.lightboxPanX = this._lbStartPanX + dx;
+                this.lightboxPanY = this._lbStartPanY + dy;
+            },
+
+            lightboxEndPan() {
+                this.lightboxPanning = false;
             },
 
             // ===================== WEBRTC =====================
