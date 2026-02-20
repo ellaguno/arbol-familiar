@@ -306,7 +306,7 @@ class PersonController extends Controller
             'familiesAsChild.husband',
             'familiesAsChild.wife',
             'media',
-            'events',
+            'events.media',
         ]);
 
         return view('persons.show', compact('person'));

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
@@ -110,5 +111,22 @@ class Event extends Model
     public function scopeForFamily($query, int $familyId)
     {
         return $query->where('family_id', $familyId);
+    }
+
+    /**
+     * Documentos vinculados a este evento.
+     */
+    public function media(): HasMany
+    {
+        return $this->hasMany(Media::class);
+    }
+
+    /**
+     * Tipos de eventos disponibles para creacion manual.
+     * Excluye BIRT y DEAT que se manejan en campos de persona.
+     */
+    public static function manualTypes(): array
+    {
+        return array_diff_key(self::TYPES, array_flip(['BIRT', 'DEAT']));
     }
 }

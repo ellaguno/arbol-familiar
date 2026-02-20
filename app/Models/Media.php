@@ -27,6 +27,7 @@ class Media extends Model
         'sort_order',
         'is_primary',
         'created_by',
+        'event_id',
     ];
 
     protected $casts = [
@@ -48,6 +49,14 @@ class Media extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Evento asociado a este documento (opcional).
+     */
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
     }
 
     /**

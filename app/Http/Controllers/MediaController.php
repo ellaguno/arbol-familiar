@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\Event;
 use App\Models\Media;
 use App\Models\Person;
 use Illuminate\Http\Request;
@@ -51,7 +52,13 @@ class MediaController extends Controller
 
         $personId = $request->get('person_id');
 
-        return view('media.create', compact('persons', 'personId'));
+        // Eventos de la persona seleccionada para vincular documentos
+        $events = collect();
+        if ($personId) {
+            $events = Event::where('person_id', $personId)->orderBy('date')->get();
+        }
+
+        return view('media.create', compact('persons', 'personId', 'events'));
     }
 
     /**
@@ -72,6 +79,7 @@ class MediaController extends Controller
             'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'person_id' => ['nullable', 'exists:persons,id'],
+            'event_id' => ['nullable', 'exists:events,id'],
             'file' => ['required_if:type,image,document', 'file', 'max:4096'], // 4MB max
             'external_url' => ['required_if:type,link', 'nullable', 'url'],
             'is_primary' => ['boolean'],
@@ -110,6 +118,7 @@ class MediaController extends Controller
             $media = Media::create([
                 'mediable_type' => $validated['person_id'] ? Person::class : null,
                 'mediable_id' => $validated['person_id'] ?? null,
+                'event_id' => $validated['event_id'] ?? null,
                 'type' => $validated['type'],
                 'title' => $validated['title'] ?? $file->getClientOriginalName(),
                 'description' => $validated['description'] ?? null,
@@ -125,6 +134,7 @@ class MediaController extends Controller
             $media = Media::create([
                 'mediable_type' => $validated['person_id'] ? Person::class : null,
                 'mediable_id' => $validated['person_id'] ?? null,
+                'event_id' => $validated['event_id'] ?? null,
                 'type' => 'link',
                 'title' => $validated['title'] ?? $validated['external_url'],
                 'description' => $validated['description'] ?? null,
@@ -182,7 +192,13 @@ class MediaController extends Controller
             }
         })->orderBy('first_name')->get();
 
-        return view('media.edit', compact('media', 'persons'));
+        // Eventos de la persona asociada para vincular documentos
+        $events = collect();
+        if ($media->mediable_id && $media->mediable_type === Person::class) {
+            $events = Event::where('person_id', $media->mediable_id)->orderBy('date')->get();
+        }
+
+        return view('media.edit', compact('media', 'persons', 'events'));
     }
 
     /**
@@ -196,12 +212,14 @@ class MediaController extends Controller
             'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'person_id' => ['nullable', 'exists:persons,id'],
+            'event_id' => ['nullable', 'exists:events,id'],
             'is_primary' => ['boolean'],
         ]);
 
         $media->update([
             'mediable_type' => $validated['person_id'] ? Person::class : null,
             'mediable_id' => $validated['person_id'] ?? null,
+            'event_id' => $validated['event_id'] ?? null,
             'title' => $validated['title'] ?? $media->title,
             'description' => $validated['description'] ?? null,
             'is_primary' => $validated['is_primary'] ?? false,

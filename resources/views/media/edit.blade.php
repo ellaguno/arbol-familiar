@@ -84,6 +84,20 @@
                         </select>
                     </div>
 
+                    @if($events->isNotEmpty())
+                        <div>
+                            <label for="event_id" class="form-label">{{ __('Vincular a evento') }}</label>
+                            <select name="event_id" id="event_id" class="form-input">
+                                <option value="">{{ __('Ninguno') }}</option>
+                                @foreach($events as $event)
+                                    <option value="{{ $event->id }}" {{ old('event_id', $media->event_id) == $event->id ? 'selected' : '' }}>
+                                        {{ $event->type_label }}{{ $event->date ? ' - ' . $event->date->format('d/m/Y') : '' }}{{ $event->place ? ' - ' . $event->place : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+
                     <div>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="is_primary" value="1" class="form-checkbox"

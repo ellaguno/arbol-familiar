@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PluginController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\EventController;
 
 /*
 |--------------------------------------------------------------------------
@@ -240,6 +241,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Invitación de consentimiento
         Route::post('/{person}/send-invitation', [InvitationController::class, 'resend'])->name('send-invitation');
+
+        // Eventos de persona
+        Route::post('/{person}/events', [EventController::class, 'store'])->name('events.store');
+        Route::put('/{person}/events/{event}', [EventController::class, 'update'])->name('events.update');
+        Route::delete('/{person}/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     });
 
     // ========================================================================

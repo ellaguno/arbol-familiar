@@ -529,31 +529,182 @@
                 </div>
 
                 <!-- Eventos -->
-                @if($person->events && $person->events->isNotEmpty())
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="text-lg font-semibold">{{ __('Eventos') }}</h2>
+                @php
+                    $canEditPerson = $person->canBeEditedBy(auth()->id()) || auth()->user()->is_admin;
+                @endphp
+                <div class="card" x-data="{ showEventForm: false, editingEventId: null }">
+                    <div class="card-header flex justify-between items-center">
+                        <h2 class="text-lg font-semibold">{{ __('Eventos') }}</h2>
+                        @if($canEditPerson)
+                            <button @click="showEventForm = !showEventForm; editingEventId = null"
+                                    class="text-sm text-mf-primary hover:underline flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                {{ __('Agregar') }}
+                            </button>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        {{-- Formulario para agregar evento --}}
+                        <div x-show="showEventForm && !editingEventId" x-collapse x-cloak>
+                            <form action="{{ route('persons.events.store', $person) }}" method="POST"
+                                  class="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mb-4">
+                                @csrf
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="form-label">{{ __('Tipo de evento') }}</label>
+                                        <select name="type" class="form-input" required>
+                                            <option value="">{{ __('Seleccionar') }}</option>
+                                            @foreach(\App\Models\Event::manualTypes() as $code => $label)
+                                                <option value="{{ $code }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">{{ __('Fecha') }}</label>
+                                        <input type="date" name="date" class="form-input" min="1000-01-01" max="9999-12-31">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">{{ __('Lugar') }}</label>
+                                        <input type="text" name="place" class="form-input" placeholder="{{ __('Ciudad, Pais') }}">
+                                    </div>
+                                    <div class="flex items-end">
+                                        <label class="flex items-center gap-2 mb-2">
+                                            <input type="checkbox" name="date_approx" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span class="text-sm text-theme-secondary">{{ __('Fecha aproximada') }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label">{{ __('Descripcion') }}</label>
+                                    <textarea name="description" rows="2" class="form-input" placeholder="{{ __('Detalles adicionales (opcional)') }}"></textarea>
+                                </div>
+                                <div class="flex justify-end gap-2">
+                                    <button type="button" @click="showEventForm = false" class="btn-outline">{{ __('Cancelar') }}</button>
+                                    <button type="submit" class="btn-primary">{{ __('Guardar') }}</button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="card-body">
+
+                        {{-- Lista de eventos --}}
+                        @if($person->events->isNotEmpty())
                             <ul class="space-y-3">
-                                @foreach($person->events as $event)
-                                    <li class="flex items-start gap-3">
-                                        <div class="w-2 h-2 rounded-full bg-mf-primary mt-2"></div>
-                                        <div>
-                                            <p class="font-medium">{{ $event->type }}</p>
-                                            @if($event->date)
-                                                <p class="text-sm text-theme-muted">{{ $event->date->format('d/m/Y') }}</p>
-                                            @endif
-                                            @if($event->place)
-                                                <p class="text-sm text-theme-muted">{{ $event->place }}</p>
+                                @foreach($person->events->sortBy('date') as $event)
+                                    <li class="p-3 rounded-lg hover:bg-theme-hover">
+                                        {{-- Vista normal del evento --}}
+                                        <div x-show="editingEventId !== {{ $event->id }}" class="flex items-start justify-between gap-3">
+                                            <div class="flex items-start gap-3">
+                                                <div class="w-2 h-2 rounded-full bg-mf-primary mt-2 flex-shrink-0"></div>
+                                                <div>
+                                                    <p class="font-medium text-theme">{{ $event->type_label }}</p>
+                                                    @if($event->date)
+                                                        <p class="text-sm text-theme-muted">
+                                                            {{ $event->date->format('d/m/Y') }}
+                                                            @if($event->date_approx) <span class="italic">({{ __('aprox.') }})</span> @endif
+                                                        </p>
+                                                    @endif
+                                                    @if($event->place)
+                                                        <p class="text-sm text-theme-muted flex items-center gap-1">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            </svg>
+                                                            {{ $event->place }}
+                                                        </p>
+                                                    @endif
+                                                    @if($event->description)
+                                                        <p class="text-sm text-theme-secondary mt-1">{{ $event->description }}</p>
+                                                    @endif
+                                                    {{-- Documentos vinculados --}}
+                                                    @if($event->media->isNotEmpty())
+                                                        <div class="flex flex-wrap gap-2 mt-2">
+                                                            @foreach($event->media as $doc)
+                                                                <a href="{{ route('media.show', $doc) }}" class="inline-flex items-center gap-1 text-xs bg-gray-100 dark:bg-gray-700 text-mf-primary hover:underline px-2 py-1 rounded">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                                    </svg>
+                                                                    {{ $doc->title }}
+                                                                </a>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @if($canEditPerson)
+                                                <div class="flex gap-1 flex-shrink-0">
+                                                    <button type="button" @click="editingEventId = {{ $event->id }}" class="text-theme-muted hover:text-mf-primary p-1" title="{{ __('Editar') }}">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                        </svg>
+                                                    </button>
+                                                    <form action="{{ route('persons.events.destroy', [$person, $event]) }}" method="POST">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-theme-muted hover:text-red-500 p-1" title="{{ __('Eliminar') }}"
+                                                                onclick="return confirm('{{ __('Eliminar este evento?') }}')">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @endif
                                         </div>
+
+                                        {{-- Formulario de edicion inline --}}
+                                        @if($canEditPerson)
+                                            <div x-show="editingEventId === {{ $event->id }}" x-collapse x-cloak>
+                                                <form action="{{ route('persons.events.update', [$person, $event]) }}" method="POST"
+                                                      class="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="grid md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label class="form-label">{{ __('Tipo de evento') }}</label>
+                                                            <select name="type" class="form-input" required>
+                                                                @foreach(\App\Models\Event::manualTypes() as $code => $label)
+                                                                    <option value="{{ $code }}" {{ $event->type === $code ? 'selected' : '' }}>{{ $label }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label class="form-label">{{ __('Fecha') }}</label>
+                                                            <input type="date" name="date" class="form-input" min="1000-01-01" max="9999-12-31"
+                                                                   value="{{ $event->date?->format('Y-m-d') }}">
+                                                        </div>
+                                                        <div>
+                                                            <label class="form-label">{{ __('Lugar') }}</label>
+                                                            <input type="text" name="place" class="form-input" value="{{ $event->place }}">
+                                                        </div>
+                                                        <div class="flex items-end">
+                                                            <label class="flex items-center gap-2 mb-2">
+                                                                <input type="checkbox" name="date_approx" value="1"
+                                                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                       {{ $event->date_approx ? 'checked' : '' }}>
+                                                                <span class="text-sm text-theme-secondary">{{ __('Fecha aproximada') }}</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label class="form-label">{{ __('Descripcion') }}</label>
+                                                        <textarea name="description" rows="2" class="form-input">{{ $event->description }}</textarea>
+                                                    </div>
+                                                    <div class="flex justify-end gap-2">
+                                                        <button type="button" @click="editingEventId = null" class="btn-outline">{{ __('Cancelar') }}</button>
+                                                        <button type="submit" class="btn-primary">{{ __('Actualizar') }}</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        @endif
                                     </li>
                                 @endforeach
                             </ul>
-                        </div>
+                        @else
+                            <p class="text-theme-muted text-center py-4">{{ __('No hay eventos registrados.') }}</p>
+                        @endif
                     </div>
-                @endif
+                </div>
 
                 <!-- Galeria y Documentos -->
                 <div class="card">
