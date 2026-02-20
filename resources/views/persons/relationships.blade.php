@@ -230,9 +230,8 @@
                     <div class="card-header">
                         <h2 class="text-lg font-semibold">{{ __('Agregar relacion') }}</h2>
                     </div>
-                    <div class="card-body">
-                        <form action="{{ route('persons.relationships.store-with-auth', $person) }}" method="POST" class="space-y-4"
-                              x-data="relationshipForm()"
+                    <div class="card-body" x-data="relationshipForm()">
+                        <form x-ref="relationForm" action="{{ route('persons.relationships.store-with-auth', $person) }}" method="POST" class="space-y-4"
                               @submit.prevent="submitForm">
                             @csrf
 
@@ -483,7 +482,7 @@
                     if (!this.selectedPersonId || !this.type) {
                         return;
                     }
-                    this.$el.submit();
+                    this.$refs.relationForm.submit();
                 }
             }
         }
