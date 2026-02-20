@@ -118,21 +118,33 @@
 window.ChatNotificationSound = {
     _audioCtx: null,
     _lastPlayed: 0,
+    _unlocked: false,
 
     getContext() {
-        if (!this._audioCtx) {
-            this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!this._audioCtx && this._unlocked) {
+            try {
+                this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {}
         }
         return this._audioCtx;
     },
 
+    unlock() {
+        if (this._unlocked) return;
+        this._unlocked = true;
+        const ctx = this.getContext();
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+    },
+
     play() {
+        if (!this._unlocked) return;
         const now = Date.now();
         if (now - this._lastPlayed < 1000) return;
         this._lastPlayed = now;
 
         try {
             const ctx = this.getContext();
+            if (!ctx) return;
             if (ctx.state === 'suspended') ctx.resume();
 
             // Chime de dos tonos: C5 → E5, E5 → G5
@@ -167,13 +179,12 @@ window.ChatNotificationSound = {
     }
 };
 
-// Desbloquear AudioContext al primer click del usuario
-document.addEventListener('click', function() {
-    try {
-        const ctx = window.ChatNotificationSound.getContext();
-        if (ctx.state === 'suspended') ctx.resume();
-    } catch (e) {}
-}, { once: true });
+// Desbloquear AudioContext al primer gesto del usuario (click, touch, keydown)
+['click', 'touchstart', 'keydown'].forEach(function(evt) {
+    document.addEventListener(evt, function() {
+        window.ChatNotificationSound.unlock();
+    }, { once: true });
+});
 
 function menuPresenceIndicator() {
     return {
@@ -318,6 +329,7 @@ function menuPresenceIndicator() {
             if (typeof window.ChatNotificationSound === 'undefined') return;
 
             const ctx = window.ChatNotificationSound.getContext();
+            if (!ctx) return;
             if (ctx.state === 'suspended') ctx.resume();
 
             const playTone = () => {

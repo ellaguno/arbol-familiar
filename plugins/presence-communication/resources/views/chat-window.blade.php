@@ -794,16 +794,22 @@
                 try {
                     const res = await fetch('{{ route("call.initiate") }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
                         body: JSON.stringify({ callee_id: this.callPeerId, media_type: mediaType }),
                     });
-                    const data = await res.json();
 
                     if (!res.ok) {
-                        alert(data.error || '{{ __("Error al iniciar llamada") }}');
+                        let errorMsg = '{{ __("Error al iniciar llamada") }}';
+                        try { const d = await res.json(); errorMsg = d.error || d.message || errorMsg; } catch (e) {}
+                        alert(errorMsg);
                         this.resetCall();
                         return;
                     }
+                    const data = await res.json();
 
                     this.roomId = data.room_id;
                     this.playRingtone('outgoing');
@@ -1460,6 +1466,7 @@
                 if (typeof window.ChatNotificationSound === 'undefined') return;
 
                 const ctx = window.ChatNotificationSound.getContext();
+                if (!ctx) return;
                 if (ctx.state === 'suspended') ctx.resume();
 
                 const playTone = () => {
