@@ -14,10 +14,12 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<class-string, array<int, class-string>>
      */
+    /**
+     * Nota: El envío de verificación se hace explícitamente en RegisterController
+     * y en los flujos de login social, no via listener, para evitar envío duplicado.
+     */
     protected $listen = [
-        Registered::class => [
-            SendEmailVerificationNotification::class,
-        ],
+        //
     ];
 
     /**

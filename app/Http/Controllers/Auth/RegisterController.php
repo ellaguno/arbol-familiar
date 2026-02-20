@@ -136,20 +136,15 @@ class RegisterController extends Controller
 
             DB::commit();
 
-            // Disparar evento de registro (esto debería activar el listener SendEmailVerificationNotification)
-            event(new Registered($user));
-
             // Login automatico
             Auth::login($user);
 
-            // Enviar correo de verificación de forma explícita como respaldo
-            // Esto asegura que el correo se envíe incluso si hay problemas con los listeners
+            // Enviar correo de verificación
+            // Nota: No usamos event(Registered) porque el listener SendEmailVerificationNotification
+            // también envía el correo, causando envío duplicado que algunos servidores SMTP rechazan.
             try {
-                if (!$user->hasVerifiedEmail()) {
-                    $user->sendEmailVerificationNotification();
-                }
+                $user->sendEmailVerificationNotification();
             } catch (\Exception $mailException) {
-                // Log del error de correo pero no fallar el registro
                 Log::warning('No se pudo enviar correo de verificación al registrar usuario', [
                     'user_id' => $user->id,
                     'email' => $user->email,
