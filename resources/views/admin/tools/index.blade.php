@@ -34,6 +34,24 @@
                     </p>
                 </div>
             </a>
+            <!-- Buscar duplicados -->
+            <a href="{{ route('admin.tools.duplicates') }}" class="card hover:shadow-md transition-shadow">
+                <div class="card-body">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-theme text-lg">{{ __('Buscar duplicados') }}</h3>
+                        </div>
+                    </div>
+                    <p class="text-sm text-theme-muted">
+                        {{ __('Detecta personas con nombre y apellido identicos. Permite comparar, fusionar o eliminar duplicados.') }}
+                    </p>
+                </div>
+            </a>
         </div>
     </div>
 </x-app-layout>

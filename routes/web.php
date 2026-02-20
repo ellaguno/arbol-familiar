@@ -91,6 +91,10 @@ Route::get('/ancestors-info', function () {
     return view('legal.ancestors-info');
 })->name('ancestors-info');
 
+Route::get('/data-deletion', function () {
+    return view('legal.data-deletion');
+})->name('data-deletion');
+
 // ============================================================================
 // INVITACIONES DE CONSENTIMIENTO (PUBLICAS)
 // ============================================================================
@@ -390,6 +394,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/tools', [ToolsController::class, 'index'])->name('tools');
         Route::get('/tools/fix-surnames', [ToolsController::class, 'fixSurnames'])->name('tools.fix-surnames');
         Route::post('/tools/fix-surnames', [ToolsController::class, 'applyFixSurnames'])->name('tools.fix-surnames.apply');
+        Route::get('/tools/duplicates', [ToolsController::class, 'duplicates'])->name('tools.duplicates');
+        Route::get('/tools/duplicates/compare/{personA}/{personB}', [ToolsController::class, 'compareDuplicates'])->name('tools.duplicates.compare');
+        Route::post('/tools/duplicates/merge', [ToolsController::class, 'mergeDuplicates'])->name('tools.duplicates.merge');
+        Route::post('/tools/duplicates/delete', [ToolsController::class, 'deleteDuplicate'])->name('tools.duplicates.delete');
 
         // Reportes
         Route::get('/reports', [ReportController::class, 'index'])->name('reports');

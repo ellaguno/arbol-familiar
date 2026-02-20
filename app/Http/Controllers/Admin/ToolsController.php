@@ -3,8 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
+use App\Models\Family;
+use App\Models\FamilyChild;
+use App\Models\Invitation;
+use App\Models\Media;
+use App\Models\Message;
 use App\Models\Person;
+use App\Models\PersonEditPermission;
+use App\Models\SurnameVariant;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ToolsController extends Controller
 {
@@ -85,6 +95,262 @@ class ToolsController extends Controller
         return redirect()->route('admin.tools.fix-surnames')
             ->with('success', "Se corrigieron {$applied} apellidos." . ($errors ? " Errores: {$errors}." : ''))
             ->with('details', $details);
+    }
+
+    // ========================================================================
+    // Buscar y fusionar duplicados
+    // ========================================================================
+
+    public function duplicates()
+    {
+        $groups = $this->findDuplicateGroups();
+
+        $byConfidence = ['alta' => [], 'media' => [], 'baja' => []];
+        $totalDuplicates = 0;
+
+        foreach ($groups as $group) {
+            $byConfidence[$group['confidence']][] = $group;
+            $totalDuplicates += count($group['persons']) - 1;
+        }
+
+        return view('admin.tools.duplicates', [
+            'byConfidence' => $byConfidence,
+            'totalGroups' => count($groups),
+            'totalDuplicates' => $totalDuplicates,
+            'totalPersons' => Person::count(),
+        ]);
+    }
+
+    public function compareDuplicates(Person $personA, Person $personB)
+    {
+        $personA->load(['events', 'media', 'familiesAsChild', 'familiesAsHusband', 'familiesAsWife']);
+        $personB->load(['events', 'media', 'familiesAsChild', 'familiesAsHusband', 'familiesAsWife']);
+
+        $fields = $this->buildComparisonFields($personA, $personB);
+
+        return view('admin.tools.duplicates-compare', [
+            'personA' => $personA,
+            'personB' => $personB,
+            'fields' => $fields,
+        ]);
+    }
+
+    public function mergeDuplicates(Request $request)
+    {
+        $request->validate([
+            'primary_id' => 'required|exists:persons,id',
+            'duplicate_id' => 'required|exists:persons,id|different:primary_id',
+        ]);
+
+        $primaryId = $request->input('primary_id');
+        $duplicateId = $request->input('duplicate_id');
+        $primary = Person::findOrFail($primaryId);
+        $duplicate = Person::findOrFail($duplicateId);
+
+        $summary = [];
+
+        DB::transaction(function () use ($primaryId, $duplicateId, $primary, $duplicate, &$summary) {
+            // 1. Transferir family_children (evitar duplicados en misma familia)
+            $childRecords = FamilyChild::where('person_id', $duplicateId)->get();
+            $transferred = 0;
+            foreach ($childRecords as $record) {
+                $exists = FamilyChild::where('family_id', $record->family_id)
+                    ->where('person_id', $primaryId)->exists();
+                if (!$exists) {
+                    $record->update(['person_id' => $primaryId]);
+                    $transferred++;
+                } else {
+                    $record->delete();
+                }
+            }
+            if ($transferred) $summary[] = "{$transferred} relacion(es) hijo-familia transferidas";
+
+            // 2. Transferir Family husband_id / wife_id
+            $husbandUpdated = Family::where('husband_id', $duplicateId)->update(['husband_id' => $primaryId]);
+            $wifeUpdated = Family::where('wife_id', $duplicateId)->update(['wife_id' => $primaryId]);
+            if ($husbandUpdated) $summary[] = "{$husbandUpdated} familia(s) como padre transferidas";
+            if ($wifeUpdated) $summary[] = "{$wifeUpdated} familia(s) como madre transferidas";
+
+            // 3. Transferir eventos
+            $eventsUpdated = Event::where('person_id', $duplicateId)->update(['person_id' => $primaryId]);
+            if ($eventsUpdated) $summary[] = "{$eventsUpdated} evento(s) transferidos";
+
+            // 4. Transferir media (polymorphic)
+            $mediaUpdated = Media::where('mediable_type', 'App\\Models\\Person')
+                ->where('mediable_id', $duplicateId)
+                ->update(['mediable_id' => $primaryId]);
+            if ($mediaUpdated) $summary[] = "{$mediaUpdated} archivo(s) multimedia transferidos";
+
+            // 5. Transferir otros registros vinculados
+            $surnameUpdated = SurnameVariant::where('person_id', $duplicateId)->update(['person_id' => $primaryId]);
+            if ($surnameUpdated) $summary[] = "{$surnameUpdated} variante(s) de apellido transferidas";
+
+            if (class_exists(Invitation::class)) {
+                Invitation::where('person_id', $duplicateId)->update(['person_id' => $primaryId]);
+            }
+            if (class_exists(Message::class)) {
+                Message::where('related_person_id', $duplicateId)->update(['related_person_id' => $primaryId]);
+            }
+            if (class_exists(PersonEditPermission::class)) {
+                PersonEditPermission::where('person_id', $duplicateId)->update(['person_id' => $primaryId]);
+            }
+
+            // 6. Re-vincular cuenta de usuario si aplica
+            $userRelinked = User::where('person_id', $duplicateId)->update(['person_id' => $primaryId]);
+            if ($userRelinked) $summary[] = "Cuenta de usuario re-vinculada";
+
+            // 7. Completar campos vacíos del principal con datos del duplicado
+            $fillable = [
+                'matronymic', 'nickname', 'birth_date', 'birth_place', 'birth_country',
+                'death_date', 'death_place', 'death_country', 'occupation', 'email', 'phone',
+                'residence_place', 'residence_country', 'biography', 'photo_path',
+                'heritage_region', 'origin_town',
+            ];
+            $filled = [];
+            foreach ($fillable as $field) {
+                if (empty($primary->$field) && !empty($duplicate->$field)) {
+                    $filled[$field] = $duplicate->$field;
+                }
+            }
+            if (!empty($filled)) {
+                $primary->update($filled);
+                $summary[] = count($filled) . " campo(s) completados desde el duplicado";
+            }
+
+            // 8. Eliminar duplicado
+            $duplicate->delete();
+        });
+
+        $name = "{$primary->first_name} {$primary->patronymic}";
+
+        return redirect()->route('admin.tools.duplicates')
+            ->with('success', "Persona #{$duplicateId} fusionada en #{$primaryId} ({$name}).")
+            ->with('details', $summary);
+    }
+
+    public function deleteDuplicate(Request $request)
+    {
+        $request->validate([
+            'person_id' => 'required|exists:persons,id',
+        ]);
+
+        $person = Person::findOrFail($request->input('person_id'));
+        $name = "#{$person->id} {$person->first_name} {$person->patronymic}";
+
+        // Verificar que no tenga cuenta de usuario vinculada
+        if (User::where('person_id', $person->id)->exists()) {
+            return redirect()->route('admin.tools.duplicates')
+                ->with('error', "No se puede eliminar {$name}: tiene una cuenta de usuario vinculada. Usa fusionar en su lugar.");
+        }
+
+        $person->delete();
+
+        return redirect()->route('admin.tools.duplicates')
+            ->with('success', "Persona {$name} eliminada.");
+    }
+
+    // ========================================================================
+    // Logica de deteccion de duplicados
+    // ========================================================================
+
+    private function findDuplicateGroups(): array
+    {
+        // Encontrar nombres+apellidos que aparecen más de una vez
+        $duplicateKeys = DB::table('persons')
+            ->select(DB::raw('LOWER(TRIM(first_name)) as fn'), DB::raw('LOWER(TRIM(patronymic)) as pat'))
+            ->whereNotNull('first_name')
+            ->where('first_name', '!=', '')
+            ->whereNotNull('patronymic')
+            ->where('patronymic', '!=', '')
+            ->groupBy('fn', 'pat')
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        $groups = [];
+
+        foreach ($duplicateKeys as $key) {
+            $persons = Person::whereRaw('LOWER(TRIM(first_name)) = ?', [$key->fn])
+                ->whereRaw('LOWER(TRIM(patronymic)) = ?', [$key->pat])
+                ->orderBy('id')
+                ->get();
+
+            if ($persons->count() < 2) continue;
+
+            // Determinar confianza del grupo
+            $confidence = $this->classifyGroupConfidence($persons);
+
+            $groups[] = [
+                'key' => ucfirst($key->fn) . ' ' . ucfirst($key->pat),
+                'persons' => $persons,
+                'confidence' => $confidence,
+            ];
+        }
+
+        // Ordenar: alta primero, luego media, luego baja
+        usort($groups, function ($a, $b) {
+            $order = ['alta' => 0, 'media' => 1, 'baja' => 2];
+            return ($order[$a['confidence']] ?? 3) <=> ($order[$b['confidence']] ?? 3);
+        });
+
+        return $groups;
+    }
+
+    private function classifyGroupConfidence($persons): string
+    {
+        $first = $persons->first();
+
+        foreach ($persons->slice(1) as $other) {
+            $sameMatronymic = !empty($first->matronymic) && !empty($other->matronymic)
+                && mb_strtolower(trim($first->matronymic)) === mb_strtolower(trim($other->matronymic));
+            $sameBirthDate = !empty($first->birth_date) && !empty($other->birth_date)
+                && $first->birth_date === $other->birth_date;
+
+            if ($sameMatronymic && $sameBirthDate) return 'alta';
+            if ($sameBirthDate) return 'media';
+        }
+
+        return 'baja';
+    }
+
+    private function buildComparisonFields(Person $personA, Person $personB): array
+    {
+        $fields = [];
+        $compare = [
+            'first_name' => __('Nombre'),
+            'patronymic' => __('Apellido paterno'),
+            'matronymic' => __('Apellido materno'),
+            'nickname' => __('Apodo'),
+            'gender' => __('Genero'),
+            'birth_date' => __('Fecha de nacimiento'),
+            'birth_place' => __('Lugar de nacimiento'),
+            'death_date' => __('Fecha de defuncion'),
+            'death_place' => __('Lugar de defuncion'),
+            'is_living' => __('Vivo/a'),
+            'occupation' => __('Ocupacion'),
+            'email' => __('Email'),
+            'phone' => __('Telefono'),
+            'residence_place' => __('Residencia'),
+            'biography' => __('Biografia'),
+        ];
+
+        foreach ($compare as $field => $label) {
+            $valA = $personA->$field;
+            $valB = $personB->$field;
+
+            if ($field === 'is_living') {
+                $valA = $valA ? __('Si') : __('No');
+                $valB = $valB ? __('Si') : __('No');
+            }
+
+            $fields[] = [
+                'label' => $label,
+                'value_a' => $valA ?? '',
+                'value_b' => $valB ?? '',
+                'different' => mb_strtolower(trim((string)($personA->$field ?? ''))) !== mb_strtolower(trim((string)($personB->$field ?? ''))),
+            ];
+        }
+
+        return $fields;
     }
 
     // ========================================================================
