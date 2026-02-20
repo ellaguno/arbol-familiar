@@ -11,7 +11,7 @@
                     <h3 class="text-xl font-bold text-red-600 mb-4">{{ __('Importante') }}</h3>
                     <div class="text-sm text-theme-secondary space-y-4">
                         <p>
-                            {{ __('Si el familiar que esta siendo registrado vive y es mayor de edad, recibira un mensaje en el correo electronico proporcionado solicitando su autorizacion para el uso de sus datos personales en tu arbol, si ya es un usuario de {{ config('app.name') }} recibira ademas una notificacion en el tablero de mensajes.') }}
+                            {{ __('Si el familiar que esta siendo registrado vive y es mayor de edad, recibira un mensaje en el correo electronico proporcionado solicitando su autorizacion para el uso de sus datos personales en tu arbol, si ya es un usuario de :app recibira ademas una notificacion en el tablero de mensajes.', ['app' => config('app.name')]) }}
                         </p>
                         <p>
                             {{ __('Una vez que su informacion sea autorizada apareceran sus datos completos. En tanto emite su autorizacion se mostraran unicamente sus apellidos y en caso de no autorizar su publicacion, se eliminaran los datos restantes de su perfil, conservandose unicamente sus apellidos en el arbol.') }}
