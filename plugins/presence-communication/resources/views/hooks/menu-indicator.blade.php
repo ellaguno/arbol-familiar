@@ -298,7 +298,7 @@ function menuPresenceIndicator() {
         acceptIncomingCall() {
             this.stopCallRingtone();
             // Redirigir a /chat para manejar la llamada ahi
-            window.location.href = '{{ route("chat.index") }}?incoming_call=' + this.incomingCallFrom;
+            window.location.href = '{{ route("chat.index") }}?incoming_call=' + this.incomingCallFrom + '&call_type=' + (this.incomingCallType || 'video');
         },
 
         async rejectIncomingCall() {

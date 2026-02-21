@@ -201,7 +201,8 @@
 
                     {{-- Mensajes --}}
                     <div x-show="selectedUserId" x-ref="messagesContainer"
-                         class="flex-1 overflow-y-auto py-4 space-y-3" style="max-height: 400px;">
+                         class="chat-scrollbar flex-1 overflow-y-auto py-4 pr-1 space-y-3"
+                         style="max-height: calc(100vh - 380px); min-height: 200px; scrollbar-width: thin; scrollbar-color: rgba(156,163,175,0.4) transparent;">
                         <div x-show="loadingMessages" class="text-center py-4">
                             <svg class="animate-spin h-5 w-5 mx-auto text-theme-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -284,8 +285,8 @@
                                         </template>
                                     </div>
                                     {{-- Grid de emojis --}}
-                                    <div class="p-2 overflow-y-auto" style="height: 180px;">
-                                        <div class="grid grid-cols-8 gap-0.5">
+                                    <div class="chat-scrollbar p-2 overflow-y-auto" style="height: 180px;">
+                                        <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px;">
                                             <template x-for="em in emojiCategories[emojiTab].emojis" :key="em">
                                                 <button type="button"
                                                         @click="insertEmoji(em)"
@@ -310,14 +311,19 @@
                             </button>
 
                             {{-- Input de texto --}}
-                            <input type="text"
-                                   x-ref="messageInput"
-                                   x-model="newMessage"
-                                   :placeholder="attachmentFile ? '{{ __('Agrega un mensaje (opcional)...') }}' : '{{ __('Escribe un mensaje...') }}'"
-                                   class="input-field flex-1"
-                                   maxlength="2000"
-                                   autocomplete="off"
-                                   @paste="handlePaste($event)">
+                            <textarea x-ref="messageInput"
+                                      x-model="newMessage"
+                                      :placeholder="attachmentFile ? '{{ __('Agrega un mensaje (opcional)...') }}' : '{{ __('Escribe un mensaje...') }}'"
+                                      class="input-field flex-1 resize-none overflow-hidden"
+                                      maxlength="2000"
+                                      autocomplete="off"
+                                      rows="1"
+                                      style="min-height: 38px; max-height: 120px;"
+                                      @paste="handlePaste($event)"
+                                      @input="$el.style.height='38px'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px'"
+                                      @keydown.enter.exact.prevent="if(newMessage.trim() || attachmentFile) $el.closest('form').requestSubmit()"
+                                      @keydown.ctrl.enter.prevent="newMessage += '\n'; $nextTick(() => { $el.style.height='38px'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px' })"
+                                      @keydown.shift.enter.prevent="newMessage += '\n'; $nextTick(() => { $el.style.height='38px'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px' })"></textarea>
 
                             {{-- Boton enviar --}}
                             <button type="submit"
@@ -442,13 +448,14 @@
                 </div>
             </template>
 
-            {{-- Overlay: Llamando (saliente) --}}
+            {{-- Overlay: Llamando / Conectando --}}
             <template x-teleport="body">
-                <div x-show="callState === 'calling'" x-cloak
+                <div x-show="callState === 'calling' || callState === 'connecting'" x-cloak
                      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
                     <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center max-w-sm mx-4 shadow-2xl">
                         <div class="mb-4">
-                            <div class="w-24 h-24 mx-auto rounded-full overflow-hidden ring-4 ring-blue-400 animate-pulse">
+                            <div class="w-24 h-24 mx-auto rounded-full overflow-hidden ring-4 animate-pulse"
+                                 :class="callState === 'connecting' ? 'ring-green-400' : 'ring-blue-400'">
                                 <template x-if="callPeerPhoto">
                                     <img :src="callPeerPhoto" class="w-full h-full object-cover">
                                 </template>
@@ -459,7 +466,10 @@
                             </div>
                         </div>
                         <h3 class="text-xl font-bold text-theme mb-1" x-text="callPeerName"></h3>
-                        <p class="text-theme-secondary mb-6">{{ __('Llamando...') }}</p>
+                        <p class="text-theme-secondary mb-6">
+                            <span x-show="callState === 'calling'">{{ __('Llamando...') }}</span>
+                            <span x-show="callState === 'connecting'">{{ __('Conectando...') }}</span>
+                        </p>
                         <button @click="endCall()"
                                 class="w-14 h-14 mx-auto rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-colors">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -531,13 +541,13 @@
                      class="fixed inset-0 z-50 flex flex-col bg-gray-900">
 
                     {{-- Video grid --}}
-                    <div class="flex-1 relative" x-show="callType === 'video'">
-                        <div class="w-full h-full grid gap-1 p-1"
+                    <div class="flex-1 relative overflow-hidden" x-show="callType === 'video'">
+                        <div class="absolute inset-0 grid gap-1 p-1"
                              :class="videoGridClass()">
                             <template x-for="peerId in Object.keys(peers)" :key="'vid-' + peerId">
-                                <div class="relative bg-gray-800 rounded-lg overflow-hidden">
+                                <div class="relative bg-gray-800 rounded-lg overflow-hidden min-h-0">
                                     <video :x-ref="'remoteVideo_' + peerId" autoplay playsinline
-                                           class="w-full h-full object-cover"
+                                           class="w-full h-full object-contain"
                                            x-effect="attachRemoteStream(peerId, $el)"></video>
                                     <div class="absolute bottom-2 left-2 bg-black/50 rounded px-2 py-0.5">
                                         <span class="text-white text-xs" x-text="peers[peerId]?.name || ''"></span>
@@ -547,7 +557,8 @@
                         </div>
 
                         {{-- Video local (mini esquina) --}}
-                        <div class="absolute top-4 right-4 w-32 h-24 rounded-lg overflow-hidden shadow-lg border-2 border-white/20 z-10">
+                        <div class="absolute top-4 right-4 w-36 h-28 rounded-lg overflow-hidden shadow-lg border-2 border-white/20 z-10 cursor-move"
+                             style="touch-action: none;">
                             <video x-ref="localVideo" autoplay playsinline muted
                                    class="w-full h-full object-cover"
                                    :class="isCameraOff ? 'hidden' : ''"></video>
@@ -638,7 +649,7 @@
 
                     {{-- Panel: Agregar participante --}}
                     <div x-show="showAddParticipant" x-cloak
-                         class="absolute top-4 left-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-4 w-72 max-h-80 overflow-y-auto z-20">
+                         class="chat-scrollbar absolute top-4 left-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-4 w-72 max-h-80 overflow-y-auto z-20">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="font-semibold text-theme text-sm">{{ __('Agregar participante') }}</h4>
                             <button @click="showAddParticipant = false" class="text-gray-400 hover:text-gray-600">
@@ -673,6 +684,25 @@
             </template>
         </div>
     </div>
+
+    @push('styles')
+    <style>
+        /* Scrollbar discreto para Chrome/Safari/Edge */
+        .chat-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.4);
+            border-radius: 3px;
+        }
+        .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.6);
+        }
+    </style>
+    @endpush
 
     @push('scripts')
     <script>
@@ -789,6 +819,17 @@
                 const incomingCall = params.get('incoming_call');
                 if (incomingCall) {
                     window.history.replaceState({}, '', window.location.pathname);
+                    const callerId = parseInt(incomingCall);
+                    const callerInfo = this.getUserInfo(callerId);
+                    this.callPeerId = callerId;
+                    this.callPeerName = callerInfo?.name || '{{ __("Usuario") }}';
+                    this.callPeerPhoto = callerInfo?.photo || null;
+                    this.callType = params.get('call_type') || 'video';
+                    this.callState = 'incoming';
+                    this.playRingtone('incoming');
+
+                    // Buscar room_id del call-request pendiente
+                    this.setSignalPollingSpeed(true);
                 }
 
                 // Enviar offline al cerrar pagina
@@ -980,13 +1021,15 @@
                     .replace(/'/g, '&#039;');
                 // 2. Detectar URLs y envolver en <a>
                 const urlRegex = /(https?:\/\/[^\s<>&"']+)/gi;
-                return escaped.replace(urlRegex, function(url) {
+                const withLinks = escaped.replace(urlRegex, function(url) {
                     const displayUrl = url.length > 50 ? url.substring(0, 47) + '...' : url;
                     return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" '
                          + 'class="underline break-all hover:opacity-80" '
                          + 'onclick="event.stopPropagation()">'
                          + displayUrl + '</a>';
                 });
+                // 3. Convertir saltos de linea en <br>
+                return withLinks.replace(/\n/g, '<br>');
             },
 
             validateAndAttachFile(file) {
@@ -1194,13 +1237,25 @@
                 if (this.callState !== 'incoming') return;
 
                 this.stopRingtone();
+                this.callState = 'connecting';
 
                 try {
-                    await fetch('{{ route("call.respond") }}', {
+                    const res = await fetch('{{ route("call.respond") }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
                         body: JSON.stringify({ caller_id: this.callPeerId, response: 'accept' }),
                     });
+
+                    if (!res.ok) {
+                        let errorMsg = '{{ __("Error al aceptar llamada") }}';
+                        try { const d = await res.json(); errorMsg = d.error || errorMsg; } catch (e) {}
+                        alert(errorMsg);
+                        this.resetCall();
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (data.room_id) this.roomId = data.room_id;
 
                     // Obtener media y preparar PeerConnection (callee side)
                     await this.getLocalMedia();

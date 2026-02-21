@@ -119,7 +119,11 @@ class WebRTCController extends Controller
             }
         }
 
-        return response()->json(['status' => 'ok']);
+        return response()->json([
+            'status' => 'ok',
+            'room_id' => $roomId,
+            'media_type' => $mediaType,
+        ]);
     }
 
     /**
