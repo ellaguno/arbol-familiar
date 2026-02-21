@@ -63,7 +63,7 @@ class ChatController extends Controller
 
             $result[] = [
                 'user_id' => $otherUser->id,
-                'name' => $otherPerson ? $otherPerson->full_name : $otherUser->email,
+                'name' => $otherPerson ? $otherPerson->full_name : (__('Usuario') . ' #' . $otherUser->id),
                 'photo' => $photoUrl,
                 'sex' => $otherPerson->sex ?? null,
                 'last_message' => $lastMessage ? [
@@ -108,7 +108,7 @@ class ChatController extends Controller
                     'is_mine' => $msg->sender_id === $currentUserId,
                     'read_at' => $msg->read_at?->toISOString(),
                     'created_at' => $msg->created_at->toISOString(),
-                    'sender_name' => $senderPerson ? $senderPerson->full_name : ($msg->sender->email ?? ''),
+                    'sender_name' => $senderPerson ? $senderPerson->full_name : (__('Usuario') . ' #' . ($msg->sender->id ?? '')),
                     'sender_photo' => $senderPhoto,
                 ];
             });
@@ -189,7 +189,7 @@ class ChatController extends Controller
                 'is_mine' => true,
                 'read_at' => null,
                 'created_at' => $chatMessage->created_at->toISOString(),
-                'sender_name' => $senderPerson ? $senderPerson->full_name : ($chatMessage->sender->email ?? ''),
+                'sender_name' => $senderPerson ? $senderPerson->full_name : (__('Usuario') . ' #' . ($chatMessage->sender->id ?? '')),
             ],
         ]);
     }
@@ -246,7 +246,7 @@ class ChatController extends Controller
                     'message' => $msg->message
                         ? Str::limit($msg->message, 80)
                         : ($msg->hasAttachment() ? __('[Imagen]') : ''),
-                    'sender_name' => $senderPerson ? $senderPerson->full_name : ($msg->sender->email ?? ''),
+                    'sender_name' => $senderPerson ? $senderPerson->full_name : (__('Usuario') . ' #' . ($msg->sender->id ?? '')),
                     'sender_photo' => $senderPhoto,
                     'created_at' => $msg->created_at->toISOString(),
                 ];

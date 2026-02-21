@@ -95,8 +95,12 @@ class WebRTCController extends Controller
             ->latest()
             ->first();
 
-        $roomId = $originalRequest?->room_id;
-        $mediaType = $originalRequest?->media_type ?? 'video';
+        if (!$originalRequest) {
+            return response()->json(['error' => __('No hay solicitud de llamada pendiente.')], 404);
+        }
+
+        $roomId = $originalRequest->room_id;
+        $mediaType = $originalRequest->media_type;
 
         WebrtcSignal::create([
             'room_id' => $roomId,
@@ -126,7 +130,7 @@ class WebRTCController extends Controller
         $request->validate([
             'peer_id' => ['required', 'integer', 'exists:users,id'],
             'type' => ['required', 'in:offer,answer,ice-candidate'],
-            'payload' => ['required', 'string'],
+            'payload' => ['required', 'string', 'max:65535'],
             'target_id' => ['nullable', 'integer', 'exists:users,id'],
             'room_id' => ['nullable', 'integer', 'exists:webrtc_rooms,id'],
         ]);
@@ -224,7 +228,7 @@ class WebRTCController extends Controller
                 $caller = $signal->caller;
                 $data['caller_name'] = $caller?->person
                     ? $caller->person->full_name
-                    : ($caller?->email ?? 'Usuario');
+                    : (__('Usuario') . ' #' . ($caller?->id ?? ''));
             }
 
             // Agregar info del invitante para room-invite
@@ -232,7 +236,7 @@ class WebRTCController extends Controller
                 $sender = $signal->sender;
                 $data['sender_name'] = $sender?->person
                     ? $sender->person->full_name
-                    : ($sender?->email ?? 'Usuario');
+                    : (__('Usuario') . ' #' . ($sender?->id ?? ''));
 
                 // Incluir participantes actuales del room
                 if ($signal->room_id) {
@@ -243,7 +247,7 @@ class WebRTCController extends Controller
                         $data['room_participants'] = $participants->map(function ($user) {
                             return [
                                 'id' => $user->id,
-                                'name' => $user->person ? $user->person->full_name : $user->email,
+                                'name' => $user->person ? $user->person->full_name : (__('Usuario') . ' #' . $user->id),
                                 'photo' => $user->person && $user->person->photo_path
                                     ? asset('storage/' . $user->person->photo_path) : null,
                             ];
@@ -257,7 +261,7 @@ class WebRTCController extends Controller
                 $sender = $signal->sender;
                 $data['sender_name'] = $sender?->person
                     ? $sender->person->full_name
-                    : ($sender?->email ?? 'Usuario');
+                    : (__('Usuario') . ' #' . ($sender?->id ?? ''));
                 $data['sender_photo'] = $sender?->person && $sender->person->photo_path
                     ? asset('storage/' . $sender->person->photo_path) : null;
             }
@@ -523,7 +527,7 @@ class WebRTCController extends Controller
         $formatted = $participants->map(function ($user) {
             return [
                 'id' => $user->id,
-                'name' => $user->person ? $user->person->full_name : $user->email,
+                'name' => $user->person ? $user->person->full_name : (__('Usuario') . ' #' . $user->id),
                 'photo' => $user->person && $user->person->photo_path
                     ? asset('storage/' . $user->person->photo_path) : null,
             ];

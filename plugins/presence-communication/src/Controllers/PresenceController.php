@@ -72,11 +72,10 @@ class PresenceController extends Controller
                 'id' => $presence->user_id,
                 'name' => $otherPerson
                     ? $otherPerson->full_name
-                    : $otherUser->email,
+                    : __('Usuario') . ' #' . $otherUser->id,
                 'photo' => $photoUrl,
                 'sex' => $otherPerson->sex ?? null,
                 'status' => $presence->status,
-                'current_page' => $presence->current_page,
                 'last_seen_at' => $presence->last_seen_at->toISOString(),
             ];
 
@@ -114,11 +113,10 @@ class PresenceController extends Controller
                     'id' => $presence->user_id,
                     'name' => $otherPerson
                         ? $otherPerson->full_name
-                        : $otherUser->email,
+                        : __('Usuario') . ' #' . $otherUser->id,
                     'photo' => $pubPhotoUrl,
                     'sex' => $otherPerson->sex ?? null,
                     'status' => $presence->status,
-                    'current_page' => $presence->current_page,
                     'last_seen_at' => $presence->last_seen_at->toISOString(),
                 ];
             }
