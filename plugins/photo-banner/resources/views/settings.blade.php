@@ -95,6 +95,16 @@
                                class="form-input w-32">
                         <p class="text-xs text-theme-muted mt-1">{{ __('Numero maximo de fotos a mostrar. Se seleccionan aleatoriamente. Rango: 10-200.') }}</p>
                     </div>
+
+                    {{-- Umbral minimo de fotos reales --}}
+                    <div>
+                        <label for="min_real_photos" class="form-label">{{ __('Minimo de fotos reales') }}</label>
+                        <input type="number" id="min_real_photos" name="min_real_photos"
+                               min="5" max="30" step="1"
+                               value="{{ $settings['min_real_photos'] ?? 10 }}"
+                               class="form-input w-32">
+                        <p class="text-xs text-theme-muted mt-1">{{ __('Si el usuario tiene menos fotos accesibles que este numero, se completan con imagenes genericas. Rango: 5-30.') }}</p>
+                    </div>
                 </div>
             </div>
 
@@ -106,7 +116,9 @@
                 <div class="card-body">
                     <div class="text-sm text-theme-secondary space-y-2">
                         <p>{{ __('El cintillo muestra fotos de los medios asociados a personas en el sistema.') }}</p>
-                        <p>{{ __('Las imagenes se seleccionan aleatoriamente y se actualizan cada 5 minutos (cache).') }}</p>
+                        <p>{{ __('Cada usuario solo ve fotos de personas a las que tiene acceso segun la configuracion de privacidad.') }}</p>
+                        <p>{{ __('Si un usuario tiene pocas fotos accesibles, se completan con imagenes genericas de la carpeta public/images/banner/.') }}</p>
+                        <p>{{ __('Las imagenes se seleccionan aleatoriamente y se actualizan cada 2 minutos (cache por usuario).') }}</p>
                         <p>{{ __('Al pasar el mouse sobre una imagen, la animacion se pausa y muestra el nombre de la persona.') }}</p>
                         <p>{{ __('Al hacer clic en una imagen, se navega al perfil de la persona.') }}</p>
                     </div>

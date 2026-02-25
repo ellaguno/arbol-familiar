@@ -20,6 +20,7 @@ class PhotoBannerPlugin extends PluginServiceProvider
             'scroll_speed' => 30,
             'max_images' => 50,
             'image_gap' => 4,
+            'min_real_photos' => 10,
         ];
     }
 }
