@@ -13,6 +13,37 @@
             <p class="text-theme-secondary mt-1">{{ __('Bienvenido a tu arbol genealogico') }}</p>
         </div>
 
+        {{-- Banner de orientacion para usuarios sin conexiones familiares (v2.6.0) --}}
+        @if($person && !$family)
+            <div class="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">{{ __('¿Como empezar?') }}</h3>
+                <p class="text-sm text-blue-700 dark:text-blue-400 mb-4">{{ __('Aun no tienes conexiones familiares. Aqui tienes algunas opciones para comenzar:') }}</p>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <a href="{{ route('search.index', ['search' => $person->patronymic]) }}" class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:shadow-md transition">
+                        <svg class="w-6 h-6 text-mf-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <p class="font-medium text-theme">{{ __('Buscar familiares') }}</p>
+                        <p class="text-sm text-theme-muted mt-1">{{ __('Busca si alguno de tus familiares ya esta en el arbol') }}</p>
+                    </a>
+                    <a href="{{ route('tree.view', $person) }}" class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:shadow-md transition">
+                        <svg class="w-6 h-6 text-mf-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <p class="font-medium text-theme">{{ __('Comenzar mi arbol') }}</p>
+                        <p class="text-sm text-theme-muted mt-1">{{ __('Agrega padres, hermanos o conyuge desde tu arbol') }}</p>
+                    </a>
+                    <a href="{{ route('help') }}" class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-800 hover:shadow-md transition">
+                        <svg class="w-6 h-6 text-mf-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="font-medium text-theme">{{ __('Ver ayuda') }}</p>
+                        <p class="text-sm text-theme-muted mt-1">{{ __('Aprende como usar la plataforma') }}</p>
+                    </a>
+                </div>
+            </div>
+        @endif
+
         <div class="grid lg:grid-cols-3 gap-8">
             <!-- Columna principal -->
             <div class="lg:col-span-2 space-y-6">

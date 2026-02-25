@@ -5,75 +5,75 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('gedcom.import') }}" class="text-gray-500 hover:text-gray-700">{{ __('Importar GEDCOM') }}</a>
+                    <a href="{{ route('gedcom.import') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Importar GEDCOM') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Preview') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Preview') }}</span>
                 </li>
             </ol>
         </nav>
 
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Preview de importacion') }}</h1>
-            <p class="text-gray-600 mt-1">{{ __('Revisa los datos antes de importar') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Preview de importacion') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ __('Revisa los datos antes de importar') }}</p>
         </div>
 
         <!-- Resumen -->
         <div class="grid md:grid-cols-4 gap-4 mb-8">
-            <div class="card bg-blue-50 border-blue-200">
+            <div class="card bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800">
                 <div class="card-body text-center">
-                    <div class="text-3xl font-bold text-blue-600">{{ $preview['total_individuals'] }}</div>
-                    <div class="text-blue-800">{{ __('Personas') }}</div>
+                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $preview['total_individuals'] }}</div>
+                    <div class="text-blue-800 dark:text-blue-300">{{ __('Personas') }}</div>
                 </div>
             </div>
-            <div class="card bg-purple-50 border-purple-200">
+            <div class="card bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800">
                 <div class="card-body text-center">
-                    <div class="text-3xl font-bold text-purple-600">{{ $preview['total_families'] }}</div>
-                    <div class="text-purple-800">{{ __('Familias') }}</div>
+                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $preview['total_families'] }}</div>
+                    <div class="text-purple-800 dark:text-purple-300">{{ __('Familias') }}</div>
                 </div>
             </div>
-            <div class="card bg-green-50 border-green-200">
+            <div class="card bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800">
                 <div class="card-body text-center">
-                    <div class="text-3xl font-bold text-green-600">{{ $preview['media_count'] ?? ($preview['total_media_objects'] ?? 0) }}</div>
-                    <div class="text-green-800">{{ __('Medios') }}</div>
+                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $preview['media_count'] ?? ($preview['total_media_objects'] ?? 0) }}</div>
+                    <div class="text-green-800 dark:text-green-300">{{ __('Medios') }}</div>
                 </div>
             </div>
-            <div class="card bg-gray-50">
+            <div class="card bg-gray-50 dark:bg-gray-800">
                 <div class="card-body text-center">
-                    <div class="text-lg font-medium text-gray-900 truncate">{{ $fileName }}</div>
-                    <div class="text-gray-500">{{ __('Archivo') }}</div>
+                    <div class="text-lg font-medium text-theme truncate">{{ $fileName }}</div>
+                    <div class="text-theme-muted">{{ __('Archivo') }}</div>
                 </div>
             </div>
         </div>
 
         <!-- Errores -->
         @if(!empty($preview['errors']))
-            <div class="card mb-8 bg-red-50 border-red-200">
-                <div class="card-header bg-red-100">
-                    <h2 class="text-lg font-semibold text-red-800">{{ __('Errores encontrados') }}</h2>
+            <div class="card mb-8 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800">
+                <div class="card-header bg-red-100 dark:bg-red-900/50">
+                    <h2 class="text-lg font-semibold text-red-800 dark:text-red-200">{{ __('Errores encontrados') }}</h2>
                 </div>
                 <div class="card-body">
-                    <ul class="list-disc list-inside text-red-700 space-y-1">
+                    <ul class="list-disc list-inside text-red-700 dark:text-red-300 space-y-1">
                         @foreach($preview['errors'] as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
-                    <p class="mt-4 text-red-600 font-medium">{{ __('No se puede importar hasta corregir estos errores.') }}</p>
+                    <p class="mt-4 text-red-600 dark:text-red-400 font-medium">{{ __('No se puede importar hasta corregir estos errores.') }}</p>
                 </div>
             </div>
         @endif
 
         <!-- Advertencias -->
         @if(!empty($preview['warnings']))
-            <div class="card mb-8 bg-yellow-50 border-yellow-200">
-                <div class="card-header bg-yellow-100">
-                    <h2 class="text-lg font-semibold text-yellow-800">{{ __('Advertencias') }}</h2>
+            <div class="card mb-8 bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800">
+                <div class="card-header bg-yellow-100 dark:bg-yellow-900/50">
+                    <h2 class="text-lg font-semibold text-yellow-800 dark:text-yellow-200">{{ __('Advertencias') }}</h2>
                 </div>
                 <div class="card-body">
-                    <ul class="list-disc list-inside text-yellow-700 space-y-1">
+                    <ul class="list-disc list-inside text-yellow-700 dark:text-yellow-300 space-y-1">
                         @foreach($preview['warnings'] as $warning)
                             <li>{{ $warning }}</li>
                         @endforeach
@@ -88,32 +88,32 @@
                 <h2 class="text-lg font-semibold">{{ __('Personas') }} ({{ __('mostrando :count de :total', ['count' => count($preview['individuals']), 'total' => $preview['total_individuals']]) }})</h2>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-theme">
+                    <thead class="bg-theme-secondary">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('ID') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Nombre') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Genero') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Nacimiento') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Lugar') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('ID') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Nombre') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Genero') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Nacimiento') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Lugar') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-theme-card divide-y divide-theme">
                         @foreach($preview['individuals'] as $indi)
                             <tr>
-                                <td class="px-4 py-3 text-sm text-gray-500">{{ $indi['gedcom_id'] }}</td>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $indi['name'] }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">
+                                <td class="px-4 py-3 text-sm text-theme-muted">{{ $indi['gedcom_id'] }}</td>
+                                <td class="px-4 py-3 text-sm font-medium text-theme">{{ $indi['name'] }}</td>
+                                <td class="px-4 py-3 text-sm text-theme-muted">
                                     @if($indi['gender'] === 'M')
-                                        <span class="text-blue-600">{{ __('Masculino') }}</span>
+                                        <span class="text-blue-600 dark:text-blue-400">{{ __('Masculino') }}</span>
                                     @elseif($indi['gender'] === 'F')
-                                        <span class="text-pink-600">{{ __('Femenino') }}</span>
+                                        <span class="text-pink-600 dark:text-pink-400">{{ __('Femenino') }}</span>
                                     @else
-                                        <span class="text-gray-400">{{ __('Desconocido') }}</span>
+                                        <span class="text-theme-muted">{{ __('Desconocido') }}</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-500">{{ $indi['birth_date'] ?? '-' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-500">{{ $indi['birth_place'] ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-theme-muted">{{ $indi['birth_date'] ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-theme-muted">{{ $indi['birth_place'] ?? '-' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -128,24 +128,24 @@
                     <h2 class="text-lg font-semibold">{{ __('Familias') }} ({{ __('mostrando :count de :total', ['count' => count($preview['families']), 'total' => $preview['total_families']]) }})</h2>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y divide-theme">
+                        <thead class="bg-theme-secondary">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('ID') }}</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Esposo') }}</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Esposa') }}</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Hijos') }}</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Matrimonio') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('ID') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Esposo') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Esposa') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Hijos') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-theme-muted uppercase">{{ __('Matrimonio') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-theme-card divide-y divide-theme">
                             @foreach($preview['families'] as $fam)
                                 <tr>
-                                    <td class="px-4 py-3 text-sm text-gray-500">{{ $fam['gedcom_id'] }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900">{{ $fam['husband'] }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900">{{ $fam['wife'] }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-500">{{ $fam['children_count'] }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-500">{{ $fam['marriage_date'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-sm text-theme-muted">{{ $fam['gedcom_id'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-theme">{{ $fam['husband'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-theme">{{ $fam['wife'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-theme-muted">{{ $fam['children_count'] }}</td>
+                                    <td class="px-4 py-3 text-sm text-theme-muted">{{ $fam['marriage_date'] ?? '-' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -157,8 +157,8 @@
         <!-- Preview de medios (si es GEDZIP) -->
         @if(($isGedzip ?? false) && !empty($preview['media_files']))
             <div class="card mb-8">
-                <div class="card-header bg-green-50">
-                    <h2 class="text-lg font-semibold text-green-800">
+                <div class="card-header bg-green-50 dark:bg-green-900/30">
+                    <h2 class="text-lg font-semibold text-green-800 dark:text-green-300">
                         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
@@ -273,7 +273,7 @@
                         </div>
 
                         @if(($isGedzip ?? false) && ($preview['media_count'] ?? 0) > 0)
-                            <div class="space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div class="space-y-2 pt-4 border-t border-theme">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" name="import_media" value="1" class="form-checkbox" checked>
                                     <span class="flex items-center gap-2">

@@ -870,6 +870,32 @@ class Person extends Model
     }
 
     /**
+     * Verifica si un usuario puede ver datos basicos de esta persona para
+     * fines de reclamacion de identidad o declaracion de parentesco.
+     * Muestra solo: nombre, año de nacimiento, lugar, genero, foto.
+     * NO reemplaza canBeViewedBy() para acceso completo al perfil.
+     */
+    public function canBeViewedForClaim(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        // Si ya puede ver normalmente, si
+        if ($this->canBeViewedBy($user)) {
+            return true;
+        }
+
+        // Cualquier usuario autenticado puede ver datos basicos para claim
+        // excepto menores de edad protegidos
+        if ($this->shouldProtectMinorData()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Verifica si un usuario es familia directa de esta persona.
      * Familia directa incluye: padres, hijos, cónyuges, hermanos,
      * y toda la línea de ascendentes y descendientes directos.

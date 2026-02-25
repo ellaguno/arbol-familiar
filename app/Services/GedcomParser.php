@@ -343,15 +343,26 @@ class GedcomParser
     {
         $names = $this->parseGedcomName($data['name'] ?? '');
 
+        $birthParsed = $this->parseGedcomDateComponents($data['birth']['date'] ?? null);
+        $deathParsed = $this->parseGedcomDateComponents($data['death']['date'] ?? null);
+
         $personData = [
             'first_name' => $names['first_name'] ?: __('Desconocido'),
             'patronymic' => $names['last_name'] ?: __('Desconocido'),
             'matronymic' => $names['maiden_name'] ?: '',
             'nickname' => $data['nickname'] ?? null,
             'gender' => $this->mapGender($data['sex'] ?? 'U'),
-            'birth_date' => $this->parseGedcomDate($data['birth']['date'] ?? null),
+            'birth_date' => $birthParsed['date'],
+            'birth_year' => $birthParsed['year'],
+            'birth_month' => $birthParsed['month'],
+            'birth_day' => $birthParsed['day'],
+            'birth_date_approx' => $birthParsed['approx'],
             'birth_place' => $data['birth']['place'] ?? null,
-            'death_date' => $this->parseGedcomDate($data['death']['date'] ?? null),
+            'death_date' => $deathParsed['date'],
+            'death_year' => $deathParsed['year'],
+            'death_month' => $deathParsed['month'],
+            'death_day' => $deathParsed['day'],
+            'death_date_approx' => $deathParsed['approx'],
             'death_place' => $data['death']['place'] ?? null,
             'is_living' => !isset($data['death']),
             'biography' => $data['note'] ?? null,
@@ -454,6 +465,16 @@ class GedcomParser
         // Retiro
         if (isset($data['retirement'])) {
             $this->createEvent($person, 'RETI', $data['retirement']);
+        }
+
+        // Censo
+        if (isset($data['census'])) {
+            $this->createEvent($person, 'CENS', $data['census']);
+        }
+
+        // Adopcion
+        if (isset($data['adoption'])) {
+            $this->createEvent($person, 'ADOP', $data['adoption']);
         }
     }
 
@@ -699,6 +720,14 @@ class GedcomParser
                 $record['retirement'] = $this->parseEventSubRecords();
                 break;
 
+            case 'CENS':
+                $record['census'] = $this->parseEventSubRecords();
+                break;
+
+            case 'ADOP':
+                $record['adoption'] = $this->parseEventSubRecords();
+                break;
+
             case 'NOTE':
                 $record['note'] = $this->parseContinuedText($value);
                 break;
@@ -927,35 +956,60 @@ class GedcomParser
      */
     protected function parseGedcomDate(?string $date): ?string
     {
+        $parsed = $this->parseGedcomDateComponents($date);
+        return $parsed['date'];
+    }
+
+    /**
+     * Parsear fecha GEDCOM y devolver componentes individuales.
+     *
+     * @return array{date: ?string, year: ?int, month: ?int, day: ?int, approx: bool}
+     */
+    protected function parseGedcomDateComponents(?string $date): array
+    {
+        $result = ['date' => null, 'year' => null, 'month' => null, 'day' => null, 'approx' => false];
+
         if (!$date) {
-            return null;
+            return $result;
         }
 
-        // Limpiar prefijos de aproximacion
-        $date = preg_replace('/^(ABT|BEF|AFT|CAL|EST|INT)\s+/i', '', $date);
+        // Detectar y limpiar prefijos de aproximacion
+        if (preg_match('/^(ABT|BEF|AFT|CAL|EST|INT)\s+/i', $date)) {
+            $result['approx'] = true;
+            $date = preg_replace('/^(ABT|BEF|AFT|CAL|EST|INT)\s+/i', '', $date);
+        }
 
         // Meses GEDCOM
         $months = [
-            'JAN' => '01', 'FEB' => '02', 'MAR' => '03', 'APR' => '04',
-            'MAY' => '05', 'JUN' => '06', 'JUL' => '07', 'AUG' => '08',
-            'SEP' => '09', 'OCT' => '10', 'NOV' => '11', 'DEC' => '12',
+            'JAN' => 1, 'FEB' => 2, 'MAR' => 3, 'APR' => 4,
+            'MAY' => 5, 'JUN' => 6, 'JUL' => 7, 'AUG' => 8,
+            'SEP' => 9, 'OCT' => 10, 'NOV' => 11, 'DEC' => 12,
+            // Meses en espanol (webtrees los exporta asi)
+            'ENE' => 1, 'ABR' => 4, 'AGO' => 8, 'DIC' => 12,
         ];
 
-        // Formato: "1 JAN 1900" o "JAN 1900" o "1900"
+        // Formato: "1 JAN 1900" - fecha completa
         if (preg_match('/^(\d{1,2})\s+([A-Z]{3})\s+(\d{4})$/i', $date, $matches)) {
-            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-            $month = $months[strtoupper($matches[2])] ?? '01';
-            $year = $matches[3];
-            return "{$year}-{$month}-{$day}";
-        } elseif (preg_match('/^([A-Z]{3})\s+(\d{4})$/i', $date, $matches)) {
-            $month = $months[strtoupper($matches[1])] ?? '01';
-            $year = $matches[2];
-            return "{$year}-{$month}-01";
-        } elseif (preg_match('/^(\d{4})$/', $date, $matches)) {
-            return "{$matches[1]}-01-01";
+            $result['day'] = (int) $matches[1];
+            $result['month'] = $months[strtoupper($matches[2])] ?? 1;
+            $result['year'] = (int) $matches[3];
+            $result['date'] = sprintf('%04d-%02d-%02d', $result['year'], $result['month'], $result['day']);
+        }
+        // Formato: "JAN 1900" - solo mes y año
+        elseif (preg_match('/^([A-Z]{3})\s+(\d{4})$/i', $date, $matches)) {
+            $result['month'] = $months[strtoupper($matches[1])] ?? 1;
+            $result['year'] = (int) $matches[2];
+            $result['approx'] = true; // sin dia = aproximada
+            $result['date'] = sprintf('%04d-%02d-01', $result['year'], $result['month']);
+        }
+        // Formato: "1900" - solo año
+        elseif (preg_match('/^(\d{4})$/', $date, $matches)) {
+            $result['year'] = (int) $matches[1];
+            $result['approx'] = true; // sin mes ni dia = aproximada
+            $result['date'] = sprintf('%04d-01-01', $result['year']);
         }
 
-        return null;
+        return $result;
     }
 
     /**

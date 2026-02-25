@@ -51,7 +51,7 @@
                                 <h3 class="font-medium text-blue-800 dark:text-blue-300">{{ __('Como funciona') }}</h3>
                                 <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
                                     {{ __('Al reclamar este perfil, enviaras una solicitud a') }}
-                                    <strong>{{ $creator?->email ?? __('el creador') }}</strong>
+                                    <strong>{{ $reviewerLabel ?? __('el responsable del perfil') }}</strong>
                                     {{ __('quien debera aprobar que tu cuenta se vincule con esta persona.') }}
                                 </p>
                                 <p class="text-sm text-blue-700 dark:text-blue-400 mt-2">
@@ -61,6 +61,20 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Aviso para usuarios con persona dummy --}}
+                @if(!empty($canClaimWithDummy) && $canClaimWithDummy)
+                    <div class="mb-6">
+                        <div class="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <p class="text-sm text-amber-700 dark:text-amber-400">
+                                {{ __('Tu perfil actual (sin relaciones familiares) sera reemplazado por este perfil al ser aprobado.') }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Formulario -->
                 <form action="{{ route('persons.claim.send', $person) }}" method="POST" class="space-y-4">

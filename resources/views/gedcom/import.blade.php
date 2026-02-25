@@ -3,12 +3,12 @@
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Importar GEDCOM') }}</h1>
-            <p class="text-gray-600 mt-1">{{ __('Importa tu arbol genealogico desde un archivo GEDCOM') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Importar GEDCOM') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ __('Importa tu arbol genealogico desde un archivo GEDCOM') }}</p>
         </div>
 
         <!-- Informacion sobre GEDCOM -->
-        <div class="card mb-8 bg-blue-50 border-blue-200">
+        <div class="card mb-8 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800">
             <div class="card-body">
                 <div class="flex gap-4">
                     <div class="flex-shrink-0">
@@ -17,11 +17,11 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-blue-900 mb-2">{{ __('Que es GEDCOM?') }}</h3>
-                        <p class="text-blue-800 text-sm mb-2">
+                        <h3 class="font-semibold text-blue-900 dark:text-blue-200 mb-2">{{ __('Que es GEDCOM?') }}</h3>
+                        <p class="text-blue-800 dark:text-blue-300 text-sm mb-2">
                             {{ __('GEDCOM (GEnealogical Data COMmunication) es el formato estandar para intercambiar datos genealogicos entre diferentes programas.') }}
                         </p>
-                        <p class="text-blue-700 text-sm">
+                        <p class="text-blue-700 dark:text-blue-300 text-sm">
                             {{ __('Puedes exportar archivos GEDCOM desde programas como Ancestry, MyHeritage, FamilySearch, Gramps, y muchos mas.') }}
                         </p>
                     </div>
@@ -37,18 +37,18 @@
                     <h2 class="text-lg font-semibold">{{ __('Seleccionar archivo') }}</h2>
                 </div>
                 <div class="card-body">
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-mf-primary transition-colors"
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-mf-primary transition-colors"
                          x-data="{ dragover: false, fileName: '' }"
                          @dragover.prevent="dragover = true"
                          @dragleave.prevent="dragover = false"
                          @drop.prevent="dragover = false; $refs.fileInput.files = $event.dataTransfer.files; fileName = $event.dataTransfer.files[0]?.name || ''"
                          :class="{ 'border-mf-primary bg-mf-light': dragover }">
 
-                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
 
-                        <p class="text-gray-600 mb-2">{{ __('Arrastra tu archivo GEDCOM o GEDZIP aqui o') }}</p>
+                        <p class="text-theme-secondary mb-2">{{ __('Arrastra tu archivo GEDCOM o GEDZIP aqui o') }}</p>
                         <label class="btn-outline cursor-pointer inline-block">
                             <input type="file" name="file" x-ref="fileInput" class="hidden"
                                    accept=".ged,.GED,.txt,.zip,.gdz"
@@ -56,14 +56,14 @@
                             {{ __('Seleccionar archivo') }}
                         </label>
 
-                        <p class="text-sm text-gray-500 mt-4">{{ __('Archivos .ged, .txt, .zip o .gdz (max 50MB)') }}</p>
+                        <p class="text-sm text-theme-muted mt-4">{{ __('Archivos .ged, .txt, .zip o .gdz (max 50MB)') }}</p>
 
                         <template x-if="fileName">
-                            <div class="mt-4 p-3 bg-green-50 rounded-lg inline-flex items-center gap-2">
+                            <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg inline-flex items-center gap-2">
                                 <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <span class="text-green-700" x-text="fileName"></span>
+                                <span class="text-green-700 dark:text-green-300" x-text="fileName"></span>
                             </div>
                         </template>
                     </div>
@@ -97,7 +97,7 @@
                 <h3 class="text-lg font-semibold">{{ __('Consejos para importar') }}</h3>
             </div>
             <div class="card-body">
-                <ul class="space-y-3 text-sm text-gray-600">
+                <ul class="space-y-3 text-sm text-theme-secondary">
                     <li class="flex items-start gap-2">
                         <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

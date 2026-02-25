@@ -5,20 +5,20 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('search.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Buscar') }}</a>
+                    <a href="{{ route('search.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Buscar') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Avanzada') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Avanzada') }}</span>
                 </li>
             </ol>
         </nav>
 
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Busqueda avanzada') }}</h1>
-            <p class="text-gray-600 mt-1">{{ __('Filtra por multiples criterios para encontrar personas especificas') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Busqueda avanzada') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ __('Filtra por multiples criterios para encontrar personas especificas') }}</p>
         </div>
 
         <form action="{{ route('search.advanced') }}" method="GET" class="space-y-6">
@@ -155,36 +155,36 @@
             <div class="mt-8">
                 <h2 class="text-xl font-semibold mb-4">
                     {{ __('Resultados') }}
-                    <span class="text-gray-500 font-normal">({{ $results->total() }})</span>
+                    <span class="text-theme-muted font-normal">({{ $results->total() }})</span>
                 </h2>
 
                 @if($results->isEmpty())
                     <div class="card">
                         <div class="card-body text-center py-12">
-                            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-16 h-16 text-theme-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('Sin resultados') }}</h3>
-                            <p class="text-gray-500">{{ __('No se encontraron personas con esos criterios.') }}</p>
+                            <h3 class="text-lg font-medium text-theme mb-2">{{ __('Sin resultados') }}</h3>
+                            <p class="text-theme-muted">{{ __('No se encontraron personas con esos criterios.') }}</p>
                         </div>
                     </div>
                 @else
-                    <div class="card divide-y divide-gray-100">
+                    <div class="card divide-y divide-theme">
                         @foreach($results as $person)
-                            <a href="{{ route('persons.show', $person) }}" class="block p-4 hover:bg-gray-50 transition-colors">
+                            <a href="{{ route('persons.show', $person) }}" class="block p-4 hover:bg-theme-hover transition-colors">
                                 <div class="flex items-center gap-4">
                                     @if($person->photo_path)
                                         <img src="{{ Storage::url($person->photo_path) }}" class="w-12 h-12 rounded-full object-cover">
                                     @else
-                                        <div class="w-12 h-12 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 flex items-center justify-center">
-                                            <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 font-bold">
+                                        <div class="w-12 h-12 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 dark:bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-900/30 flex items-center justify-center">
+                                            <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 dark:text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-400 font-bold">
                                                 {{ substr($person->first_name, 0, 1) }}
                                             </span>
                                         </div>
                                     @endif
                                     <div class="flex-1">
-                                        <h3 class="font-medium text-gray-900">{{ $person->full_name }}</h3>
-                                        <p class="text-sm text-gray-500">
+                                        <h3 class="font-medium text-theme">{{ $person->full_name }}</h3>
+                                        <p class="text-sm text-theme-muted">
                                             @if($person->birth_date)
                                                 {{ $person->birth_date->format('d/m/Y') }}
                                             @endif
@@ -192,18 +192,18 @@
                                                 - {{ $person->birth_place }}
                                             @endif
                                             @if(!$person->is_living)
-                                                <span class="text-gray-400">({{ __('Fallecido') }})</span>
+                                                <span class="text-theme-muted">({{ __('Fallecido') }})</span>
                                             @endif
                                         </p>
                                     </div>
                                     <div class="text-right">
                                         @if($person->heritage_region)
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                            <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs rounded-full">
                                                 {{ $person->heritage_region }}
                                             </span>
                                         @endif
                                         @if($person->origin_town)
-                                            <p class="text-xs text-gray-500 mt-1">{{ $person->origin_town }}</p>
+                                            <p class="text-xs text-theme-muted mt-1">{{ $person->origin_town }}</p>
                                         @endif
                                     </div>
                                 </div>

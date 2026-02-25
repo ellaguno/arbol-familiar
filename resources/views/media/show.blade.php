@@ -59,13 +59,13 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('media.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Galeria') }}</a>
+                    <a href="{{ route('media.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Galeria') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium truncate max-w-xs ml-1 md:ml-2">{{ $media->title }}</span>
+                    <span class="text-theme-secondary font-medium truncate max-w-xs ml-1 md:ml-2">{{ $media->title }}</span>
                 </li>
             </ol>
         </nav>
@@ -159,7 +159,7 @@
                                     <svg class="w-24 h-24 mx-auto text-blue-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
-                                    <p class="text-gray-600 mb-4">{{ $media->file_name }}</p>
+                                    <p class="text-theme-secondary mb-4">{{ $media->file_name }}</p>
                                     <a href="{{ route('media.download', $media) }}" class="btn-primary">
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -170,10 +170,10 @@
                             @endif
                         @else
                             <div class="p-12 text-center">
-                                <svg class="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-24 h-24 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                 </svg>
-                                <p class="text-gray-600 mb-4">{{ __('Enlace externo') }}</p>
+                                <p class="text-theme-secondary mb-4">{{ __('Enlace externo') }}</p>
                                 <a href="{{ $media->external_url }}" target="_blank" class="btn-primary">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -194,9 +194,9 @@
                     </div>
                     <div class="card-body space-y-4">
                         <div>
-                            <h3 class="font-medium text-gray-900">{{ $media->title }}</h3>
+                            <h3 class="font-medium text-theme">{{ $media->title }}</h3>
                             @if($media->is_primary)
-                                <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300">
                                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
@@ -207,14 +207,14 @@
 
                         @if($media->description)
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Descripcion') }}</dt>
-                                <dd class="text-gray-700">{{ $media->description }}</dd>
+                                <dt class="text-sm text-theme-muted">{{ __('Descripcion') }}</dt>
+                                <dd class="text-theme-secondary">{{ $media->description }}</dd>
                             </div>
                         @endif
 
                         <div>
-                            <dt class="text-sm text-gray-500">{{ __('Tipo') }}</dt>
-                            <dd class="text-gray-700">
+                            <dt class="text-sm text-theme-muted">{{ __('Tipo') }}</dt>
+                            <dd class="text-theme-secondary">
                                 @if($media->isImage()) {{ __('Imagen') }}
                                 @elseif($media->isDocument()) {{ __('Documento') }}
                                 @else {{ __('Enlace') }}
@@ -224,14 +224,14 @@
 
                         @if($media->file_size)
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Tamano') }}</dt>
-                                <dd class="text-gray-700">{{ $media->formatted_size }}</dd>
+                                <dt class="text-sm text-theme-muted">{{ __('Tamano') }}</dt>
+                                <dd class="text-theme-secondary">{{ $media->formatted_size }}</dd>
                             </div>
                         @endif
 
                         @if($media->mediable)
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Persona asociada') }}</dt>
+                                <dt class="text-sm text-theme-muted">{{ __('Persona asociada') }}</dt>
                                 <dd>
                                     <a href="{{ route('persons.show', $media->mediable_id) }}" class="text-mf-primary hover:underline">
                                         {{ $media->mediable->full_name }}
@@ -242,8 +242,8 @@
 
                         @if($media->created_at)
                             <div>
-                                <dt class="text-sm text-gray-500">{{ __('Subido') }}</dt>
-                                <dd class="text-gray-700">{{ $media->created_at->format('d/m/Y H:i') }}</dd>
+                                <dt class="text-sm text-theme-muted">{{ __('Subido') }}</dt>
+                                <dd class="text-theme-secondary">{{ $media->created_at->format('d/m/Y H:i') }}</dd>
                             </div>
                         @endif
                     </div>

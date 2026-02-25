@@ -4,8 +4,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ __('Galeria') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('Fotos, documentos y enlaces') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Galeria') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Fotos, documentos y enlaces') }}</p>
             </div>
             <a href="{{ route('media.create') }}" class="btn-primary">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,11 +41,11 @@
         @if($media->isEmpty())
             <div class="card">
                 <div class="card-body text-center py-12">
-                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-16 h-16 text-theme-muted mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('No hay archivos') }}</h3>
-                    <p class="text-gray-500 mb-4">{{ __('Sube fotos y documentos para tu arbol genealogico.') }}</p>
+                    <h3 class="text-lg font-medium text-theme mb-2">{{ __('No hay archivos') }}</h3>
+                    <p class="text-theme-muted mb-4">{{ __('Sube fotos y documentos para tu arbol genealogico.') }}</p>
                     <a href="{{ route('media.create') }}" class="btn-primary">{{ __('Subir primer archivo') }}</a>
                 </div>
             </div>
@@ -55,12 +55,12 @@
                     <div class="group relative">
                         <a href="{{ route('media.show', $item) }}" class="block">
                             @if($item->isImage())
-                                <div class="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                                     <img src="{{ $item->url }}" alt="{{ $item->title }}"
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                                 </div>
                             @elseif($item->isDocument())
-                                <div class="aspect-square rounded-lg bg-gray-100 flex items-center justify-center">
+                                <div class="aspect-square rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                                     @if($item->isPdf())
                                         <svg class="w-12 h-12 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM8.5 13h1c.55 0 1 .45 1 1v2c0 .55-.45 1-1 1h-1v1.5H7V13h1.5zm1 2.5v-1h-1v1h1zm2.5-2.5h1.5c.55 0 1 .45 1 1v3c0 .55-.45 1-1 1H12V13zm1 4v-3h-.5v3h.5zm2-4h2v1h-1.5v.5h1v1h-1v2H15V13z"/>
@@ -72,8 +72,8 @@
                                     @endif
                                 </div>
                             @else
-                                <div class="aspect-square rounded-lg bg-gray-100 flex items-center justify-center">
-                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="aspect-square rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                    <svg class="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                     </svg>
                                 </div>
@@ -90,8 +90,8 @@
                             </div>
                         @endif
 
-                        <p class="mt-2 text-sm font-medium text-gray-900 truncate">{{ $item->title }}</p>
-                        <p class="text-xs text-gray-500">{{ $item->formatted_size }}</p>
+                        <p class="mt-2 text-sm font-medium text-theme truncate">{{ $item->title }}</p>
+                        <p class="text-xs text-theme-muted">{{ $item->formatted_size }}</p>
                     </div>
                 @endforeach
             </div>

@@ -46,7 +46,7 @@
                                  class="w-20 h-20 rounded-full object-cover">
                         @else
                             <div class="w-20 h-20 rounded-full bg-mf-primary text-white flex items-center justify-center text-2xl font-bold">
-                                {{ substr($person->given_names, 0, 1) }}
+                                {{ substr($person->first_name, 0, 1) }}
                             </div>
                         @endif
                         <div>
@@ -78,7 +78,9 @@
             </div>
 
             <!-- Search form -->
-            <form action="{{ route('research.search') }}" method="POST" class="space-y-6">
+            <form action="{{ route('research.search') }}" method="POST" class="space-y-6"
+                  x-data="{ submitting: false }"
+                  @submit="if (submitting) { $event.preventDefault(); return; } submitting = true;">
                 @csrf
                 <input type="hidden" name="person_id" value="{{ $person->id }}">
 
@@ -134,11 +136,16 @@
 
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('persons.show', $person) }}" class="btn-outline">{{ __('Cancelar') }}</a>
-                    <button type="submit" class="btn-primary">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button type="submit" class="btn-primary" :disabled="submitting" :class="{ 'opacity-50 cursor-not-allowed': submitting }">
+                        <svg x-show="!submitting" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        {{ __('Iniciar investigacion') }}
+                        <svg x-show="submitting" x-cloak class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span x-show="!submitting">{{ __('Iniciar investigacion') }}</span>
+                        <span x-show="submitting" x-cloak>{{ __('Iniciando...') }}</span>
                     </button>
                 </div>
             </form>

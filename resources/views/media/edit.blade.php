@@ -5,25 +5,25 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('media.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Galeria') }}</a>
+                    <a href="{{ route('media.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Galeria') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <a href="{{ route('media.show', $media) }}" class="text-gray-500 hover:text-gray-700 truncate max-w-xs ml-1 md:ml-2">{{ $media->title }}</a>
+                    <a href="{{ route('media.show', $media) }}" class="text-theme-muted hover:text-theme-secondary truncate max-w-xs ml-1 md:ml-2">{{ $media->title }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Editar') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Editar') }}</span>
                 </li>
             </ol>
         </nav>
 
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Editar archivo') }}</h1>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Editar archivo') }}</h1>
         </div>
 
         <form action="{{ route('media.update', $media) }}" method="POST" class="space-y-6">
@@ -41,14 +41,14 @@
                             <svg class="w-16 h-16 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
-                            <p class="mt-2 text-gray-600">{{ $media->file_name }}</p>
+                            <p class="mt-2 text-theme-secondary">{{ $media->file_name }}</p>
                         </div>
                     @else
                         <div class="text-center p-8">
-                            <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                             </svg>
-                            <p class="mt-2 text-gray-600 break-all">{{ $media->external_url }}</p>
+                            <p class="mt-2 text-theme-secondary break-all">{{ $media->external_url }}</p>
                         </div>
                     @endif
                 </div>

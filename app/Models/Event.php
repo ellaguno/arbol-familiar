@@ -47,6 +47,9 @@ class Event extends Model
         'RESI' => 'Residencia',
         'OCCU' => 'Ocupacion',
         'RETI' => 'Retiro',
+        'CENS' => 'Censo',
+        'ADOP' => 'Adopcion',
+        'EDUC' => 'Educacion',
     ];
 
     /**

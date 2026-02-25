@@ -20,6 +20,8 @@ class Message extends Model
         'subject',
         'body',
         'related_person_id',
+        'claiming_person_id',
+        'metadata',
         'action_required',
         'action_status',
         'action_taken_at',
@@ -32,6 +34,7 @@ class Message extends Model
         'read_at' => 'datetime',
         'deleted_at' => 'datetime',
         'created_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     /**
@@ -56,6 +59,14 @@ class Message extends Model
     public function relatedPerson(): BelongsTo
     {
         return $this->belongsTo(Person::class, 'related_person_id');
+    }
+
+    /**
+     * Persona dummy del solicitante (para claims de usuario nuevo).
+     */
+    public function claimingPerson(): BelongsTo
+    {
+        return $this->belongsTo(Person::class, 'claiming_person_id');
     }
 
     /**
@@ -183,6 +194,14 @@ class Message extends Model
     public function isPersonMerge(): bool
     {
         return $this->type === 'person_merge';
+    }
+
+    /**
+     * Verifica si es una declaracion de parentesco.
+     */
+    public function isRelationshipClaim(): bool
+    {
+        return $this->type === 'relationship_claim';
     }
 
     /**

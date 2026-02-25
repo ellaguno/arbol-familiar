@@ -72,6 +72,14 @@
                             <span class="px-3 py-1 text-sm rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
                                 {{ __('Consentimiento') }}
                             </span>
+                        @elseif($message->type === 'person_claim')
+                            <span class="px-3 py-1 text-sm rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300">
+                                {{ __('Reclamacion de perfil') }}
+                            </span>
+                        @elseif($message->type === 'relationship_claim')
+                            <span class="px-3 py-1 text-sm rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
+                                {{ __('Declaracion de parentesco') }}
+                            </span>
                         @elseif($message->type === 'system')
                             <span class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                                 {{ __('Sistema') }}
@@ -99,6 +107,28 @@
                 <div class="prose dark:prose-invert max-w-none">
                     {!! nl2br(e($message->body)) !!}
                 </div>
+
+                {{-- Detalle de relacion declarada (relationship_claim) --}}
+                @if($message->type === 'relationship_claim' && $message->metadata)
+                    @php
+                        $meta = is_array($message->metadata) ? $message->metadata : [];
+                        $relLabels = [
+                            'father' => __('Padre'),
+                            'mother' => __('Madre'),
+                            'child' => __('Hijo/a'),
+                            'sibling' => __('Hermano/a'),
+                            'spouse' => __('Conyuge'),
+                        ];
+                    @endphp
+                    <div class="mt-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+                        <p class="text-sm font-medium text-indigo-800 dark:text-indigo-300">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            {{ __('Relacion declarada:') }} {{ $relLabels[$meta['relationship_type'] ?? ''] ?? __('Desconocida') }}
+                        </p>
+                    </div>
+                @endif
             </div>
 
             <!-- Accion requerida (solo mensajes directos) -->

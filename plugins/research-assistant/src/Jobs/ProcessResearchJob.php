@@ -77,8 +77,9 @@ class ProcessResearchJob implements ShouldQueue
 
         $context = [
             'name' => $person->full_name,
-            'given_name' => $person->given_names,
-            'surname' => $person->surname,
+            'given_name' => $person->first_name,
+            'surname' => $person->patronymic,
+            'matronymic' => $person->matronymic,
             'birth_date' => $person->birth_date?->format('Y-m-d'),
             'birth_year' => $person->birth_date?->year,
             'birth_place' => $person->birth_place,
@@ -92,18 +93,18 @@ class ProcessResearchJob implements ShouldQueue
         // Add family relationships
         if ($person->father) {
             $context['father'] = $person->father->full_name;
-            $context['father_name'] = $person->father->given_names;
+            $context['father_name'] = $person->father->first_name;
         }
 
         if ($person->mother) {
             $context['mother'] = $person->mother->full_name;
-            $context['mother_name'] = $person->mother->given_names;
+            $context['mother_name'] = $person->mother->first_name;
         }
 
         $spouses = $person->spouses;
         if ($spouses->isNotEmpty()) {
             $context['spouses'] = $spouses->pluck('full_name')->toArray();
-            $context['spouse_name'] = $spouses->first()->given_names;
+            $context['spouse_name'] = $spouses->first()->first_name;
         }
 
         return $context;

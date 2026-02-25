@@ -3,13 +3,13 @@
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="text-center mb-8">
-            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-4">
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
                 <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Importacion completada') }}</h1>
-            <p class="text-gray-600 mt-2">{{ __('Los datos han sido importados exitosamente') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Importacion completada') }}</h1>
+            <p class="text-theme-secondary mt-2">{{ __('Los datos han sido importados exitosamente') }}</p>
         </div>
 
         <!-- Estadisticas -->
@@ -17,48 +17,48 @@
             <div class="card">
                 <div class="card-body text-center">
                     <div class="text-3xl font-bold text-green-600">{{ $result['stats']['persons_created'] }}</div>
-                    <div class="text-gray-600 text-sm">{{ __('Personas creadas') }}</div>
+                    <div class="text-theme-secondary text-sm">{{ __('Personas creadas') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
                     <div class="text-3xl font-bold text-blue-600">{{ $result['stats']['persons_updated'] }}</div>
-                    <div class="text-gray-600 text-sm">{{ __('Personas actualizadas') }}</div>
+                    <div class="text-theme-secondary text-sm">{{ __('Personas actualizadas') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
                     <div class="text-3xl font-bold text-purple-600">{{ $result['stats']['families_created'] }}</div>
-                    <div class="text-gray-600 text-sm">{{ __('Familias creadas') }}</div>
+                    <div class="text-theme-secondary text-sm">{{ __('Familias creadas') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
                     <div class="text-3xl font-bold text-yellow-600">{{ $result['stats']['events_created'] }}</div>
-                    <div class="text-gray-600 text-sm">{{ __('Eventos creados') }}</div>
+                    <div class="text-theme-secondary text-sm">{{ __('Eventos creados') }}</div>
                 </div>
             </div>
         </div>
 
         @if(($result['stats']['media_imported'] ?? 0) > 0 || ($result['stats']['media_linked'] ?? 0) > 0)
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                <div class="card bg-green-50 border-green-200">
+                <div class="card bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800">
                     <div class="card-body text-center">
-                        <div class="text-3xl font-bold text-green-600">{{ $result['stats']['media_imported'] ?? 0 }}</div>
-                        <div class="text-green-800 text-sm">{{ __('Medios importados') }}</div>
+                        <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $result['stats']['media_imported'] ?? 0 }}</div>
+                        <div class="text-green-800 dark:text-green-300 text-sm">{{ __('Medios importados') }}</div>
                     </div>
                 </div>
-                <div class="card bg-blue-50 border-blue-200">
+                <div class="card bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800">
                     <div class="card-body text-center">
-                        <div class="text-3xl font-bold text-blue-600">{{ $result['stats']['media_linked'] ?? 0 }}</div>
-                        <div class="text-blue-800 text-sm">{{ __('Medios vinculados') }}</div>
+                        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $result['stats']['media_linked'] ?? 0 }}</div>
+                        <div class="text-blue-800 dark:text-blue-300 text-sm">{{ __('Medios vinculados') }}</div>
                     </div>
                 </div>
                 @if(($result['stats']['media_skipped'] ?? 0) > 0)
-                    <div class="card bg-yellow-50 border-yellow-200">
+                    <div class="card bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800">
                         <div class="card-body text-center">
-                            <div class="text-3xl font-bold text-yellow-600">{{ $result['stats']['media_skipped'] }}</div>
-                            <div class="text-yellow-800 text-sm">{{ __('Medios omitidos') }}</div>
+                            <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $result['stats']['media_skipped'] }}</div>
+                            <div class="text-yellow-800 dark:text-yellow-300 text-sm">{{ __('Medios omitidos') }}</div>
                         </div>
                     </div>
                 @endif
@@ -67,12 +67,12 @@
 
         <!-- Advertencias -->
         @if(!empty($result['warnings']))
-            <div class="card mb-8 bg-yellow-50 border-yellow-200">
-                <div class="card-header bg-yellow-100">
-                    <h2 class="text-lg font-semibold text-yellow-800">{{ __('Advertencias durante la importacion') }}</h2>
+            <div class="card mb-8 bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800">
+                <div class="card-header bg-yellow-100 dark:bg-yellow-900/50">
+                    <h2 class="text-lg font-semibold text-yellow-800 dark:text-yellow-200">{{ __('Advertencias durante la importacion') }}</h2>
                 </div>
                 <div class="card-body">
-                    <ul class="list-disc list-inside text-yellow-700 space-y-1 max-h-48 overflow-y-auto">
+                    <ul class="list-disc list-inside text-yellow-700 dark:text-yellow-300 space-y-1 max-h-48 overflow-y-auto">
                         @foreach($result['warnings'] as $warning)
                             <li>{{ $warning }}</li>
                         @endforeach
@@ -91,33 +91,33 @@
                     <li class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-mf-primary text-white flex items-center justify-center text-sm font-bold">1</div>
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ __('Revisa las personas importadas') }}</h4>
-                            <p class="text-gray-600 text-sm">{{ __('Verifica que los datos sean correctos y completa la informacion faltante.') }}</p>
+                            <h4 class="font-medium text-theme">{{ __('Revisa las personas importadas') }}</h4>
+                            <p class="text-theme-secondary text-sm">{{ __('Verifica que los datos sean correctos y completa la informacion faltante.') }}</p>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-mf-primary text-white flex items-center justify-center text-sm font-bold">2</div>
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ __('Revisa fotos y documentos') }}</h4>
+                            <h4 class="font-medium text-theme">{{ __('Revisa fotos y documentos') }}</h4>
                             @if(($result['stats']['media_imported'] ?? 0) > 0)
-                                <p class="text-gray-600 text-sm">{{ __('Se importaron :count medios. Verifica que esten correctamente vinculados.', ['count' => $result['stats']['media_imported']]) }}</p>
+                                <p class="text-theme-secondary text-sm">{{ __('Se importaron :count medios. Verifica que esten correctamente vinculados.', ['count' => $result['stats']['media_imported']]) }}</p>
                             @else
-                                <p class="text-gray-600 text-sm">{{ __('Puedes agregar fotos y documentos manualmente, o importar un archivo GEDZIP.') }}</p>
+                                <p class="text-theme-secondary text-sm">{{ __('Puedes agregar fotos y documentos manualmente, o importar un archivo GEDZIP.') }}</p>
                             @endif
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-mf-primary text-white flex items-center justify-center text-sm font-bold">3</div>
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ __('Ajusta la privacidad') }}</h4>
-                            <p class="text-gray-600 text-sm">{{ __('Revisa los niveles de privacidad de cada persona segun sea necesario.') }}</p>
+                            <h4 class="font-medium text-theme">{{ __('Ajusta la privacidad') }}</h4>
+                            <p class="text-theme-secondary text-sm">{{ __('Revisa los niveles de privacidad de cada persona segun sea necesario.') }}</p>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-8 h-8 rounded-full bg-mf-primary text-white flex items-center justify-center text-sm font-bold">4</div>
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ __('Vincula tu cuenta') }}</h4>
-                            <p class="text-gray-600 text-sm">{{ __('Asegurate de que tu persona en el arbol este vinculada a tu cuenta.') }}</p>
+                            <h4 class="font-medium text-theme">{{ __('Vincula tu cuenta') }}</h4>
+                            <p class="text-theme-secondary text-sm">{{ __('Asegurate de que tu persona en el arbol este vinculada a tu cuenta.') }}</p>
                         </div>
                     </li>
                 </ul>

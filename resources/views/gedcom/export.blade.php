@@ -3,28 +3,28 @@
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Exportar GEDCOM') }}</h1>
-            <p class="text-gray-600 mt-1">{{ __('Descarga tu arbol genealogico en formato GEDCOM') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Exportar GEDCOM') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ __('Descarga tu arbol genealogico en formato GEDCOM') }}</p>
         </div>
 
         <!-- Estadisticas -->
         <div class="grid grid-cols-3 gap-4 mb-8">
             <div class="card">
                 <div class="card-body text-center">
-                    <div class="text-2xl font-bold text-gray-900">{{ $stats['total_persons'] }}</div>
-                    <div class="text-gray-600 text-sm">{{ __('Total personas') }}</div>
+                    <div class="text-2xl font-bold text-theme">{{ $stats['total_persons'] }}</div>
+                    <div class="text-theme-secondary text-sm">{{ __('Total personas') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
                     <div class="text-2xl font-bold text-green-600">{{ $stats['total_living'] }}</div>
-                    <div class="text-gray-600 text-sm">{{ __('Vivas') }}</div>
+                    <div class="text-theme-secondary text-sm">{{ __('Vivas') }}</div>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body text-center">
-                    <div class="text-2xl font-bold text-gray-500">{{ $stats['total_deceased'] }}</div>
-                    <div class="text-gray-600 text-sm">{{ __('Fallecidas') }}</div>
+                    <div class="text-2xl font-bold text-theme-muted">{{ $stats['total_deceased'] }}</div>
+                    <div class="text-theme-secondary text-sm">{{ __('Fallecidas') }}</div>
                 </div>
             </div>
         </div>
@@ -39,26 +39,26 @@
                     <h2 class="text-lg font-semibold">{{ __('Que deseas exportar?') }}</h2>
                 </div>
                 <div class="card-body space-y-4">
-                    <label class="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    <label class="flex items-start gap-3 p-4 border border-theme rounded-lg cursor-pointer hover:bg-theme-hover transition-colors"
                            :class="{ 'border-mf-primary bg-mf-light': exportType === 'all' }">
                         <input type="radio" name="export_type" value="all" class="mt-1" x-model="exportType">
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ __('Todo el arbol') }}</h4>
-                            <p class="text-sm text-gray-500">{{ __('Exporta todas las personas y familias de tu base de datos.') }}</p>
+                            <h4 class="font-medium text-theme">{{ __('Todo el arbol') }}</h4>
+                            <p class="text-sm text-theme-muted">{{ __('Exporta todas las personas y familias de tu base de datos.') }}</p>
                         </div>
                     </label>
 
-                    <label class="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    <label class="flex items-start gap-3 p-4 border border-theme rounded-lg cursor-pointer hover:bg-theme-hover transition-colors"
                            :class="{ 'border-mf-primary bg-mf-light': exportType === 'tree' }">
                         <input type="radio" name="export_type" value="tree" class="mt-1" x-model="exportType">
                         <div>
-                            <h4 class="font-medium text-gray-900">{{ __('Arbol desde persona raiz') }}</h4>
-                            <p class="text-sm text-gray-500">{{ __('Exporta ancestros y descendientes de una persona especifica.') }}</p>
+                            <h4 class="font-medium text-theme">{{ __('Arbol desde persona raiz') }}</h4>
+                            <p class="text-sm text-theme-muted">{{ __('Exporta ancestros y descendientes de una persona especifica.') }}</p>
                         </div>
                     </label>
 
                     <!-- Opciones de arbol -->
-                    <div x-show="exportType === 'tree'" x-cloak class="ml-8 space-y-4 border-l-2 border-gray-200 pl-4">
+                    <div x-show="exportType === 'tree'" x-cloak class="ml-8 space-y-4 border-l-2 border-theme pl-4">
                         <div>
                             <label for="start_person_id" class="form-label">{{ __('Persona raiz') }}</label>
                             <select name="start_person_id" id="start_person_id" class="form-input">
@@ -96,31 +96,31 @@
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" name="include_living" value="1" class="form-checkbox" checked>
                         <div>
-                            <span class="font-medium text-gray-900">{{ __('Incluir personas vivas') }}</span>
-                            <p class="text-sm text-gray-500">{{ __('Si no se marca, solo se exportaran personas fallecidas.') }}</p>
+                            <span class="font-medium text-theme">{{ __('Incluir personas vivas') }}</span>
+                            <p class="text-sm text-theme-muted">{{ __('Si no se marca, solo se exportaran personas fallecidas.') }}</p>
                         </div>
                     </label>
 
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" name="include_notes" value="1" class="form-checkbox" checked>
                         <div>
-                            <span class="font-medium text-gray-900">{{ __('Incluir notas y biografias') }}</span>
-                            <p class="text-sm text-gray-500">{{ __('Agrega las notas personales al archivo GEDCOM.') }}</p>
+                            <span class="font-medium text-theme">{{ __('Incluir notas y biografias') }}</span>
+                            <p class="text-sm text-theme-muted">{{ __('Agrega las notas personales al archivo GEDCOM.') }}</p>
                         </div>
                     </label>
 
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" name="include_events" value="1" class="form-checkbox" checked>
                         <div>
-                            <span class="font-medium text-gray-900">{{ __('Incluir eventos') }}</span>
-                            <p class="text-sm text-gray-500">{{ __('Bautizos, confirmaciones, educacion, ocupacion, etc.') }}</p>
+                            <span class="font-medium text-theme">{{ __('Incluir eventos') }}</span>
+                            <p class="text-sm text-theme-muted">{{ __('Bautizos, confirmaciones, educacion, ocupacion, etc.') }}</p>
                         </div>
                     </label>
                 </div>
             </div>
 
             <!-- Informacion -->
-            <div class="card bg-blue-50 border-blue-200">
+            <div class="card bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800">
                 <div class="card-body">
                     <div class="flex gap-4">
                         <div class="flex-shrink-0">
@@ -129,8 +129,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-blue-900 mb-1">{{ __('Acerca del archivo GEDCOM') }}</h3>
-                            <ul class="text-blue-800 text-sm space-y-1">
+                            <h3 class="font-semibold text-blue-900 dark:text-blue-200 mb-1">{{ __('Acerca del archivo GEDCOM') }}</h3>
+                            <ul class="text-blue-800 dark:text-blue-300 text-sm space-y-1">
                                 <li>{{ __('El archivo se genera en formato GEDCOM 5.5.1 con codificacion UTF-8.') }}</li>
                                 <li>{{ __('Las fotos y documentos no se incluyen, solo los datos.') }}</li>
                                 <li>{{ __('Compatible con la mayoria de programas genealogicos.') }}</li>

@@ -5,20 +5,20 @@
         <nav class="flex mb-6" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="flex items-center">
-                    <a href="{{ route('media.index') }}" class="text-gray-500 hover:text-gray-700">{{ __('Galeria') }}</a>
+                    <a href="{{ route('media.index') }}" class="text-theme-muted hover:text-theme-secondary">{{ __('Galeria') }}</a>
                 </li>
                 <li class="flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 text-theme-muted" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-gray-700 font-medium ml-1 md:ml-2">{{ __('Subir archivo') }}</span>
+                    <span class="text-theme-secondary font-medium ml-1 md:ml-2">{{ __('Subir archivo') }}</span>
                 </li>
             </ol>
         </nav>
 
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('Subir archivo') }}</h1>
-            <p class="text-gray-600 mt-1">{{ __('Sube fotos, documentos o agrega enlaces') }}</p>
+            <h1 class="text-3xl font-bold text-theme">{{ __('Subir archivo') }}</h1>
+            <p class="text-theme-secondary mt-1">{{ __('Sube fotos, documentos o agrega enlaces') }}</p>
         </div>
 
         <form action="{{ route('media.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6"
@@ -38,7 +38,7 @@
                         <label class="cursor-pointer">
                             <input type="radio" name="type" value="image" class="sr-only peer" x-model="type">
                             <div class="p-4 border-2 rounded-lg text-center peer-checked:border-mf-primary peer-checked:bg-mf-light transition-colors">
-                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400 peer-checked:text-mf-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-theme-muted peer-checked:text-mf-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                                 <span class="text-sm font-medium">{{ __('Imagen') }}</span>
@@ -74,7 +74,7 @@
                     <h2 class="text-lg font-semibold">{{ __('Archivo') }}</h2>
                 </div>
                 <div class="card-body">
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-mf-primary transition-colors"
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-mf-primary transition-colors"
                          :class="{ 'border-mf-primary bg-mf-light': dragover }"
                          @dragover.prevent.stop="dragover = true"
                          @dragenter.prevent.stop="dragover = true"
@@ -91,7 +91,7 @@
                             }
                          ">
 
-                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!fileName">
+                        <svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!fileName">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                         </svg>
 
@@ -100,8 +100,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
 
-                        <p class="text-gray-600 mb-2" x-show="!fileName">{{ __('Arrastra un archivo aqui o') }}</p>
-                        <p class="text-green-600 font-medium mb-2" x-show="fileName" x-cloak>
+                        <p class="text-theme-secondary mb-2" x-show="!fileName">{{ __('Arrastra un archivo aqui o') }}</p>
+                        <p class="text-green-600 dark:text-green-400 font-medium mb-2" x-show="fileName" x-cloak>
                             {{ __('Archivo seleccionado:') }} <span x-text="fileName"></span>
                         </p>
                         <label class="btn-outline cursor-pointer inline-block">
@@ -112,7 +112,7 @@
                             <span x-show="fileName" x-cloak>{{ __('Cambiar archivo') }}</span>
                         </label>
 
-                        <p class="text-sm text-gray-500 mt-4">
+                        <p class="text-sm text-theme-muted mt-4">
                             <span x-show="type === 'image'">{{ __('JPG, PNG, WebP (max 4MB)') }}</span>
                             <span x-show="type === 'document'">{{ __('PDF, Word, TXT (max 4MB)') }}</span>
                         </p>
