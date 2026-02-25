@@ -76,9 +76,16 @@
     if ($images->count() < $minRealPhotos) {
         $genericCacheKey = "photo_banner_generics_v{$cacheVersion}";
         $genericImages = Cache::remember($genericCacheKey, 3600, function () {
-            $bannerPath = public_path('images/banner');
+            // Usar base_path del document root real (public_html en producción)
+            // en vez de public_path() que puede apuntar a otro directorio
+            $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? public_path();
+            $bannerPath = rtrim($docRoot, '/') . '/images/banner';
             if (!is_dir($bannerPath)) {
-                return collect();
+                // Fallback a public_path() para desarrollo local
+                $bannerPath = public_path('images/banner');
+                if (!is_dir($bannerPath)) {
+                    return collect();
+                }
             }
             $files = [];
             foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
