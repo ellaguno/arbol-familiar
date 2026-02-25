@@ -94,23 +94,30 @@
 
                         <!-- Acciones -->
                         <div class="mt-6 flex flex-col gap-2">
-                            {{-- Botones "Este soy yo" / "Fusionar con mi perfil" --}}
+                            {{-- Botones "Este soy yo" / "Fusionar con mi perfil" / "Estoy relacionado" --}}
                             @php
                                 $user = auth()->user();
                                 $isOwnPerson = $user->person_id === $person->id;
-                                $canClaim = !$user->person_id && !$person->user_id;
 
-                                // Admin o creador puede re-vincularse SOLO si su persona actual
-                                // no tiene relaciones familiares (es la persona dummy del seeder)
-                                $canRelink = false;
-                                if ($user->person_id && $user->person_id !== $person->id && !$person->user_id
-                                    && ($user->is_admin || $person->created_by === $user->id)) {
+                                // Determinar si la persona del usuario es "dummy" (sin conexiones familiares)
+                                $currentPersonIsDummy = false;
+                                if ($user->person_id) {
                                     $currentPerson = $user->person;
                                     if ($currentPerson) {
                                         $hasFamily = $currentPerson->familiesAsChild()->exists()
                                             || $currentPerson->familiesAsSpouse()->exists();
-                                        $canRelink = !$hasFamily;
+                                        $currentPersonIsDummy = !$hasFamily;
                                     }
+                                }
+
+                                // Puede reclamar: sin persona_id, O con persona dummy
+                                $canClaim = ($currentPersonIsDummy || !$user->person_id) && !$person->user_id;
+
+                                // Admin o creador puede re-vincularse si su persona es dummy
+                                $canRelink = false;
+                                if ($user->person_id && $user->person_id !== $person->id && !$person->user_id
+                                    && ($user->is_admin || $person->created_by === $user->id)) {
+                                    $canRelink = $currentPersonIsDummy;
                                 }
 
                                 // Verificar si la persona ya está en el árbol del usuario
@@ -118,17 +125,28 @@
                                 if ($user->person_id && $user->person_id !== $person->id) {
                                     $userPerson = $user->person;
                                     if ($userPerson) {
-                                        // Ya está en el árbol si: fue creada por el mismo usuario,
-                                        // o es familiar directo del usuario
                                         $isAlreadyInTree = $person->created_by === $user->id
                                             || in_array($person->id, $userPerson->directFamilyIds);
                                     }
                                 }
                                 $canAddToTree = $user->person_id && $user->person_id !== $person->id && !$isAlreadyInTree;
 
+                                // Puede declarar relacion directa
+                                $canDeclareRelationship = $user->person_id && $user->person_id !== $person->id && !$isAlreadyInTree;
+
                                 $hasPendingClaim = \App\Models\Message::where('sender_id', $user->id)
                                     ->where('related_person_id', $person->id)
-                                    ->where('type', 'person_claim')
+                                    ->whereIn('type', ['person_claim', 'relationship_claim'])
+                                    ->where('action_status', 'pending')
+                                    ->exists();
+
+                                // Determinar si puede editar (sin abort, solo booleano)
+                                $canEdit = $person->canBeEditedBy($user->id) || $user->is_admin || $isOwnPerson;
+
+                                // Verificar si hay solicitud de edicion pendiente
+                                $hasPendingEditRequest = !$canEdit && \App\Models\Message::where('sender_id', $user->id)
+                                    ->where('related_person_id', $person->id)
+                                    ->where('type', 'family_edit_request')
                                     ->where('action_status', 'pending')
                                     ->exists();
                             @endphp
@@ -152,8 +170,8 @@
                                     </span>
                                 </div>
                             @elseif($canClaim)
-                                {{-- Usuario sin perfil puede reclamar --}}
-                                <a href="{{ route('persons.claim', $person) }}" style="line-height : 21.06px; color :#EF4034; color : rgb(239, 64, 52);" class="btn-primary w-full ">
+                                {{-- Usuario puede reclamar (sin perfil o con persona dummy) --}}
+                                <a href="{{ route('persons.claim', $person) }}" class="btn-primary w-full">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                     </svg>
@@ -196,6 +214,16 @@
                                 </div>
                             @endif
 
+                            {{-- Boton "Estoy relacionado directamente" (v2.6.0) --}}
+                            @if($canDeclareRelationship && !$hasPendingClaim && !$isOwnPerson)
+                                <a href="{{ route('persons.relationship-claim', $person) }}" class="btn-outline w-full">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                    </svg>
+                                    {{ __('Estoy relacionado directamente') }}
+                                </a>
+                            @endif
+
                             @if($isOwnPerson)
                                 {{-- Para perfil propio: ir a Mi Perfil (con configuracion y cambio de contrasena) --}}
                                 <a href="{{ route('profile.edit') }}" class="btn-primary w-full">
@@ -212,12 +240,33 @@
                                     {{ __('Configuracion') }}
                                 </a>
                             @else
-                                <a href="{{ route('persons.edit', $person) }}" class="btn-primary w-full">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                    {{ __('Editar') }}
-                                </a>
+                                @if($canEdit)
+                                    <a href="{{ route('persons.edit', $person) }}" class="btn-primary w-full">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        {{ __('Editar') }}
+                                    </a>
+                                @elseif($hasPendingEditRequest)
+                                    <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-center">
+                                        <span class="text-yellow-700 dark:text-yellow-400 text-sm">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            {{ __('Solicitud de edicion pendiente') }}
+                                        </span>
+                                    </div>
+                                @elseif($isAlreadyInTree)
+                                    <form action="{{ route('persons.request-edit-permission', $person) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-outline w-full">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                            </svg>
+                                            {{ __('Solicitar permiso de edicion') }}
+                                        </button>
+                                    </form>
+                                @endif
                             @endif
                             <a href="{{ route('persons.relationships', $person) }}" class="btn-outline w-full">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

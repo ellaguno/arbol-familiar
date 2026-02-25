@@ -226,6 +226,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{person}/claim', [PersonController::class, 'claimForm'])->name('claim');
         Route::post('/{person}/claim', [PersonController::class, 'sendClaimRequest'])->name('claim.send');
 
+        // Declarar parentesco (v2.6.0)
+        Route::get('/{person}/relationship-claim', [PersonController::class, 'relationshipClaimForm'])->name('relationship-claim');
+        Route::post('/{person}/relationship-claim', [PersonController::class, 'sendRelationshipClaim'])->name('relationship-claim.send');
+
         // Fusionar persona (cuando ya tienes perfil y encuentras duplicado)
         Route::get('/{person}/merge', [PersonController::class, 'mergeForm'])->name('merge');
         Route::post('/{person}/merge', [PersonController::class, 'sendMergeRequest'])->name('merge.send');
@@ -237,6 +241,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Solicitar acceso para editar familia directa
         Route::get('/family-edit-access', [PersonController::class, 'familyEditAccessForm'])->name('family-edit-access');
         Route::post('/family-edit-access', [PersonController::class, 'sendFamilyEditAccessRequest'])->name('family-edit-access.send');
+
+        // Solicitar permiso de edicion para una persona individual
+        Route::post('/{person}/request-edit-permission', [PersonController::class, 'requestEditPermission'])->name('request-edit-permission');
 
         // Relaciones familiares
         Route::get('/{person}/relationships', [PersonController::class, 'relationships'])->name('relationships');

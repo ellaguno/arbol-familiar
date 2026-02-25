@@ -176,7 +176,7 @@
 
                 <div class="mt-6 pt-4 border-t border-theme">
                     <p class="text-xs text-theme-muted text-center">
-                        {{ __('Si rechazas la invitacion, se notificara a :name para que considere eliminar o anonimizar tus datos.', ['name' => $invitation->inviter->person?->full_name ?? $invitation->inviter->email]) }}
+                        {{ __('Si rechazas la invitacion, tus datos personales seran anonimizados automaticamente, conservando unicamente tu genero y apellidos.') }}
                     </p>
                 </div>
             </div>

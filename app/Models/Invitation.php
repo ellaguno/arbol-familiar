@@ -68,7 +68,7 @@ class Invitation extends Model
      */
     public function isExpired(): bool
     {
-        return $this->expires_at->isPast();
+        return $this->expires_at ? $this->expires_at->isPast() : false;
     }
 
     /**

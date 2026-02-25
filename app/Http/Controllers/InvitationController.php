@@ -322,43 +322,108 @@ class InvitationController extends Controller
     {
         $invitation = Invitation::findByToken($token);
 
-        if (!$invitation || !$invitation->isPending()) {
-            return redirect()->route('invitation.show', $token)
-                ->with('error', __('Esta invitacion no es valida.'));
+        if (!$invitation) {
+            return view('invitation.declined', [
+                'invitation' => null,
+                'alreadyProcessed' => true,
+            ]);
         }
 
-        $invitation->decline();
+        // Si ya fue procesada (rechazada, aceptada o expirada), mostrar pagina informativa
+        if (!$invitation->isPending()) {
+            return view('invitation.declined', [
+                'invitation' => $invitation,
+                'alreadyProcessed' => true,
+            ]);
+        }
 
-        // Actualizar persona - marcar que rechazó el consentimiento
-        $person = $invitation->person;
-        $person->update([
-            'consent_status' => 'declined',
-            'consent_responded_at' => now(),
-        ]);
+        try {
+            $invitation->decline();
 
-        // Notificar al invitador
-        \App\Models\Message::create([
-            'recipient_id' => $invitation->inviter_id,
-            'type' => 'system',
-            'subject' => __('Invitacion rechazada'),
-            'body' => __('La persona con correo :email ha rechazado la invitacion para :person. Considera eliminar o anonimizar sus datos.', [
-                'email' => $invitation->email,
-                'person' => $person->full_name,
-            ]),
-            'related_person_id' => $person->id,
-            'action_required' => true,
-            'action_status' => 'pending',
-            'created_at' => now(),
-        ]);
+            $person = $invitation->person;
 
-        ActivityLog::log('consent_invitation_declined', null, $person, [
-            'invitation_id' => $invitation->id,
-            'email' => $invitation->email,
-        ]);
+            if ($person) {
+                $personName = $person->full_name;
 
-        return view('invitation.declined', [
-            'invitation' => $invitation,
-        ]);
+                // Anonimizar datos personales automaticamente (cumplimiento legal).
+                // Se conservan: genero, apellido paterno, apellido materno y posicion en el arbol.
+                if ($person->photo_path) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($person->photo_path);
+                }
+
+                $person->update([
+                    'consent_status' => 'declined',
+                    'consent_responded_at' => now(),
+                    'first_name' => __('Anonimo'),
+                    'nickname' => null,
+                    'birth_date' => null,
+                    'birth_year' => null,
+                    'birth_month' => null,
+                    'birth_day' => null,
+                    'birth_date_approx' => false,
+                    'birth_place' => null,
+                    'birth_country' => null,
+                    'death_date' => null,
+                    'death_year' => null,
+                    'death_month' => null,
+                    'death_day' => null,
+                    'death_date_approx' => false,
+                    'death_place' => null,
+                    'death_country' => null,
+                    'residence_place' => null,
+                    'residence_country' => null,
+                    'occupation' => null,
+                    'email' => null,
+                    'phone' => null,
+                    'has_ethnic_heritage' => false,
+                    'heritage_region' => null,
+                    'origin_town' => null,
+                    'migration_decade' => null,
+                    'migration_destination' => null,
+                    'heritage_family_member_name' => null,
+                    'heritage_family_relationship' => null,
+                    'photo_path' => null,
+                    'privacy_level' => 'private',
+                ]);
+
+                // Notificar al invitador (informativo, ya no requiere accion)
+                \App\Models\Message::create([
+                    'recipient_id' => $invitation->inviter_id,
+                    'type' => 'system',
+                    'subject' => __('Invitacion rechazada'),
+                    'body' => __('La persona con correo :email ha rechazado la invitacion para :person. Sus datos personales han sido anonimizados automaticamente, conservando unicamente su genero y apellidos.', [
+                        'email' => $invitation->email,
+                        'person' => $personName,
+                    ]),
+                    'related_person_id' => $person->id,
+                    'action_required' => false,
+                    'created_at' => now(),
+                ]);
+
+                ActivityLog::log('consent_invitation_declined', null, $person, [
+                    'invitation_id' => $invitation->id,
+                    'email' => $invitation->email,
+                    'data_anonymized' => true,
+                ]);
+            }
+
+            return view('invitation.declined', [
+                'invitation' => $invitation,
+                'alreadyProcessed' => false,
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error al rechazar invitacion', [
+                'token' => $token,
+                'error' => $e->getMessage(),
+            ]);
+
+            return view('invitation.declined', [
+                'invitation' => $invitation,
+                'alreadyProcessed' => false,
+                'error' => true,
+            ]);
+        }
     }
 
     /**

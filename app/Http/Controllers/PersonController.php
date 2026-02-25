@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Family;
 use App\Models\FamilyChild;
+use App\Models\Message;
 use App\Models\Person;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -296,7 +298,22 @@ class PersonController extends Controller
      */
     public function show(Person $person)
     {
-        $this->authorizeView($person);
+        $user = auth()->user();
+
+        if (!$person->canBeViewedBy($user)) {
+            // Si no puede ver completo pero si para claim, mostrar vista limitada
+            if ($person->canBeViewedForClaim($user)) {
+                return view('persons.show-limited', compact('person'));
+            }
+
+            $previousUrl = url()->previous();
+            $currentUrl = url()->current();
+            $redirectUrl = ($previousUrl && $previousUrl !== $currentUrl)
+                ? $previousUrl
+                : route('persons.index');
+
+            return redirect($redirectUrl)->with('error', __('No tienes permiso para ver esta persona.'));
+        }
 
         $person->load([
             'familiesAsHusband.wife',
@@ -519,6 +536,66 @@ class PersonController extends Controller
 
         $relatedPerson = Person::findOrFail($validated['related_person_id']);
         $user = auth()->user();
+
+        // Si la persona destino tiene cuenta registrada y no es editable por el usuario,
+        // redirigir al flujo de autorización en lugar de vincular directamente.
+        if ($relatedPerson->user_id
+            && $relatedPerson->user_id !== $user->id
+            && !$relatedPerson->canBeEditedBy($user->id)
+            && !$user->is_admin
+        ) {
+            // Determinar destinatario: el usuario vinculado
+            $recipientId = $relatedPerson->user_id;
+
+            // Verificar si ya hay solicitud pendiente
+            $pendingExists = \App\Models\Message::where('sender_id', $user->id)
+                ->where('related_person_id', $relatedPerson->id)
+                ->where('type', 'family_edit_request')
+                ->where('action_status', 'pending')
+                ->exists();
+
+            if ($pendingExists) {
+                return back()->with('info', __('Ya tienes una solicitud pendiente para vincular con :name.', [
+                    'name' => $relatedPerson->full_name,
+                ]));
+            }
+
+            \App\Models\Message::create([
+                'sender_id' => $user->id,
+                'recipient_id' => $recipientId,
+                'type' => 'family_edit_request',
+                'subject' => __(':name solicita vincular a :person como :relation de :target', [
+                    'name' => $user->person?->full_name ?? $user->email,
+                    'person' => $relatedPerson->full_name,
+                    'relation' => __($validated['relationship_type']),
+                    'target' => $person->full_name,
+                ]),
+                'body' => __('Solicito permiso para establecer que :person es :relation de :target.', [
+                    'person' => $relatedPerson->full_name,
+                    'relation' => __($validated['relationship_type']),
+                    'target' => $person->full_name,
+                ]),
+                'related_person_id' => $relatedPerson->id,
+                'action_required' => true,
+                'action_status' => 'pending',
+                'metadata' => json_encode([
+                    'link_request' => true,
+                    'source_person_id' => $person->id,
+                    'relationship_type' => $validated['relationship_type'],
+                    'family_status' => $validated['family_status'] ?? null,
+                    'marriage_date' => $validated['marriage_date'] ?? null,
+                ]),
+            ]);
+
+            ActivityLog::log('relationship_authorization_requested', $user, $person, [
+                'related_person_id' => $relatedPerson->id,
+                'relationship_type' => $validated['relationship_type'],
+            ]);
+
+            return back()->with('info', __('Se envio una solicitud de autorizacion a :name para vincular esta relacion.', [
+                'name' => $relatedPerson->full_name,
+            ]));
+        }
 
         // Normalizar father/mother a parent para el switch
         $relationshipType = $validated['relationship_type'];
@@ -852,7 +929,7 @@ class PersonController extends Controller
      * Agrega relacion de conyuge.
      * Verifica que no exista ya una familia con los mismos conyuges para evitar duplicados.
      */
-    protected function addSpouseRelationship(Person $person, Person $related, array $data): void
+    public function addSpouseRelationship(Person $person, Person $related, array $data): void
     {
         // Determinar quien es esposo/esposa basado en genero
         $husband = $person->gender === 'M' ? $person : $related;
@@ -933,7 +1010,7 @@ class PersonController extends Controller
      * @param Person $parent La persona que sera el padre/madre
      * @param string|null $forceGender Si se especifica ('M' o 'F'), usa este genero en lugar del genero de la persona
      */
-    protected function addParentRelationship(Person $child, Person $parent, ?string $forceGender = null): void
+    public function addParentRelationship(Person $child, Person $parent, ?string $forceGender = null): void
     {
         // Usar el genero forzado si se proporciona, si no usar el de la persona
         $gender = $forceGender ?? $parent->gender;
@@ -968,7 +1045,7 @@ class PersonController extends Controller
     /**
      * Agrega relacion de hijo.
      */
-    protected function addChildRelationship(Person $parent, Person $child, ?int $familyId = null): void
+    public function addChildRelationship(Person $parent, Person $child, ?int $familyId = null): void
     {
         // Si se especifica una familia, usarla
         if ($familyId) {
@@ -1005,7 +1082,7 @@ class PersonController extends Controller
     /**
      * Agrega relacion de hermano.
      */
-    protected function addSiblingRelationship(Person $person, Person $sibling): void
+    public function addSiblingRelationship(Person $person, Person $sibling): void
     {
         // Buscar familia del primer hermano
         $family = $person->familiesAsChild()->first();
@@ -1047,34 +1124,44 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        // Verificar que el usuario puede ver la persona
-        $this->authorizeView($person);
+        // Check suave de privacidad para flujo de claim
+        if (!$person->canBeViewedForClaim($user)) {
+            return back()->with('error', __('No tienes permiso para ver esta persona.'));
+        }
 
-        // Admin o creador puede re-vincularse SOLO si su persona actual
-        // no tiene relaciones familiares (es la persona dummy del seeder)
-        $canRelink = false;
-        if ($user->person_id && !$person->user_id
-            && ($user->is_admin || $person->created_by === $user->id)) {
+        // Determinar si la persona actual del usuario es "dummy" (sin conexiones familiares)
+        $currentPersonIsDummy = false;
+        if ($user->person_id) {
             $currentPerson = $user->person;
             if ($currentPerson) {
                 $hasFamily = $currentPerson->familiesAsChild()->exists()
                     || $currentPerson->familiesAsSpouse()->exists();
-                $canRelink = !$hasFamily;
+                $currentPersonIsDummy = !$hasFamily;
             }
         }
 
-        // No puede reclamar si ya tiene persona asociada (a menos que pueda re-vincularse)
-        if ($user->person_id && !$canRelink) {
-            return back()->with('error', __('Ya tienes un perfil asociado a tu cuenta.'));
+        // Admin o creador puede re-vincularse si su persona es dummy
+        $canRelink = false;
+        if ($user->person_id && !$person->user_id
+            && ($user->is_admin || $person->created_by === $user->id)) {
+            $canRelink = $currentPersonIsDummy;
+        }
+
+        // Usuario nuevo con persona dummy puede reclamar (envia solicitud)
+        $canClaimWithDummy = $currentPersonIsDummy && !$person->user_id && !$canRelink;
+
+        // Bloquear si tiene persona con relaciones familiares reales
+        if ($user->person_id && !$currentPersonIsDummy && !$canRelink) {
+            return back()->with('error', __('Ya tienes un perfil con relaciones familiares. Usa la opcion de fusionar perfiles si esta persona eres tu.'));
         }
 
         // No puede reclamar si la persona ya tiene usuario
-        if ($person->user_id) {
+        if ($person->user_id && !$canRelink) {
             return back()->with('error', __('Esta persona ya esta vinculada a otra cuenta.'));
         }
 
         // Verificar si ya hay una solicitud pendiente
-        $pendingClaim = \App\Models\Message::where('sender_id', $user->id)
+        $pendingClaim = Message::where('sender_id', $user->id)
             ->where('related_person_id', $person->id)
             ->where('type', 'person_claim')
             ->where('action_status', 'pending')
@@ -1084,10 +1171,11 @@ class PersonController extends Controller
             return back()->with('info', __('Ya tienes una solicitud pendiente para esta persona.'));
         }
 
-        // Cargar el creador de la persona
-        $creator = \App\Models\User::find($person->created_by);
+        // Determinar quien revisara la solicitud
+        $recipients = $this->resolveClaimRecipients($person);
+        $reviewerLabel = $this->getReviewerLabel($person, $recipients);
 
-        return view('persons.claim', compact('person', 'creator', 'canRelink'));
+        return view('persons.claim', compact('person', 'canRelink', 'canClaimWithDummy', 'reviewerLabel'));
     }
 
     /**
@@ -1102,19 +1190,29 @@ class PersonController extends Controller
             return back()->with('error', __('Esta persona ya esta vinculada a otra cuenta.'));
         }
 
-        // Admin o creador puede re-vincularse solo si su persona actual no tiene familia
-        $canRelink = false;
-        if ($user->person_id && ($user->is_admin || $person->created_by === $user->id)) {
+        // Determinar si persona actual es dummy
+        $currentPersonIsDummy = false;
+        $dummyPersonId = null;
+        if ($user->person_id) {
             $currentPerson = $user->person;
             if ($currentPerson) {
                 $hasFamily = $currentPerson->familiesAsChild()->exists()
                     || $currentPerson->familiesAsSpouse()->exists();
-                $canRelink = !$hasFamily;
+                $currentPersonIsDummy = !$hasFamily;
+                if ($currentPersonIsDummy) {
+                    $dummyPersonId = $currentPerson->id;
+                }
             }
         }
 
+        // Admin o creador puede re-vincularse si su persona es dummy
+        $canRelink = false;
+        if ($user->person_id && ($user->is_admin || $person->created_by === $user->id)) {
+            $canRelink = $currentPersonIsDummy;
+        }
+
         if ($canRelink) {
-            // Desvincular persona anterior
+            // Desvincular persona anterior (dummy)
             $oldPerson = $user->person;
             if ($oldPerson) {
                 $oldPerson->update(['user_id' => null]);
@@ -1128,19 +1226,24 @@ class PersonController extends Controller
                 'consent_responded_at' => now(),
             ]);
 
+            // Eliminar persona dummy si no tiene datos importantes
+            if ($oldPerson && !$oldPerson->familiesAsChild()->exists() && !$oldPerson->familiesAsSpouse()->exists()) {
+                $oldPerson->delete();
+            }
+
             ActivityLog::log('person_claimed', $user, $person);
 
             return redirect()->route('tree.view', $person)
                 ->with('success', __('Tu cuenta ha sido vinculada a este perfil correctamente.'));
         }
 
-        // Usuario sin persona asociada: flujo normal de solicitud
-        if ($user->person_id) {
-            return back()->with('error', __('Ya tienes un perfil asociado a tu cuenta.'));
+        // Bloquear si tiene persona con relaciones familiares reales
+        if ($user->person_id && !$currentPersonIsDummy) {
+            return back()->with('error', __('Ya tienes un perfil con relaciones familiares. Usa la opcion de fusionar perfiles si esta persona eres tu.'));
         }
 
         // Verificar si ya hay solicitud pendiente
-        $pendingClaim = \App\Models\Message::where('sender_id', $user->id)
+        $pendingClaim = Message::where('sender_id', $user->id)
             ->where('related_person_id', $person->id)
             ->where('type', 'person_claim')
             ->where('action_status', 'pending')
@@ -1154,26 +1257,36 @@ class PersonController extends Controller
             'message' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        // Crear mensaje de solicitud al creador de la persona
-        \App\Models\Message::create([
-            'sender_id' => $user->id,
-            'recipient_id' => $person->created_by,
-            'type' => 'person_claim',
-            'subject' => __(':name solicita vincularse a :person', [
-                'name' => $user->person?->full_name ?? $user->email,
-                'person' => $person->full_name,
-            ]),
-            'body' => $request->input('message') ?? __('Solicito vincular mi cuenta con este perfil porque soy esta persona.'),
-            'related_person_id' => $person->id,
-            'action_required' => true,
-            'action_status' => 'pending',
-            'created_at' => now(),
-        ]);
+        // Determinar destinatarios
+        $recipientIds = $this->resolveClaimRecipients($person);
+
+        if (empty($recipientIds)) {
+            return back()->with('error', __('No se pudo determinar quien debe aprobar esta solicitud. Contacta al administrador.'));
+        }
+
+        // Crear mensaje de solicitud a cada destinatario
+        foreach ($recipientIds as $recipientId) {
+            Message::create([
+                'sender_id' => $user->id,
+                'recipient_id' => $recipientId,
+                'type' => 'person_claim',
+                'subject' => __(':name solicita vincularse a :person', [
+                    'name' => $user->person?->full_name ?? $user->email,
+                    'person' => $person->full_name,
+                ]),
+                'body' => $request->input('message') ?? __('Solicito vincular mi cuenta con este perfil porque soy esta persona.'),
+                'related_person_id' => $person->id,
+                'claiming_person_id' => $dummyPersonId,
+                'action_required' => true,
+                'action_status' => 'pending',
+                'created_at' => now(),
+            ]);
+        }
 
         ActivityLog::log('person_claim_requested', $user, $person);
 
         return redirect()->route('persons.show', $person)
-            ->with('success', __('Solicitud enviada. El creador del perfil debe aprobarla.'));
+            ->with('success', __('Solicitud enviada. Sera revisada por el responsable del perfil.'));
     }
 
     /**
@@ -1186,13 +1299,8 @@ class PersonController extends Controller
         $result = [
             'can_claim' => false,
             'reason' => null,
+            'claim_type' => null,
         ];
-
-        // Ya tiene persona asociada
-        if ($user->person_id) {
-            $result['reason'] = 'already_has_person';
-            return $result;
-        }
 
         // La persona ya tiene usuario
         if ($person->user_id) {
@@ -1200,8 +1308,25 @@ class PersonController extends Controller
             return $result;
         }
 
+        // Verificar si la persona del usuario es dummy (sin conexiones familiares)
+        $currentPersonIsDummy = false;
+        if ($user->person_id) {
+            $currentPerson = $user->person;
+            if ($currentPerson) {
+                $hasFamily = $currentPerson->familiesAsChild()->exists()
+                    || $currentPerson->familiesAsSpouse()->exists();
+                $currentPersonIsDummy = !$hasFamily;
+            }
+        }
+
+        // Tiene persona con relaciones familiares reales
+        if ($user->person_id && !$currentPersonIsDummy) {
+            $result['reason'] = 'already_has_person_with_family';
+            return $result;
+        }
+
         // Hay solicitud pendiente
-        $pendingClaim = \App\Models\Message::where('sender_id', $user->id)
+        $pendingClaim = Message::where('sender_id', $user->id)
             ->where('related_person_id', $person->id)
             ->where('type', 'person_claim')
             ->where('action_status', 'pending')
@@ -1213,7 +1338,179 @@ class PersonController extends Controller
         }
 
         $result['can_claim'] = true;
+        $result['claim_type'] = $currentPersonIsDummy ? 'dummy_swap' : 'fresh_claim';
         return $result;
+    }
+
+    // ========================================================================
+    // DECLARACION DE PARENTESCO (v2.6.0)
+    // ========================================================================
+
+    /**
+     * Muestra formulario para declarar relacion familiar con una persona.
+     */
+    public function relationshipClaimForm(Person $person)
+    {
+        $user = auth()->user();
+
+        if (!$user->person_id) {
+            return redirect()->route('dashboard')
+                ->with('error', __('Primero debes tener un perfil asociado.'));
+        }
+
+        if ($user->person_id === $person->id) {
+            return back()->with('error', __('No puedes declarar relacion contigo mismo.'));
+        }
+
+        // Check suave de privacidad
+        if (!$person->canBeViewedForClaim($user)) {
+            return back()->with('error', __('No tienes permiso para ver esta persona.'));
+        }
+
+        // Verificar si ya hay solicitud pendiente
+        $pendingClaim = Message::where('sender_id', $user->id)
+            ->where('related_person_id', $person->id)
+            ->where('type', 'relationship_claim')
+            ->where('action_status', 'pending')
+            ->exists();
+
+        if ($pendingClaim) {
+            return back()->with('info', __('Ya tienes una solicitud de relacion pendiente para esta persona.'));
+        }
+
+        $userPerson = $user->person;
+        $recipients = $this->resolveClaimRecipients($person);
+        $reviewerLabel = $this->getReviewerLabel($person, $recipients);
+
+        return view('persons.relationship-claim', compact('person', 'userPerson', 'reviewerLabel'));
+    }
+
+    /**
+     * Envia solicitud de declaracion de parentesco.
+     */
+    public function sendRelationshipClaim(Request $request, Person $person)
+    {
+        $user = auth()->user();
+
+        if (!$user->person_id) {
+            return back()->with('error', __('Primero debes tener un perfil asociado.'));
+        }
+
+        if ($user->person_id === $person->id) {
+            return back()->with('error', __('No puedes declarar relacion contigo mismo.'));
+        }
+
+        $validated = $request->validate([
+            'relationship_type' => ['required', 'in:father,mother,child,sibling,spouse'],
+            'message' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        // Verificar solicitud pendiente
+        $pendingClaim = Message::where('sender_id', $user->id)
+            ->where('related_person_id', $person->id)
+            ->where('type', 'relationship_claim')
+            ->where('action_status', 'pending')
+            ->exists();
+
+        if ($pendingClaim) {
+            return back()->with('error', __('Ya tienes una solicitud pendiente para esta persona.'));
+        }
+
+        $userPerson = $user->person;
+        $relationLabels = [
+            'father' => __('padre'),
+            'mother' => __('madre'),
+            'child' => __('hijo/a'),
+            'sibling' => __('hermano/a'),
+            'spouse' => __('conyuge'),
+        ];
+        $relationLabel = $relationLabels[$validated['relationship_type']] ?? $validated['relationship_type'];
+
+        $recipientIds = $this->resolveClaimRecipients($person);
+
+        if (empty($recipientIds)) {
+            return back()->with('error', __('No se pudo determinar quien debe aprobar esta solicitud. Contacta al administrador.'));
+        }
+
+        foreach ($recipientIds as $recipientId) {
+            Message::create([
+                'sender_id' => $user->id,
+                'recipient_id' => $recipientId,
+                'type' => 'relationship_claim',
+                'subject' => __(':name declara ser :relation de :person', [
+                    'name' => $userPerson->full_name,
+                    'relation' => $relationLabel,
+                    'person' => $person->full_name,
+                ]),
+                'body' => $validated['message'] ?? __('Declaro que :person es mi :relation.', [
+                    'person' => $person->full_name,
+                    'relation' => $relationLabel,
+                ]),
+                'related_person_id' => $person->id,
+                'metadata' => [
+                    'relationship_type' => $validated['relationship_type'],
+                    'claiming_person_id' => $userPerson->id,
+                ],
+                'action_required' => true,
+                'action_status' => 'pending',
+                'created_at' => now(),
+            ]);
+        }
+
+        ActivityLog::log('relationship_claim_requested', $user, $person, [
+            'relationship_type' => $validated['relationship_type'],
+        ]);
+
+        return redirect()->route('persons.show', $person)
+            ->with('success', __('Solicitud de relacion enviada. Sera revisada por el responsable del perfil.'));
+    }
+
+    // ========================================================================
+    // HELPERS PARA CLAIMS (v2.6.0)
+    // ========================================================================
+
+    /**
+     * Determina quien debe recibir una notificacion de claim para una persona.
+     * Prioridad: usuario vinculado > creador > todos los admins.
+     */
+    protected function resolveClaimRecipients(Person $person): array
+    {
+        // 1. Si la persona tiene usuario vinculado
+        if ($person->user_id) {
+            $linkedUser = User::find($person->user_id);
+            if ($linkedUser) {
+                return [$linkedUser->id];
+            }
+        }
+
+        // 2. Si la persona tiene creador
+        if ($person->created_by) {
+            $creator = User::find($person->created_by);
+            if ($creator) {
+                return [$creator->id];
+            }
+        }
+
+        // 3. Fallback: todos los administradores
+        return User::where('is_admin', true)->pluck('id')->toArray();
+    }
+
+    /**
+     * Retorna texto legible de quien revisara la solicitud.
+     */
+    protected function getReviewerLabel(Person $person, array $recipientIds): string
+    {
+        if ($person->user_id && in_array($person->user_id, $recipientIds)) {
+            $linkedUser = User::find($person->user_id);
+            return $linkedUser ? $linkedUser->email : __('el usuario vinculado');
+        }
+
+        if ($person->created_by && in_array($person->created_by, $recipientIds)) {
+            $creator = User::find($person->created_by);
+            return $creator ? $creator->email : __('el creador del perfil');
+        }
+
+        return __('los administradores del sitio');
     }
 
     /**
@@ -1905,5 +2202,71 @@ class PersonController extends Controller
         }
 
         return ['type' => 'other', 'label' => __('familiar')];
+    }
+
+    /**
+     * Solicitar permiso de edicion para una persona individual.
+     */
+    public function requestEditPermission(Person $person)
+    {
+        $user = auth()->user();
+
+        if (!$user->person_id) {
+            return back()->with('error', __('Primero debes vincular tu cuenta con un perfil del arbol.'));
+        }
+
+        // Si ya puede editar, no necesita solicitar
+        if ($person->canBeEditedBy($user->id) || $user->is_admin) {
+            return back()->with('info', __('Ya tienes permiso para editar a esta persona.'));
+        }
+
+        // Verificar si ya hay solicitud pendiente
+        $pendingExists = \App\Models\Message::where('sender_id', $user->id)
+            ->where('related_person_id', $person->id)
+            ->where('type', 'family_edit_request')
+            ->where('action_status', 'pending')
+            ->exists();
+
+        if ($pendingExists) {
+            return back()->with('info', __('Ya tienes una solicitud pendiente para esta persona.'));
+        }
+
+        // Determinar destinatario: usuario vinculado > creador
+        $recipientId = $person->user_id ?? $person->created_by;
+
+        // No puede solicitarse permiso a sí mismo
+        if ($recipientId === $user->id) {
+            return back()->with('error', __('No puedes solicitar permiso a ti mismo.'));
+        }
+
+        $userPerson = $user->person;
+        $relationship = $this->determineRelationship($userPerson, $person);
+
+        \App\Models\Message::create([
+            'sender_id' => $user->id,
+            'recipient_id' => $recipientId,
+            'type' => 'family_edit_request',
+            'subject' => __(':name solicita permiso para editar a :person', [
+                'name' => $userPerson->full_name,
+                'person' => $person->full_name,
+            ]),
+            'body' => __(':name es mi :relationship y solicito permiso para poder editar su informacion.', [
+                'name' => $person->full_name,
+                'relationship' => $relationship['label'],
+            ]),
+            'related_person_id' => $person->id,
+            'action_required' => true,
+            'action_status' => 'pending',
+            'metadata' => json_encode([
+                'requester_person_id' => $userPerson->id,
+                'relationship_type' => $relationship['type'],
+            ]),
+        ]);
+
+        ActivityLog::log('family_edit_access_requested', $user, $person, [
+            'relationship_type' => $relationship['type'],
+        ]);
+
+        return back()->with('success', __('Se ha enviado tu solicitud de permiso de edicion.'));
     }
 }

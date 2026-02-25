@@ -291,15 +291,12 @@ class MessageController extends Controller
         $relatedPerson = $message->relatedPerson;
         $replySubject = 'Re: ' . preg_replace('/^Re: /i', '', $message->subject);
         $originalMessage = $message;
+        $isReply = true;
 
-        $canBroadcastAll = Auth::user()->isAdmin();
-        $canBroadcastFamily = Auth::user()->person_id !== null;
-
-        $users = User::select(['id', 'email', 'person_id'])
-            ->with(['person:id,first_name,patronymic'])
-            ->where('id', '!=', Auth::id())
-            ->orderBy('email')
-            ->get();
+        // En respuestas no se necesitan broadcast ni lista completa de usuarios
+        $canBroadcastAll = false;
+        $canBroadcastFamily = false;
+        $users = collect();
 
         $persons = Person::select(['id', 'first_name', 'patronymic'])
             ->orderBy('patronymic')
@@ -309,7 +306,7 @@ class MessageController extends Controller
 
         return view('messages.compose', compact(
             'users', 'persons', 'recipient', 'relatedPerson',
-            'replySubject', 'originalMessage',
+            'replySubject', 'originalMessage', 'isReply',
             'canBroadcastAll', 'canBroadcastFamily'
         ));
     }
@@ -467,6 +464,10 @@ class MessageController extends Controller
             case 'family_edit_request':
                 $this->handleFamilyEditRequestAccepted($message);
                 break;
+
+            case 'relationship_claim':
+                $this->handleRelationshipClaimAccepted($message);
+                break;
         }
 
         // Notificar al remitente (solo si existe)
@@ -530,16 +531,42 @@ class MessageController extends Controller
             return;
         }
 
-        if ($claimingUser->person_id || $person->user_id) {
+        // Si la persona ya tiene usuario vinculado, no se puede aceptar
+        if ($person->user_id) {
             return;
         }
 
+        // Limpiar persona dummy del usuario si existe
+        $dummyPersonId = $message->claiming_person_id;
+        if ($dummyPersonId && $claimingUser->person_id === $dummyPersonId) {
+            $dummyPerson = Person::find($dummyPersonId);
+            if ($dummyPerson) {
+                $hasFamily = $dummyPerson->familiesAsChild()->exists()
+                    || $dummyPerson->familiesAsSpouse()->exists();
+                if (!$hasFamily) {
+                    $claimingUser->update(['person_id' => null]);
+                    $dummyPerson->delete();
+                }
+            }
+        }
+
+        // Vincular usuario a la persona reclamada
         $claimingUser->update(['person_id' => $person->id]);
         $person->update([
             'user_id' => $claimingUser->id,
             'consent_status' => 'approved',
             'consent_responded_at' => now(),
         ]);
+
+        // Auto-denegar otros claims pendientes para la misma persona
+        Message::where('related_person_id', $person->id)
+            ->where('type', 'person_claim')
+            ->where('action_status', 'pending')
+            ->where('id', '!=', $message->id)
+            ->update([
+                'action_status' => 'denied',
+                'action_taken_at' => now(),
+            ]);
 
         \App\Models\ActivityLog::log('person_claimed', $claimingUser, $person);
     }
@@ -596,7 +623,7 @@ class MessageController extends Controller
             return;
         }
 
-        $metadata = json_decode($message->metadata ?? '{}', true);
+        $metadata = $message->metadata ?? [];
         $relationshipType = $metadata['relationship_type'] ?? 'other';
 
         $existingPermission = \App\Models\PersonEditPermission::where('person_id', $person->id)
@@ -622,6 +649,74 @@ class MessageController extends Controller
             'requester_user_id' => $requestingUser->id,
             'relationship_type' => $relationshipType,
         ]);
+    }
+
+    /**
+     * Manejar declaracion de parentesco aceptada.
+     */
+    protected function handleRelationshipClaimAccepted(Message $message): void
+    {
+        if (!$message->related_person_id || !$message->sender_id) {
+            return;
+        }
+
+        $targetPerson = $message->relatedPerson;
+        $claimingUser = User::find($message->sender_id);
+
+        if (!$targetPerson || !$claimingUser || !$claimingUser->person_id) {
+            return;
+        }
+
+        $claimingPerson = $claimingUser->person;
+        if (!$claimingPerson) {
+            return;
+        }
+
+        $metadata = $message->metadata ?? [];
+        $relationshipType = $metadata['relationship_type'] ?? null;
+
+        if (!$relationshipType) {
+            return;
+        }
+
+        $personController = app(PersonController::class);
+
+        try {
+            switch ($relationshipType) {
+                case 'father':
+                    // targetPerson es padre de claimingPerson
+                    $personController->addParentRelationship($claimingPerson, $targetPerson, 'M');
+                    break;
+                case 'mother':
+                    // targetPerson es madre de claimingPerson
+                    $personController->addParentRelationship($claimingPerson, $targetPerson, 'F');
+                    break;
+                case 'child':
+                    // targetPerson es hijo de claimingPerson
+                    $personController->addChildRelationship($claimingPerson, $targetPerson);
+                    break;
+                case 'sibling':
+                    // targetPerson es hermano de claimingPerson
+                    $personController->addSiblingRelationship($claimingPerson, $targetPerson);
+                    break;
+                case 'spouse':
+                    // targetPerson es conyuge de claimingPerson
+                    $personController->addSpouseRelationship($claimingPerson, $targetPerson, [
+                        'family_status' => 'married',
+                    ]);
+                    break;
+            }
+
+            \App\Models\ActivityLog::log('relationship_claim_accepted', Auth::user(), $targetPerson, [
+                'claiming_person_id' => $claimingPerson->id,
+                'relationship_type' => $relationshipType,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error creando relacion desde claim', [
+                'message_id' => $message->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
