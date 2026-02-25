@@ -5,6 +5,59 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.1] - 2026-02-25
+
+### Corregido
+- **Fix error "Undefined array key person_id"** al editar usuarios sin persona vinculada en el panel de admin
+  - `AdminController::updateUser()` fallaba cuando `person_id` no se enviaba en el formulario
+  - Aplicado operador null coalesce (`?? null`) para manejar campos nullable ausentes del array validado
+
+### Cambiado
+- Actualizada version a 2.6.1 en `config/mi-familia.php` y `composer.json`
+
+---
+
+## [2.6.0] - 2026-02-20
+
+### Agregado
+- **Sistema de claim para usuarios nuevos**: Permite a nuevos usuarios reclamar perfiles existentes en el arbol
+- Deteccion de "dummy person" (persona sin conexiones familiares) para permitir re-claim
+- Metodo `canBeViewedForClaim()` con verificacion de privacidad relajada para claims
+- Vista `show-limited.blade.php` para perfiles con privacidad restringida pero disponibles para claim
+- Metodo `resolveClaimRecipients()` para enrutar notificaciones de claim
+- Tipo de mensaje `relationship_claim` para flujo "estoy relacionado directamente"
+- Columna `metadata` (JSON) en tabla messages
+- FK `claiming_person_id` en messages para rastrear persona dummy en claims
+- Seccion "¿Ya existes en el arbol?" en pagina de bienvenida
+- Banner de orientacion en dashboard para usuarios sin conexiones familiares
+
+### Cambiado
+- Metodos `addParentRelationship`, `addChildRelationship`, `addSiblingRelationship`, `addSpouseRelationship` cambiados a `public` en PersonController
+
+---
+
+## [2.5.0] - 2026-02-15
+
+### Agregado
+- **Sistema de personalizacion de sitio** via `site_settings`
+- Fuente personalizable (12 opciones, default: Ubuntu) via SiteSettingsService
+- Carga de fuentes con variable CSS `--mf-font` en todos los layouts
+- Panel admin `/admin/content` para edicion de texto/imagenes
+- Panel admin `/admin/settings` para personalizacion de colores
+
+---
+
+## [2.1.0] - 2026-02-10
+
+### Agregado
+- **Sistema de privacidad v2.1** con traversal BFS para familia extendida
+- Metodo `getAllConnectedPersonIds()` en Person.php (carga grafo completo en 2 queries)
+- Linaje siempre visible: ancestros/descendientes ignoran niveles de privacidad
+- Cache de datos del arbol (TTL 120s) con CacheInvalidationObserver
+- Flujo "Este soy yo" para que admin/creador pueda re-vincular a otra persona
+
+---
+
 ## [2.0.0] - 2026-02-04
 
 ### Changed

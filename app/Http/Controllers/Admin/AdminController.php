@@ -152,7 +152,7 @@ class AdminController extends Controller
 
         $user->update([
             'email' => $validated['email'],
-            'person_id' => $validated['person_id'],
+            'person_id' => $validated['person_id'] ?? null,
             'privacy_level' => $validated['privacy_level'],
         ]);
 
@@ -162,7 +162,7 @@ class AdminController extends Controller
         }
 
         // Actualizar user_id en persona
-        if ($validated['person_id']) {
+        if ($validated['person_id'] ?? null) {
             Person::where('id', $validated['person_id'])->update(['user_id' => $user->id]);
         }
 

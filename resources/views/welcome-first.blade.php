@@ -80,7 +80,7 @@
     <section class="py-8 bg-theme-card">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Contenedor con fondo beige y margen blanco -->
-            <div class="bg-[#eae8e4] rounded-xl p-8 md:p-12">
+            <div class="bg-theme-card rounded-xl p-8 md:p-12">
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <!-- Columna izquierda - Circulos decorativos -->
                     <div class="flex justify-center lg:justify-start">

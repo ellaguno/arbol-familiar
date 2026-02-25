@@ -42,6 +42,11 @@ try {
         echo Artisan::output();
     }
 
+    // Limpiar vistas compiladas
+    echo "\n--- Limpiando vistas compiladas ---\n";
+    Artisan::call('view:clear');
+    echo Artisan::output();
+
     echo "\n=== Migraciones completadas ===\n";
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
