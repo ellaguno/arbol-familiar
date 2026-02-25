@@ -77,13 +77,13 @@
                         <label for="scroll_speed" class="form-label">{{ __('Velocidad del scroll') }} ({{ __('segundos') }})</label>
                         <div class="flex items-center gap-4">
                             <input type="range" id="scroll_speed" name="scroll_speed"
-                                   min="10" max="120" step="5"
+                                   min="10" max="300" step="5"
                                    value="{{ $settings['scroll_speed'] ?? 30 }}"
                                    class="flex-1"
                                    oninput="document.getElementById('speed_value').textContent = this.value + 's'">
                             <span id="speed_value" class="text-sm font-medium text-theme w-16 text-right">{{ $settings['scroll_speed'] ?? 30 }}s</span>
                         </div>
-                        <p class="text-xs text-theme-muted mt-1">{{ __('Tiempo en segundos para un ciclo completo. Menor = mas rapido. Rango: 10-120s.') }}</p>
+                        <p class="text-xs text-theme-muted mt-1">{{ __('Tiempo en segundos para un ciclo completo. Menor = mas rapido. Rango: 10-300s.') }}</p>
                     </div>
 
                     {{-- Maximo de imagenes --}}

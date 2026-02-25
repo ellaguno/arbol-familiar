@@ -20,7 +20,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'banner_height' => 'required|integer|min:60|max:200',
-            'scroll_speed' => 'required|integer|min:10|max:120',
+            'scroll_speed' => 'required|integer|min:10|max:300',
             'max_images' => 'required|integer|min:10|max:200',
             'image_gap' => 'required|integer|min:0|max:16',
             'min_real_photos' => 'required|integer|min:5|max:30|lte:max_images',
