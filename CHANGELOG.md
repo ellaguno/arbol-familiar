@@ -5,6 +5,26 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.2] - 2026-02-25
+
+### Agregado
+- **Privacidad en cintillo de fotos**: Cada usuario solo ve fotos de personas accesibles segun niveles de privacidad (BFS, creador, community/public)
+- Imagenes genericas de relleno en `public/images/banner/` cuando el usuario tiene pocas fotos accesibles
+- Configuracion de umbral minimo de fotos reales (`min_real_photos`) en admin del plugin
+- Cache por usuario con invalidacion por version en photo-banner
+- Enlace de Chat en menu movil/responsivo
+
+### Corregido
+- Cintillo de fotos mostraba fotos de todas las personas sin respetar privacidad
+- Chat no aparecia en el menu de navegacion movil
+- `public_path()` no apuntaba al document root real en hostings con estructura separada
+- Rango de velocidad del cintillo ampliado a 10-300s (antes max 120s)
+
+### Cambiado
+- Actualizada version a 2.6.2 en `config/mi-familia.php` y `composer.json`
+
+---
+
 ## [2.6.1] - 2026-02-25
 
 ### Corregido
