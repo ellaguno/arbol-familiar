@@ -1,12 +1,12 @@
 <x-app-layout>
-    <x-slot name="title">{{ __('Personas') }} - {{ config('app.name') }}</x-slot>
+    <x-slot name="title">{{ __('Mi Familia') }} - {{ config('app.name') }}</x-slot>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Encabezado -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-theme">{{ __('Personas') }}</h1>
-                <p class="text-theme-secondary mt-1">{{ __('Administra las personas en tu arbol genealogico') }}</p>
+                <h1 class="text-3xl font-bold text-theme">{{ __('Mi Familia') }}</h1>
+                <p class="text-theme-secondary mt-1">{{ __('Las personas de tu arbol genealogico a las que tienes acceso') }}</p>
             </div>
             <a href="{{ route('persons.create') }}" class="btn-primary">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
