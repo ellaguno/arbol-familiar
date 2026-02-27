@@ -7,12 +7,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Plugin\PresenceCommunication\Models\ChatAuthorization;
 use Plugin\PresenceCommunication\Models\UserPresence;
 use Plugin\PresenceCommunication\Models\WebrtcRoom;
 use Plugin\PresenceCommunication\Models\WebrtcSignal;
+use Plugin\PresenceCommunication\Traits\ChecksFamilyRelation;
 
 class WebRTCController extends Controller
 {
+    use ChecksFamilyRelation;
     /**
      * Iniciar una llamada.
      */
@@ -37,6 +40,20 @@ class WebRTCController extends Controller
 
         if (!$calleeOnline) {
             return response()->json(['error' => __('El usuario no esta en linea.')], 422);
+        }
+
+        // Verificar autorizacion de chat para no-familia
+        if (!$caller->isAdmin()) {
+            $callerPerson = $caller->person;
+            $callee = \App\Models\User::with('person')->find($calleeId);
+            $calleePerson = $callee ? $callee->person : null;
+
+            if (!$this->isFamilyOf($callerPerson, $calleePerson) &&
+                !ChatAuthorization::isAuthorized($caller->id, $calleeId)) {
+                return response()->json([
+                    'error' => __('Debes tener una conversacion autorizada para llamar a este usuario.'),
+                ], 403);
+            }
         }
 
         // Crear room para la llamada

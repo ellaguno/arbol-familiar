@@ -19,6 +19,7 @@ Route::middleware(['web', 'auth', 'verified'])->group(function () {
     Route::post('/chat/mark-read/{userId}', [ChatController::class, 'markRead'])->name('chat.mark-read')->middleware('throttle:60,1');
     Route::get('/chat/unread-count', [ChatController::class, 'unreadCount'])->name('chat.unread-count')->middleware('throttle:60,1');
     Route::get('/chat/unread-messages', [ChatController::class, 'unreadMessages'])->name('chat.unread-messages')->middleware('throttle:60,1');
+    Route::get('/chat/auth-status/{userId}', [ChatController::class, 'checkAuthStatus'])->name('chat.auth-status')->middleware('throttle:60,1');
 
     // WebRTC Calls
     Route::post('/call/initiate', [WebRTCController::class, 'initiateCall'])->name('call.initiate')->middleware('throttle:10,1');

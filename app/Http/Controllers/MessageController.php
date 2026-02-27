@@ -468,6 +468,10 @@ class MessageController extends Controller
             case 'relationship_claim':
                 $this->handleRelationshipClaimAccepted($message);
                 break;
+
+            case 'chat_request':
+                $this->handleChatRequestAccepted($message);
+                break;
         }
 
         // Notificar al remitente (solo si existe)
@@ -715,6 +719,33 @@ class MessageController extends Controller
             \Illuminate\Support\Facades\Log::error('Error creando relacion desde claim', [
                 'message_id' => $message->id,
                 'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Manejar solicitud de chat aceptada.
+     */
+    protected function handleChatRequestAccepted(Message $message): void
+    {
+        if (!$message->sender_id || !$message->recipient_id) {
+            return;
+        }
+
+        // Crear autorizacion bidireccional
+        \Plugin\PresenceCommunication\Models\ChatAuthorization::authorize(
+            $message->sender_id,
+            $message->recipient_id,
+            $message->id
+        );
+
+        // Entregar el mensaje inicial como ChatMessage si existe
+        $metadata = $message->metadata ?? [];
+        if (!empty($metadata['initial_message'])) {
+            \Plugin\PresenceCommunication\Models\ChatMessage::create([
+                'sender_id' => $message->sender_id,
+                'recipient_id' => $message->recipient_id,
+                'message' => $metadata['initial_message'],
             ]);
         }
     }

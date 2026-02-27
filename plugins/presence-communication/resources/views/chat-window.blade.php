@@ -199,6 +199,28 @@
                         </div>
                     </div>
 
+                    {{-- Banner: solicitud de chat necesaria --}}
+                    <div x-show="selectedUserId && chatAuthStatus === 'none'" x-cloak
+                         class="mx-1 mt-3 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <div class="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>{{ __('Este usuario no es parte de tu familia. Tu primer mensaje sera una solicitud de chat.') }}</span>
+                        </div>
+                    </div>
+
+                    {{-- Banner: solicitud pendiente --}}
+                    <div x-show="selectedUserId && chatAuthStatus === 'pending'" x-cloak
+                         class="mx-1 mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <div class="flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-200">
+                            <svg class="w-5 h-5 flex-shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>{{ __('Solicitud de chat pendiente. Te notificaremos cuando responda.') }}</span>
+                        </div>
+                    </div>
+
                     {{-- Mensajes --}}
                     <div x-show="selectedUserId" x-ref="messagesContainer"
                          class="chat-scrollbar flex-1 overflow-y-auto py-4 pr-1 space-y-3"
@@ -244,7 +266,13 @@
                            class="hidden">
 
                     {{-- Input de mensaje --}}
-                    <div x-show="selectedUserId" class="pt-4 border-t border-theme">
+                    {{-- Formulario: estado pendiente --}}
+                    <div x-show="selectedUserId && chatAuthStatus === 'pending'" x-cloak class="pt-4 border-t border-theme text-center py-3">
+                        <p class="text-sm text-theme-secondary">{{ __('Esperando respuesta a tu solicitud de chat...') }}</p>
+                    </div>
+
+                    {{-- Formulario: estado normal o solicitud --}}
+                    <div x-show="selectedUserId && chatAuthStatus !== 'pending'" class="pt-4 border-t border-theme">
                         {{-- Preview de adjunto --}}
                         <div x-show="attachmentPreviewUrl" x-cloak class="pb-2 flex items-center gap-3">
                             <div class="relative">
@@ -259,8 +287,8 @@
                         </div>
 
                         <form @submit.prevent="sendMessage()" class="flex items-end gap-1">
-                            {{-- Emoji picker --}}
-                            <div class="relative" @click.outside="showEmojiPicker = false">
+                            {{-- Emoji picker (oculto en modo solicitud) --}}
+                            <div x-show="chatAuthStatus !== 'none'" class="relative" @click.outside="showEmojiPicker = false">
                                 <button type="button"
                                         @click="showEmojiPicker = !showEmojiPicker"
                                         class="p-2 text-theme-secondary hover:text-theme transition-colors"
@@ -299,8 +327,8 @@
                                 </div>
                             </div>
 
-                            {{-- Boton adjuntar imagen --}}
-                            <button type="button"
+                            {{-- Boton adjuntar imagen (oculto en modo solicitud) --}}
+                            <button x-show="chatAuthStatus !== 'none'" type="button"
                                     @click="$refs.attachmentInput.click()"
                                     class="p-2 text-theme-secondary hover:text-theme transition-colors"
                                     title="{{ __('Adjuntar imagen') }}">
@@ -313,7 +341,7 @@
                             {{-- Input de texto --}}
                             <textarea x-ref="messageInput"
                                       x-model="newMessage"
-                                      :placeholder="attachmentFile ? '{{ __('Agrega un mensaje (opcional)...') }}' : '{{ __('Escribe un mensaje...') }}'"
+                                      :placeholder="chatAuthStatus === 'none' ? '{{ __('Escribe tu mensaje de solicitud...') }}' : (attachmentFile ? '{{ __('Agrega un mensaje (opcional)...') }}' : '{{ __('Escribe un mensaje...') }}')"
                                       class="input-field flex-1 resize-none overflow-hidden"
                                       maxlength="2000"
                                       autocomplete="off"
@@ -325,11 +353,13 @@
                                       @keydown.ctrl.enter.prevent="newMessage += '\n'; $nextTick(() => { $el.style.height='38px'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px' })"
                                       @keydown.shift.enter.prevent="newMessage += '\n'; $nextTick(() => { $el.style.height='38px'; $el.style.height = Math.min($el.scrollHeight, 120) + 'px' })"></textarea>
 
-                            {{-- Boton enviar --}}
+                            {{-- Boton enviar / solicitar --}}
                             <button type="submit"
                                     class="btn-primary px-4"
-                                    :disabled="(!newMessage.trim() && !attachmentFile) || sending">
-                                <svg x-show="!sending" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    :disabled="(!newMessage.trim() && !attachmentFile) || sending"
+                                    :title="chatAuthStatus === 'none' ? '{{ __('Enviar solicitud de chat') }}' : '{{ __('Enviar') }}'">
+                                <span x-show="chatAuthStatus === 'none' && !sending" class="text-xs font-medium whitespace-nowrap">{{ __('Solicitar') }}</span>
+                                <svg x-show="chatAuthStatus !== 'none' && !sending" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                 </svg>
                                 <svg x-show="sending" class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -725,6 +755,11 @@
             pollInterval: null,
             messagePollInterval: null,
 
+            // Autorizacion de chat
+            chatAuthStatus: 'family',
+            authChecking: false,
+            isCurrentUserAdmin: {{ Auth::user()->isAdmin() ? 'true' : 'false' }},
+
             // Emoji picker
             showEmojiPicker: false,
             emojiTab: 0,
@@ -897,10 +932,27 @@
                 this.selectedUserPhoto = photo || null;
                 this.messages = [];
                 this.loadingMessages = true;
+                this.chatAuthStatus = 'family';
 
                 // Limpiar poll anterior
                 if (this.messagePollInterval) {
                     clearInterval(this.messagePollInterval);
+                }
+
+                // Verificar autorizacion si no es admin y no es familia
+                if (!this.isCurrentUserAdmin) {
+                    const isFam = this.familyUsers.some(u => u.id === userId);
+                    if (!isFam) {
+                        this.authChecking = true;
+                        try {
+                            const resp = await fetch(`/chat/auth-status/${userId}`);
+                            const data = await resp.json();
+                            this.chatAuthStatus = data.status;
+                        } catch (e) {
+                            this.chatAuthStatus = 'none';
+                        }
+                        this.authChecking = false;
+                    }
                 }
 
                 await this.fetchMessages();
@@ -966,6 +1018,18 @@
                         this.removeAttachment();
                         this.$nextTick(() => this.scrollToBottom());
                         this.fetchConversations();
+                    } else if (response.status === 202) {
+                        // Solicitud de chat enviada
+                        const data = await response.json();
+                        this.chatAuthStatus = 'pending';
+                        this.newMessage = '';
+                        this.removeAttachment();
+                    } else if (response.status === 403) {
+                        const errData = await response.json().catch(() => ({}));
+                        if (errData.auth_status === 'pending') {
+                            this.chatAuthStatus = 'pending';
+                        }
+                        if (errData.error) alert(errData.error);
                     } else {
                         const errData = await response.json().catch(() => ({}));
                         if (errData.error) alert(errData.error);

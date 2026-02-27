@@ -704,5 +704,18 @@
     "El archivo debe ser una imagen.": "The file must be an image.",
     "Formato permitido: JPG, PNG, GIF o WebP.": "Allowed formats: JPG, PNG, GIF or WebP.",
     "La imagen no debe superar 3 MB.": "Image must not exceed 3 MB.",
-    "Escribe un mensaje o adjunta una imagen.": "Write a message or attach an image."
+    "Escribe un mensaje o adjunta una imagen.": "Write a message or attach an image.",
+    "Este usuario no es parte de tu familia. Tu primer mensaje sera una solicitud de chat.": "This user is not part of your family. Your first message will be a chat request.",
+    "Solicitud de chat pendiente. Te notificaremos cuando responda.": "Chat request pending. We will notify you when they respond.",
+    "Esperando respuesta a tu solicitud de chat...": "Waiting for response to your chat request...",
+    "Solicitar": "Request",
+    "Enviar solicitud de chat": "Send chat request",
+    "Escribe tu mensaje de solicitud...": "Write your request message...",
+    "Solicitud de chat": "Chat request",
+    ":name quiere enviarte un mensaje por chat. ¿Deseas aceptar la conversacion?": ":name wants to send you a chat message. Do you want to accept the conversation?",
+    "Se ha enviado una solicitud de chat. Te notificaremos cuando responda.": "A chat request has been sent. We will notify you when they respond.",
+    "Ya tienes una solicitud de chat pendiente con este usuario.": "You already have a pending chat request with this user.",
+    "Debes tener una conversacion autorizada para llamar a este usuario.": "You must have an authorized conversation to call this user.",
+    "Solicitudes de chat": "Chat requests",
+    "Declaracion de parentesco": "Relationship declaration"
 }

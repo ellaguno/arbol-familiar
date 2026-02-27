@@ -50,6 +50,7 @@
                             <option value="system" {{ request('type') === 'system' ? 'selected' : '' }}>{{ __('Sistema') }}</option>
                             <option value="invitation" {{ request('type') === 'invitation' ? 'selected' : '' }}>{{ __('Invitaciones') }}</option>
                             <option value="consent_request" {{ request('type') === 'consent_request' ? 'selected' : '' }}>{{ __('Consentimientos') }}</option>
+                            <option value="chat_request" {{ request('type') === 'chat_request' ? 'selected' : '' }}>{{ __('Solicitudes de chat') }}</option>
                         </select>
                     </div>
 
@@ -152,6 +153,10 @@
                                     @elseif($message->type === 'consent_request')
                                         <span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
                                             {{ __('Consentimiento') }}
+                                        </span>
+                                    @elseif($message->type === 'chat_request')
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300">
+                                            {{ __('Solicitud de chat') }}
                                         </span>
                                     @elseif($message->type === 'system')
                                         <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">

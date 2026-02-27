@@ -80,6 +80,10 @@
                             <span class="px-3 py-1 text-sm rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
                                 {{ __('Declaracion de parentesco') }}
                             </span>
+                        @elseif($message->type === 'chat_request')
+                            <span class="px-3 py-1 text-sm rounded-full bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300">
+                                {{ __('Solicitud de chat') }}
+                            </span>
                         @elseif($message->type === 'system')
                             <span class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                                 {{ __('Sistema') }}

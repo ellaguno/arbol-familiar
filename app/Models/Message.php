@@ -205,6 +205,14 @@ class Message extends Model
     }
 
     /**
+     * Verifica si es una solicitud de chat.
+     */
+    public function isChatRequest(): bool
+    {
+        return $this->type === 'chat_request';
+    }
+
+    /**
      * Verifica si ha sido leido.
      */
     public function isRead(): bool

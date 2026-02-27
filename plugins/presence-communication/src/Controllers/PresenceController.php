@@ -8,9 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Plugin\PresenceCommunication\Models\UserPresence;
+use Plugin\PresenceCommunication\Traits\ChecksFamilyRelation;
 
 class PresenceController extends Controller
 {
+    use ChecksFamilyRelation;
     /**
      * Heartbeat: actualizar presencia del usuario actual.
      */
@@ -134,30 +136,6 @@ class PresenceController extends Controller
             'community_count' => count($community),
             'public_count' => count($public),
         ]);
-    }
-
-    /**
-     * Determina si la otra persona es "familia" del usuario actual.
-     */
-    private function isFamilyOf($currentPerson, $otherPerson): bool
-    {
-        if (!$currentPerson || !$otherPerson) {
-            return false;
-        }
-
-        if ($currentPerson->created_by === $otherPerson->created_by) {
-            return true;
-        }
-
-        if (in_array($otherPerson->id, $currentPerson->directFamilyIds)) {
-            return true;
-        }
-
-        if (in_array($otherPerson->id, $currentPerson->extendedFamilyIds)) {
-            return true;
-        }
-
-        return false;
     }
 
     /**

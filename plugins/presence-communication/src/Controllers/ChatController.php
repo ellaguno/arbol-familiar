@@ -3,6 +3,7 @@
 namespace Plugin\PresenceCommunication\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,10 +11,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Plugin\PresenceCommunication\Events\ChatMessageSent;
+use Plugin\PresenceCommunication\Models\ChatAuthorization;
 use Plugin\PresenceCommunication\Models\ChatMessage;
+use Plugin\PresenceCommunication\Traits\ChecksFamilyRelation;
 
 class ChatController extends Controller
 {
+    use ChecksFamilyRelation;
+
     /**
      * Vista principal del chat (pagina completa).
      */
@@ -123,6 +128,55 @@ class ChatController extends Controller
     }
 
     /**
+     * Verificar estado de autorizacion de chat con otro usuario.
+     * Retorna: 'family', 'authorized', 'pending', 'none'
+     */
+    public function checkAuthStatus(int $userId): JsonResponse
+    {
+        $currentUser = Auth::user();
+
+        // Admins pueden chatear con todos
+        if ($currentUser->isAdmin()) {
+            return response()->json(['status' => 'authorized']);
+        }
+
+        $otherUser = User::with('person')->find($userId);
+        if (!$otherUser) {
+            return response()->json(['status' => 'none']);
+        }
+
+        // Verificar relacion familiar
+        $currentPerson = $currentUser->person;
+        $otherPerson = $otherUser->person;
+        if ($this->isFamilyOf($currentPerson, $otherPerson)) {
+            return response()->json(['status' => 'family']);
+        }
+
+        // Verificar autorizacion existente
+        if (ChatAuthorization::isAuthorized($currentUser->id, $userId)) {
+            return response()->json(['status' => 'authorized']);
+        }
+
+        // Verificar solicitud pendiente (en cualquier direccion)
+        $pending = Message::where('type', 'chat_request')
+            ->where('action_status', 'pending')
+            ->where(function ($q) use ($currentUser, $userId) {
+                $q->where(function ($q2) use ($currentUser, $userId) {
+                    $q2->where('sender_id', $currentUser->id)->where('recipient_id', $userId);
+                })->orWhere(function ($q2) use ($currentUser, $userId) {
+                    $q2->where('sender_id', $userId)->where('recipient_id', $currentUser->id);
+                });
+            })
+            ->exists();
+
+        if ($pending) {
+            return response()->json(['status' => 'pending']);
+        }
+
+        return response()->json(['status' => 'none']);
+    }
+
+    /**
      * Enviar un mensaje.
      */
     public function send(Request $request): JsonResponse
@@ -149,6 +203,103 @@ class ChatController extends Controller
         if ($senderId === $recipientId) {
             return response()->json(['error' => __('No puedes enviarte mensajes a ti mismo')], 422);
         }
+
+        // --- Gate de autorizacion ---
+        $currentUser = Auth::user();
+        $recipientUser = User::with('person')->find($recipientId);
+        $needsAuth = true;
+
+        // Admins bypass
+        if ($currentUser->isAdmin()) {
+            $needsAuth = false;
+        }
+
+        // Familia bypass
+        if ($needsAuth) {
+            $currentPerson = $currentUser->person;
+            $otherPerson = $recipientUser ? $recipientUser->person : null;
+            if ($this->isFamilyOf($currentPerson, $otherPerson)) {
+                $needsAuth = false;
+            }
+        }
+
+        // Autorizacion existente bypass
+        if ($needsAuth && ChatAuthorization::isAuthorized($senderId, $recipientId)) {
+            $needsAuth = false;
+        }
+
+        if ($needsAuth) {
+            // Verificar si el otro usuario ya nos envio solicitud (auto-aceptar)
+            $reverseRequest = Message::where('type', 'chat_request')
+                ->where('action_status', 'pending')
+                ->where('sender_id', $recipientId)
+                ->where('recipient_id', $senderId)
+                ->first();
+
+            if ($reverseRequest) {
+                $reverseRequest->accept();
+                ChatAuthorization::authorize($senderId, $recipientId, $reverseRequest->id);
+
+                // Entregar mensaje inicial del otro usuario si existe
+                $reverseMeta = $reverseRequest->metadata ?? [];
+                if (!empty($reverseMeta['initial_message'])) {
+                    ChatMessage::create([
+                        'sender_id' => $recipientId,
+                        'recipient_id' => $senderId,
+                        'message' => $reverseMeta['initial_message'],
+                    ]);
+                }
+
+                $needsAuth = false;
+            }
+        }
+
+        if ($needsAuth) {
+            // Verificar si ya hay solicitud pendiente (en cualquier direccion)
+            $existingRequest = Message::where('type', 'chat_request')
+                ->where('action_status', 'pending')
+                ->where(function ($q) use ($senderId, $recipientId) {
+                    $q->where(function ($q2) use ($senderId, $recipientId) {
+                        $q2->where('sender_id', $senderId)->where('recipient_id', $recipientId);
+                    })->orWhere(function ($q2) use ($senderId, $recipientId) {
+                        $q2->where('sender_id', $recipientId)->where('recipient_id', $senderId);
+                    });
+                })
+                ->exists();
+
+            if ($existingRequest) {
+                return response()->json([
+                    'error' => __('Ya tienes una solicitud de chat pendiente con este usuario.'),
+                    'auth_status' => 'pending',
+                ], 403);
+            }
+
+            // Crear solicitud de chat via Message
+            $senderPerson = $currentUser->person;
+            $senderName = $senderPerson ? $senderPerson->full_name : $currentUser->email;
+
+            Message::create([
+                'sender_id' => $senderId,
+                'recipient_id' => $recipientId,
+                'type' => 'chat_request',
+                'subject' => __('Solicitud de chat'),
+                'body' => __(':name quiere enviarte un mensaje por chat. ¿Deseas aceptar la conversacion?', [
+                    'name' => $senderName,
+                ]),
+                'metadata' => [
+                    'initial_message' => $request->input('message'),
+                ],
+                'action_required' => true,
+                'action_status' => 'pending',
+                'created_at' => now(),
+            ]);
+
+            return response()->json([
+                'auth_status' => 'request_sent',
+                'message_text' => __('Se ha enviado una solicitud de chat. Te notificaremos cuando responda.'),
+            ], 202);
+        }
+        // --- Fin gate de autorizacion ---
 
         $attachmentPath = null;
         $attachmentType = null;
