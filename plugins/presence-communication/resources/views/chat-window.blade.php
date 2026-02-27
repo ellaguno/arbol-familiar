@@ -906,6 +906,7 @@
             async fetchOnline() {
                 try {
                     const response = await fetch('{{ route("presence.online") }}');
+                    if (!response.ok) return;
                     const data = await response.json();
                     this.familyUsers = data.family || [];
                     this.communityUsers = data.community || [];
@@ -917,6 +918,7 @@
             async fetchConversations() {
                 try {
                     const response = await fetch('{{ route("chat.conversations") }}');
+                    if (!response.ok) return;
                     const data = await response.json();
                     this.conversations = data.conversations || [];
                 } catch (e) {
@@ -964,6 +966,7 @@
             async fetchMessages() {
                 try {
                     const response = await fetch(`/chat/messages/${this.selectedUserId}`);
+                    if (!response.ok) return; // Ignorar 429, 500, etc. sin corromper messages
                     const data = await response.json();
                     const oldCount = this.messages.length;
                     const oldLastId = oldCount > 0 ? this.messages[oldCount - 1].id : 0;
@@ -1672,6 +1675,7 @@
             async pollSignals() {
                 try {
                     const res = await fetch('{{ route("call.poll") }}');
+                    if (!res.ok) return;
                     const data = await res.json();
                     const signals = data.signals || [];
 
