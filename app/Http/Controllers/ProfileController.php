@@ -272,7 +272,7 @@ class ProfileController extends Controller
                 'email' => null,
                 'phone' => null,
                 'is_living' => true,
-                'consent_status' => 'revoked',
+                'consent_status' => 'denied',
             ]);
         }
 
