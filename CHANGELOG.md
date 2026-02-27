@@ -5,6 +5,17 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.3] - 2026-02-26
+
+### Cambiado
+- **Renombrado "Personas" a "Mi Familia"** en menu desktop, movil y vista index para reflejar que solo muestra personas accesibles por privacidad
+- Eliminadas todas las referencias a Croacia en seeders, tests y vistas (nombres, apellidos, ciudades, placeholders) reemplazadas por equivalentes latinoamericanos
+
+### Actualizado
+- Version a 2.6.3 en `config/mi-familia.php` y `composer.json`
+
+---
+
 ## [2.6.2] - 2026-02-25
 
 ### Agregado
