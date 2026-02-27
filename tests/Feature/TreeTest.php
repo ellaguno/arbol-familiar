@@ -18,8 +18,8 @@ class TreeTest extends TestCase
 
         // Create root person
         $root = Person::factory()->create([
-            'first_name' => 'Ivan',
-            'patronymic' => 'Horvat',
+            'first_name' => 'Miguel',
+            'patronymic' => 'Ramirez',
             'user_id' => $user->id,
             'created_by' => $user->id,
             'privacy_level' => 'community',
@@ -28,8 +28,8 @@ class TreeTest extends TestCase
 
         // Create parents
         $father = Person::factory()->create([
-            'first_name' => 'Ante',
-            'patronymic' => 'Horvat',
+            'first_name' => 'Ernesto',
+            'patronymic' => 'Ramirez',
             'gender' => 'M',
             'created_by' => $user->id,
             'privacy_level' => 'community',
@@ -37,7 +37,7 @@ class TreeTest extends TestCase
 
         $mother = Person::factory()->create([
             'first_name' => 'Maria',
-            'patronymic' => 'Kovacic',
+            'patronymic' => 'Velasco',
             'gender' => 'F',
             'created_by' => $user->id,
             'privacy_level' => 'community',
@@ -69,8 +69,8 @@ class TreeTest extends TestCase
         ]);
 
         $child = Person::factory()->create([
-            'first_name' => 'Petar',
-            'patronymic' => 'Horvat',
+            'first_name' => 'Daniel',
+            'patronymic' => 'Ramirez',
             'birth_year' => 2015,
             'created_by' => $user->id,
             'privacy_level' => 'community',
@@ -135,8 +135,8 @@ class TreeTest extends TestCase
         $this->assertNotEmpty($json['ancestors']);
 
         $ancestorNames = collect($json['ancestors'])->pluck('name')->toArray();
-        $this->assertContains('Ante Horvat', $ancestorNames);
-        $this->assertContains('Maria Kovacic', $ancestorNames);
+        $this->assertContains('Ernesto Ramirez', $ancestorNames);
+        $this->assertContains('Maria Velasco', $ancestorNames);
     }
 
     public function test_tree_api_includes_descendants(): void

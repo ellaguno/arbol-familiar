@@ -169,18 +169,18 @@ class AuthenticationTest extends TestCase
             'email_confirmation' => 'newuser@example.com',
             'password' => 'Password1!',
             'password_confirmation' => 'Password1!',
-            'first_name' => 'Ivan',
-            'patronymic' => 'Horvat',
+            'first_name' => 'Miguel',
+            'patronymic' => 'Ramirez',
             'gender' => 'M',
             'has_ethnic_heritage' => 1,
-            'ancestor_first_name' => 'Ante',
-            'ancestor_patronymic' => 'Horvat',
-            'heritage_region' => 'dalmatia',
+            'ancestor_first_name' => 'Ernesto',
+            'ancestor_patronymic' => 'Ramirez',
+            'heritage_region' => 'veracruz',
             'privacy_accepted' => true,
         ]);
 
         $this->assertDatabaseHas('users', ['email' => 'newuser@example.com']);
-        $this->assertDatabaseHas('persons', ['first_name' => 'Ivan', 'patronymic' => 'Horvat']);
+        $this->assertDatabaseHas('persons', ['first_name' => 'Miguel', 'patronymic' => 'Ramirez']);
 
         $user = User::where('email', 'newuser@example.com')->first();
         $this->assertNotNull($user->person_id);

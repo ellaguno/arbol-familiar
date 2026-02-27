@@ -308,12 +308,12 @@ class SmallModelsTest extends TestCase
         $person = Person::factory()->create();
         $sv = SurnameVariant::create([
             'person_id' => $person->id,
-            'original_surname' => 'Horvat',
-            'variant_1' => 'Horvath',
+            'original_surname' => 'Ramirez',
+            'variant_1' => 'Ramires',
             'variant_2' => null,
         ]);
 
-        $this->assertEquals(['Horvat', 'Horvath'], $sv->allVariants);
+        $this->assertEquals(['Ramirez', 'Ramires'], $sv->allVariants);
     }
 
     public function test_surname_variant_matches(): void
@@ -321,12 +321,12 @@ class SmallModelsTest extends TestCase
         $person = Person::factory()->create();
         $sv = SurnameVariant::create([
             'person_id' => $person->id,
-            'original_surname' => 'Horvat',
-            'variant_1' => 'Horvath',
+            'original_surname' => 'Ramirez',
+            'variant_1' => 'Ramires',
         ]);
 
-        $this->assertTrue($sv->matches('horvat'));
-        $this->assertTrue($sv->matches('HORVATH'));
+        $this->assertTrue($sv->matches('ramirez'));
+        $this->assertTrue($sv->matches('RAMIRES'));
         $this->assertFalse($sv->matches('Garcia'));
     }
 
@@ -335,12 +335,12 @@ class SmallModelsTest extends TestCase
         $person = Person::factory()->create();
         SurnameVariant::create([
             'person_id' => $person->id,
-            'original_surname' => 'Horvat',
-            'variant_1' => 'Horvath',
+            'original_surname' => 'Ramirez',
+            'variant_1' => 'Ramires',
         ]);
 
-        $this->assertCount(1, SurnameVariant::searchVariant('Horvat')->get());
-        $this->assertCount(1, SurnameVariant::searchVariant('Horvath')->get());
+        $this->assertCount(1, SurnameVariant::searchVariant('Ramirez')->get());
+        $this->assertCount(1, SurnameVariant::searchVariant('Ramires')->get());
         $this->assertCount(0, SurnameVariant::searchVariant('Garcia')->get());
     }
 

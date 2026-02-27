@@ -15,83 +15,83 @@ class FamilySeeder extends Seeder
      */
     public function run(): void
     {
-        $ivan = User::where('email', 'ivan.horvat@example.com')->first();
+        $miguel = User::where('email', 'miguel.ramirez@example.com')->first();
 
         // Obtener personas
-        $ivanPerson = Person::where('first_name', 'Ivan')->where('patronymic', 'Horvat')->first();
-        $ivanFather = Person::where('first_name', 'Josip')->where('patronymic', 'Horvat')->first();
-        $ivanMother = Person::where('first_name', 'Ana')->where('patronymic', 'Babic')->first();
-        $ivanGrandfather = Person::where('first_name', 'Marko')->where('patronymic', 'Horvat')->first();
-        $ivanWife = Person::where('first_name', 'Laura')->where('patronymic', 'Mendez')->first();
-        $ivanSon = Person::where('first_name', 'Mateo')->where('patronymic', 'Horvat')->first();
-        $ivanDaughter = Person::where('first_name', 'Sofia')->where('patronymic', 'Horvat')->first();
-        $ivanBrother = Person::where('first_name', 'Petar')->where('patronymic', 'Horvat')->first();
+        $miguelPerson = Person::where('first_name', 'Miguel')->where('patronymic', 'Ramirez')->first();
+        $miguelFather = Person::where('first_name', 'Roberto')->where('patronymic', 'Ramirez')->first();
+        $miguelMother = Person::where('first_name', 'Rosa')->where('patronymic', 'Gutierrez')->first();
+        $miguelGrandfather = Person::where('first_name', 'Ernesto')->where('patronymic', 'Ramirez')->first();
+        $miguelWife = Person::where('first_name', 'Laura')->where('patronymic', 'Mendez')->first();
+        $miguelSon = Person::where('first_name', 'Mateo')->where('patronymic', 'Ramirez')->first();
+        $miguelDaughter = Person::where('first_name', 'Sofia')->where('patronymic', 'Ramirez')->first();
+        $miguelBrother = Person::where('first_name', 'Daniel')->where('patronymic', 'Ramirez')->first();
 
-        // Familia de los padres de Ivan
+        // Familia de los padres de Miguel
         $familyParents = Family::create([
-            'husband_id' => $ivanFather->id,
-            'wife_id' => $ivanMother->id,
+            'husband_id' => $miguelFather->id,
+            'wife_id' => $miguelMother->id,
             'marriage_date' => '1970-06-15',
             'marriage_place' => 'Guadalajara, Mexico',
             'status' => 'widowed',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
         // Agregar hijos a la familia de los padres
         FamilyChild::create([
             'family_id' => $familyParents->id,
-            'person_id' => $ivanBrother->id,
+            'person_id' => $miguelBrother->id,
             'child_order' => 1,
             'relationship_type' => 'biological',
         ]);
 
         FamilyChild::create([
             'family_id' => $familyParents->id,
-            'person_id' => $ivanPerson->id,
+            'person_id' => $miguelPerson->id,
             'child_order' => 2,
             'relationship_type' => 'biological',
         ]);
 
-        // Familia de Ivan y Laura
-        $familyIvan = Family::create([
-            'husband_id' => $ivanPerson->id,
-            'wife_id' => $ivanWife->id,
+        // Familia de Miguel y Laura
+        $familyMiguel = Family::create([
+            'husband_id' => $miguelPerson->id,
+            'wife_id' => $miguelWife->id,
             'marriage_date' => '2003-08-20',
             'marriage_place' => 'Guadalajara, Mexico',
             'status' => 'married',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // Agregar hijos a la familia de Ivan
+        // Agregar hijos a la familia de Miguel
         FamilyChild::create([
-            'family_id' => $familyIvan->id,
-            'person_id' => $ivanSon->id,
+            'family_id' => $familyMiguel->id,
+            'person_id' => $miguelSon->id,
             'child_order' => 1,
             'relationship_type' => 'biological',
         ]);
 
         FamilyChild::create([
-            'family_id' => $familyIvan->id,
-            'person_id' => $ivanDaughter->id,
+            'family_id' => $familyMiguel->id,
+            'person_id' => $miguelDaughter->id,
             'child_order' => 2,
             'relationship_type' => 'biological',
         ]);
 
         // Familia de los abuelos (solo abuelo conocido, se crea la familia para mantener la relacion)
         $familyGrandparents = Family::create([
-            'husband_id' => $ivanGrandfather->id,
+            'husband_id' => $miguelGrandfather->id,
             'wife_id' => null,
             'marriage_date' => '1940-01-01',
             'marriage_date_approx' => true,
-            'marriage_place' => 'Osijek, Croacia',
+            'marriage_place' => 'Veracruz, Mexico',
             'status' => 'widowed',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // El padre de Ivan es hijo del abuelo
+        // El padre de Miguel es hijo del abuelo
         FamilyChild::create([
             'family_id' => $familyGrandparents->id,
-            'person_id' => $ivanFather->id,
+            'person_id' => $miguelFather->id,
             'child_order' => 1,
             'relationship_type' => 'biological',
         ]);

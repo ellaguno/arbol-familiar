@@ -42,7 +42,7 @@
                         <input type="text" name="patronymic" id="patronymic"
                                value="{{ request('patronymic') }}"
                                class="form-input"
-                               placeholder="{{ __('Ej: Horvat') }}">
+                               placeholder="{{ __('Ej: Ramirez') }}">
                     </div>
 
                     <div>
@@ -50,7 +50,7 @@
                         <input type="text" name="matronymic" id="matronymic"
                                value="{{ request('matronymic') }}"
                                class="form-input"
-                               placeholder="{{ __('Ej: Kovac') }}">
+                               placeholder="{{ __('Ej: Gutierrez') }}">
                     </div>
                 </div>
             </div>
@@ -83,7 +83,7 @@
                         <input type="text" name="birth_place" id="birth_place"
                                value="{{ request('birth_place') }}"
                                class="form-input"
-                               placeholder="{{ __('Ej: Zagreb') }}">
+                               placeholder="{{ __('Ej: Guadalajara') }}">
                     </div>
                 </div>
             </div>

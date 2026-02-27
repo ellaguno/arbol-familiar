@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
 
         // Usuario de prueba con herencia
         User::create([
-            'email' => 'ivan.horvat@example.com',
+            'email' => 'miguel.ramirez@example.com',
             'password' => 'MiFamilia2025!',
             'language' => 'es',
             'privacy_level' => 'extended_family',
@@ -46,7 +46,7 @@ class UserSeeder extends Seeder
 
         // Usuario de prueba (nuevo, sin verificar)
         User::create([
-            'email' => 'ana.kovac@example.com',
+            'email' => 'rosa.luna@example.com',
             'password' => 'MiFamilia2025!',
             'language' => 'en',
             'privacy_level' => 'direct_family',

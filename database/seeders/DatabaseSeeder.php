@@ -26,8 +26,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('');
         $this->command->info('Usuarios de prueba:');
         $this->command->info('  - admin@mi-familia.org / MiFamilia2025! (Administrador)');
-        $this->command->info('  - ivan.horvat@example.com / MiFamilia2025! (Usuario con herencia)');
+        $this->command->info('  - miguel.ramirez@example.com / MiFamilia2025! (Usuario con herencia)');
         $this->command->info('  - maria.garcia@example.com / MiFamilia2025! (Usuario regular)');
-        $this->command->info('  - ana.kovac@example.com / MiFamilia2025! (Usuario sin verificar)');
+        $this->command->info('  - rosa.luna@example.com / MiFamilia2025! (Usuario sin verificar)');
     }
 }

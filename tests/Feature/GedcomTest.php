@@ -192,11 +192,11 @@ GEDCOM;
         $this->actingAs($user);
 
         $person = Person::factory()->create([
-            'first_name' => 'Ivan',
-            'patronymic' => 'Horvat',
+            'first_name' => 'Miguel',
+            'patronymic' => 'Ramirez',
             'gender' => 'M',
             'birth_date' => '1985-05-15',
-            'birth_place' => 'Zagreb',
+            'birth_place' => 'Guadalajara',
             'is_living' => true,
             'created_by' => $user->id,
         ]);
@@ -206,7 +206,7 @@ GEDCOM;
 
         $this->assertStringContainsString('0 HEAD', $content);
         $this->assertStringContainsString('GEDC', $content);
-        $this->assertStringContainsString('Ivan /Horvat/', $content);
+        $this->assertStringContainsString('Miguel /Ramirez/', $content);
         $this->assertStringContainsString('SEX M', $content);
         $this->assertStringContainsString('0 TRLR', $content);
     }

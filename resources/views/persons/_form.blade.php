@@ -167,7 +167,7 @@
                     <label for="birth_country" class="form-label">{{ __('Pais de nacimiento') }}</label>
                     <input type="text" name="birth_country" id="birth_country"
                            value="{{ old('birth_country', $person?->birth_country) }}"
-                           placeholder="{{ __('Mexico, Croacia, etc.') }}"
+                           placeholder="{{ __('Mexico, Colombia, etc.') }}"
                            class="form-input">
                 </div>
             </div>

@@ -53,7 +53,7 @@ class FamilyTest extends TestCase
     public function test_husband_and_wife_relationships(): void
     {
         $user = User::factory()->create();
-        $h = Person::factory()->create(['first_name' => 'Ivan', 'created_by' => $user->id]);
+        $h = Person::factory()->create(['first_name' => 'Miguel', 'created_by' => $user->id]);
         $w = Person::factory()->create(['first_name' => 'Maria', 'created_by' => $user->id]);
 
         $family = Family::factory()->create([
@@ -62,7 +62,7 @@ class FamilyTest extends TestCase
             'created_by' => $user->id,
         ]);
 
-        $this->assertEquals('Ivan', $family->husband->first_name);
+        $this->assertEquals('Miguel', $family->husband->first_name);
         $this->assertEquals('Maria', $family->wife->first_name);
     }
 
@@ -117,8 +117,8 @@ class FamilyTest extends TestCase
     public function test_label_attribute(): void
     {
         $user = User::factory()->create();
-        $h = Person::factory()->create(['patronymic' => 'Horvat', 'created_by' => $user->id]);
-        $w = Person::factory()->create(['patronymic' => 'Kovacic', 'created_by' => $user->id]);
+        $h = Person::factory()->create(['patronymic' => 'Ramirez', 'created_by' => $user->id]);
+        $w = Person::factory()->create(['patronymic' => 'Velasco', 'created_by' => $user->id]);
 
         $family = Family::factory()->create([
             'husband_id' => $h->id,
@@ -126,7 +126,7 @@ class FamilyTest extends TestCase
             'created_by' => $user->id,
         ]);
 
-        $this->assertEquals('Horvat / Kovacic', $family->label);
+        $this->assertEquals('Ramirez / Velasco', $family->label);
     }
 
     public function test_label_without_spouses(): void

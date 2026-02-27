@@ -14,14 +14,14 @@ class PersonSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('email', 'admin@mi-familia.org')->first();
-        $ivan = User::where('email', 'ivan.horvat@example.com')->first();
+        $miguel = User::where('email', 'miguel.ramirez@example.com')->first();
 
         // Persona para el admin
         $adminPerson = Person::create([
             'user_id' => $admin->id,
             'first_name' => 'Carlos',
             'patronymic' => 'Rodriguez',
-            'matronymic' => 'Kovacevic',
+            'matronymic' => 'Velasco',
             'gender' => 'M',
             'birth_date' => '1980-05-15',
             'birth_place' => 'Ciudad de Mexico',
@@ -33,7 +33,7 @@ class PersonSeeder extends Seeder
             'email' => 'admin@mi-familia.org',
             'has_ethnic_heritage' => true,
             'heritage_region' => 'region_2',
-            'origin_town' => 'Split',
+            'origin_town' => 'Oaxaca',
             'migration_decade' => '1920-1930',
             'migration_destination' => 'Mexico',
             'privacy_level' => 'community',
@@ -44,12 +44,12 @@ class PersonSeeder extends Seeder
         // Actualizar usuario con person_id
         $admin->update(['person_id' => $adminPerson->id]);
 
-        // Persona para Ivan (usuario con herencia)
-        $ivanPerson = Person::create([
-            'user_id' => $ivan->id,
-            'first_name' => 'Ivan',
-            'patronymic' => 'Horvat',
-            'matronymic' => 'Babic',
+        // Persona para Miguel (usuario con herencia)
+        $miguelPerson = Person::create([
+            'user_id' => $miguel->id,
+            'first_name' => 'Miguel',
+            'patronymic' => 'Ramirez',
+            'matronymic' => 'Gutierrez',
             'gender' => 'M',
             'birth_date' => '1975-08-22',
             'birth_place' => 'Guadalajara',
@@ -58,23 +58,23 @@ class PersonSeeder extends Seeder
             'residence_place' => 'Guadalajara',
             'residence_country' => 'Mexico',
             'occupation' => 'Comerciante',
-            'email' => 'ivan.horvat@example.com',
+            'email' => 'miguel.ramirez@example.com',
             'has_ethnic_heritage' => true,
             'heritage_region' => 'region_3',
-            'origin_town' => 'Osijek',
+            'origin_town' => 'Veracruz',
             'migration_decade' => '1900-1910',
             'migration_destination' => 'Mexico',
             'privacy_level' => 'extended_family',
             'consent_status' => 'not_required',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        $ivan->update(['person_id' => $ivanPerson->id]);
+        $miguel->update(['person_id' => $miguelPerson->id]);
 
-        // Padre de Ivan
-        $ivanFather = Person::create([
-            'first_name' => 'Josip',
-            'patronymic' => 'Horvat',
+        // Padre de Miguel
+        $miguelFather = Person::create([
+            'first_name' => 'Roberto',
+            'patronymic' => 'Ramirez',
             'gender' => 'M',
             'birth_date' => '1945-03-10',
             'birth_place' => 'Guadalajara',
@@ -86,18 +86,18 @@ class PersonSeeder extends Seeder
             'occupation' => 'Agricultor',
             'has_ethnic_heritage' => true,
             'heritage_region' => 'region_3',
-            'origin_town' => 'Osijek',
+            'origin_town' => 'Veracruz',
             'migration_decade' => '1900-1910',
             'migration_destination' => 'Mexico',
             'privacy_level' => 'extended_family',
             'consent_status' => 'not_required',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // Madre de Ivan
-        $ivanMother = Person::create([
-            'first_name' => 'Ana',
-            'patronymic' => 'Babic',
+        // Madre de Miguel
+        $miguelMother = Person::create([
+            'first_name' => 'Rosa',
+            'patronymic' => 'Gutierrez',
             'matronymic' => 'Martinez',
             'gender' => 'F',
             'birth_date' => '1948-07-20',
@@ -106,27 +106,27 @@ class PersonSeeder extends Seeder
             'is_living' => true,
             'residence_place' => 'Guadalajara',
             'residence_country' => 'Mexico',
-            'email' => 'ana.babic@example.com',
+            'email' => 'rosa.gutierrez@example.com',
             'has_ethnic_heritage' => true,
             'heritage_region' => 'region_2',
-            'origin_town' => 'Dubrovnik',
+            'origin_town' => 'Puebla',
             'migration_decade' => '1910-1920',
             'migration_destination' => 'Mexico',
             'privacy_level' => 'extended_family',
             'consent_status' => 'pending',
             'consent_requested_at' => now(),
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // Abuelo paterno de Ivan (emigrante)
-        $ivanGrandfather = Person::create([
-            'first_name' => 'Marko',
-            'patronymic' => 'Horvat',
+        // Abuelo paterno de Miguel (emigrante)
+        $miguelGrandfather = Person::create([
+            'first_name' => 'Ernesto',
+            'patronymic' => 'Ramirez',
             'gender' => 'M',
             'birth_date' => '1905-01-15',
             'birth_date_approx' => true,
-            'birth_place' => 'Osijek',
-            'birth_country' => 'Croacia',
+            'birth_place' => 'Veracruz',
+            'birth_country' => 'Mexico',
             'death_date' => '1985-06-30',
             'death_place' => 'Guadalajara',
             'death_country' => 'Mexico',
@@ -134,16 +134,16 @@ class PersonSeeder extends Seeder
             'occupation' => 'Zapatero',
             'has_ethnic_heritage' => true,
             'heritage_region' => 'region_3',
-            'origin_town' => 'Osijek',
+            'origin_town' => 'Veracruz',
             'migration_decade' => '1920-1930',
             'migration_destination' => 'Mexico',
             'privacy_level' => 'community',
             'consent_status' => 'not_required',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // Esposa de Ivan
-        $ivanWife = Person::create([
+        // Esposa de Miguel
+        $miguelWife = Person::create([
             'first_name' => 'Laura',
             'patronymic' => 'Mendez',
             'matronymic' => 'Ruiz',
@@ -159,13 +159,13 @@ class PersonSeeder extends Seeder
             'privacy_level' => 'extended_family',
             'consent_status' => 'approved',
             'consent_responded_at' => now()->subDays(30),
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // Hijo de Ivan
-        $ivanSon = Person::create([
+        // Hijo de Miguel
+        $miguelSon = Person::create([
             'first_name' => 'Mateo',
-            'patronymic' => 'Horvat',
+            'patronymic' => 'Ramirez',
             'matronymic' => 'Mendez',
             'gender' => 'M',
             'birth_date' => '2005-04-08',
@@ -179,13 +179,13 @@ class PersonSeeder extends Seeder
             'heritage_region' => 'region_3',
             'privacy_level' => 'direct_family',
             'consent_status' => 'not_required',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // Hija de Ivan
-        $ivanDaughter = Person::create([
+        // Hija de Miguel
+        $miguelDaughter = Person::create([
             'first_name' => 'Sofia',
-            'patronymic' => 'Horvat',
+            'patronymic' => 'Ramirez',
             'matronymic' => 'Mendez',
             'gender' => 'F',
             'birth_date' => '2008-09-25',
@@ -199,14 +199,14 @@ class PersonSeeder extends Seeder
             'heritage_region' => 'region_3',
             'privacy_level' => 'direct_family',
             'consent_status' => 'not_required',
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
 
-        // Hermano de Ivan
+        // Hermano de Miguel
         Person::create([
-            'first_name' => 'Petar',
-            'patronymic' => 'Horvat',
-            'matronymic' => 'Babic',
+            'first_name' => 'Daniel',
+            'patronymic' => 'Ramirez',
+            'matronymic' => 'Gutierrez',
             'gender' => 'M',
             'birth_date' => '1972-02-14',
             'birth_place' => 'Guadalajara',
@@ -214,14 +214,14 @@ class PersonSeeder extends Seeder
             'is_living' => true,
             'residence_place' => 'Monterrey',
             'residence_country' => 'Mexico',
-            'email' => 'petar.horvat@example.com',
+            'email' => 'daniel.ramirez@example.com',
             'occupation' => 'Medico',
             'has_ethnic_heritage' => true,
             'heritage_region' => 'region_3',
             'privacy_level' => 'extended_family',
             'consent_status' => 'pending',
             'consent_requested_at' => now()->subDays(3),
-            'created_by' => $ivan->id,
+            'created_by' => $miguel->id,
         ]);
     }
 }

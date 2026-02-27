@@ -13,42 +13,42 @@ class SurnameVariantSeeder extends Seeder
      */
     public function run(): void
     {
-        // Variantes para el abuelo Horvat
-        $grandfather = Person::where('first_name', 'Marko')->where('patronymic', 'Horvat')->first();
+        // Variantes para el abuelo Ramirez
+        $grandfather = Person::where('first_name', 'Ernesto')->where('patronymic', 'Ramirez')->first();
 
         if ($grandfather) {
             SurnameVariant::create([
                 'person_id' => $grandfather->id,
-                'original_surname' => 'Horvat',
-                'variant_1' => 'Horvath',
-                'variant_2' => 'Orvat',
-                'notes' => 'El apellido Horvat se escribio como Horvath en algunos documentos mexicanos debido a la influencia hungara. Tambien aparece como Orvat en algunos registros civiles.',
+                'original_surname' => 'Ramirez',
+                'variant_1' => 'Ramires',
+                'variant_2' => 'Ramirez de Leon',
+                'notes' => 'El apellido Ramirez aparece como Ramires en algunos registros civiles antiguos. Tambien se registra con el compuesto Ramirez de Leon en documentos parroquiales.',
             ]);
         }
 
-        // Variantes para la madre Ana Babic
-        $anaBabic = Person::where('first_name', 'Ana')->where('patronymic', 'Babic')->first();
+        // Variantes para la madre Rosa Gutierrez
+        $rosaGutierrez = Person::where('first_name', 'Rosa')->where('patronymic', 'Gutierrez')->first();
 
-        if ($anaBabic) {
+        if ($rosaGutierrez) {
             SurnameVariant::create([
-                'person_id' => $anaBabic->id,
-                'original_surname' => 'Babic',
-                'variant_1' => 'Babich',
+                'person_id' => $rosaGutierrez->id,
+                'original_surname' => 'Gutierrez',
+                'variant_1' => 'Gutierres',
                 'variant_2' => null,
-                'notes' => 'El apellido Babic frecuentemente se hispanizo como Babich en Mexico.',
+                'notes' => 'El apellido Gutierrez frecuentemente aparece como Gutierres en registros anteriores a 1950.',
             ]);
         }
 
-        // Admin con apellido Kovacevic
-        $admin = Person::where('matronymic', 'Kovacevic')->first();
+        // Admin con apellido Velasco
+        $admin = Person::where('matronymic', 'Velasco')->first();
 
         if ($admin) {
             SurnameVariant::create([
                 'person_id' => $admin->id,
-                'original_surname' => 'Kovacevic',
-                'variant_1' => 'Kovachevich',
-                'variant_2' => 'Kovacevich',
-                'notes' => 'El apellido Kovacevic (que significa "hijo del herrero") tiene multiples variantes debido a la transliteracion del alfabeto original.',
+                'original_surname' => 'Velasco',
+                'variant_1' => 'Belasco',
+                'variant_2' => 'Velazco',
+                'notes' => 'El apellido Velasco tiene variantes como Belasco (intercambio b/v comun en documentos coloniales) y Velazco.',
             ]);
         }
     }

@@ -39,13 +39,13 @@ class PersonTest extends TestCase
     public function test_fillable_attributes(): void
     {
         $person = Person::factory()->create([
-            'first_name' => 'Ivan',
-            'patronymic' => 'Horvat',
+            'first_name' => 'Miguel',
+            'patronymic' => 'Ramirez',
             'gender' => 'M',
         ]);
 
-        $this->assertEquals('Ivan', $person->first_name);
-        $this->assertEquals('Horvat', $person->patronymic);
+        $this->assertEquals('Miguel', $person->first_name);
+        $this->assertEquals('Ramirez', $person->patronymic);
         $this->assertEquals('M', $person->gender);
     }
 
@@ -65,23 +65,23 @@ class PersonTest extends TestCase
     public function test_full_name_attribute(): void
     {
         $person = Person::factory()->create([
-            'first_name' => 'Ivan',
-            'patronymic' => 'Horvat',
-            'matronymic' => 'Kovacic',
+            'first_name' => 'Miguel',
+            'patronymic' => 'Ramirez',
+            'matronymic' => 'Velasco',
         ]);
 
-        $this->assertEquals('Ivan Horvat Kovacic', $person->full_name);
+        $this->assertEquals('Miguel Ramirez Velasco', $person->full_name);
     }
 
     public function test_full_name_without_matronymic(): void
     {
         $person = Person::factory()->create([
-            'first_name' => 'Ivan',
-            'patronymic' => 'Horvat',
+            'first_name' => 'Miguel',
+            'patronymic' => 'Ramirez',
             'matronymic' => null,
         ]);
 
-        $this->assertEquals('Ivan Horvat', $person->full_name);
+        $this->assertEquals('Miguel Ramirez', $person->full_name);
     }
 
     public function test_age_attribute_living(): void
@@ -222,8 +222,8 @@ class PersonTest extends TestCase
         $person = Person::factory()->create();
         SurnameVariant::create([
             'person_id' => $person->id,
-            'original_surname' => 'Horvat',
-            'variant_1' => 'Horvath',
+            'original_surname' => 'Ramirez',
+            'variant_1' => 'Ramires',
         ]);
 
         $this->assertCount(1, $person->surnameVariants);
@@ -300,20 +300,20 @@ class PersonTest extends TestCase
 
     public function test_scope_search_by_name_single_term(): void
     {
-        Person::factory()->create(['first_name' => 'Ivan', 'patronymic' => 'Horvat']);
+        Person::factory()->create(['first_name' => 'Miguel', 'patronymic' => 'Ramirez']);
         Person::factory()->create(['first_name' => 'Maria', 'patronymic' => 'Lopez']);
 
-        $results = Person::searchByName('Ivan')->get();
+        $results = Person::searchByName('Miguel')->get();
         $this->assertCount(1, $results);
-        $this->assertEquals('Ivan', $results->first()->first_name);
+        $this->assertEquals('Miguel', $results->first()->first_name);
     }
 
     public function test_scope_search_by_name_multiple_terms(): void
     {
-        Person::factory()->create(['first_name' => 'Ivan', 'patronymic' => 'Horvat']);
+        Person::factory()->create(['first_name' => 'Miguel', 'patronymic' => 'Ramirez']);
         Person::factory()->create(['first_name' => 'Maria', 'patronymic' => 'Lopez']);
 
-        $results = Person::searchByName('Ivan Horvat')->get();
+        $results = Person::searchByName('Miguel Ramirez')->get();
         $this->assertCount(1, $results);
     }
 
