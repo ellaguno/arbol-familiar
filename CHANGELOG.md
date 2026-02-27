@@ -5,6 +5,28 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.5] - 2026-02-27
+
+### Agregado
+- **Sistema de autorizacion de chat para usuarios no-familia**: Usuarios fuera de la familia extendida deben solicitar permiso antes de chatear
+- Tabla `chat_authorizations` para autorizaciones bidireccionales permanentes
+- Tipo `chat_request` en mensajes con flujo Accept/Deny en bandeja
+- Endpoint `GET /chat/auth-status/{userId}` para consulta de estado
+- Gate de autorizacion en envio de mensajes y llamadas WebRTC
+- Auto-aceptacion cuando ambos usuarios se solicitan mutuamente
+- Banners informativos en UI: azul (solicitud necesaria), amarillo (pendiente)
+- Badge de tipo "Solicitud de chat" en bandeja y detalle de mensajes
+- Trait `ChecksFamilyRelation` compartido entre controllers del plugin
+- Retrocompatibilidad: conversaciones existentes se autorizan automaticamente
+
+### Corregido
+- **Fix error al eliminar cuenta**: `consent_status = 'revoked'` no existia en el enum, cambiado a `'denied'`
+
+### Actualizado
+- Version a 2.6.5 en `config/mi-familia.php` y `composer.json`
+
+---
+
 ## [2.6.4] - 2026-02-27
 
 ### Corregido
