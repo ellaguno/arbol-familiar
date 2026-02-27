@@ -16,7 +16,7 @@ class VerificationController extends Controller
     public function show()
     {
         return auth()->user()->hasVerifiedEmail()
-            ? redirect()->intended(route('dashboard'))
+            ? redirect($this->safeIntendedUrl())
             : view('auth.verify-email');
     }
 
@@ -26,7 +26,7 @@ class VerificationController extends Controller
     public function verify(EmailVerificationRequest $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard'));
+            return redirect($this->safeIntendedUrl());
         }
 
         if ($request->user()->markEmailAsVerified()) {
@@ -34,7 +34,14 @@ class VerificationController extends Controller
             event(new Verified($request->user()));
         }
 
-        return redirect()->intended(route('dashboard'))
+        // Un usuario recien verificado que no ha completado su primer login
+        // debe ir a la pagina de bienvenida, no al dashboard
+        if (!$request->user()->first_login_completed) {
+            return redirect()->route('welcome.first')
+                ->with('success', 'Tu correo electronico ha sido verificado.');
+        }
+
+        return redirect($this->safeIntendedUrl())
             ->with('success', 'Tu correo electronico ha sido verificado.');
     }
 
@@ -44,7 +51,7 @@ class VerificationController extends Controller
     public function resend(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard'));
+            return redirect($this->safeIntendedUrl());
         }
 
         // Regenerar el codigo de verificacion
@@ -79,7 +86,31 @@ class VerificationController extends Controller
         ActivityLog::log('email_verified', $user);
         event(new Verified($user));
 
+        if (!$user->first_login_completed) {
+            return redirect()->route('welcome.first')
+                ->with('success', 'Tu correo electronico ha sido verificado.');
+        }
+
         return redirect()->route('dashboard')
             ->with('success', 'Tu correo electronico ha sido verificado.');
+    }
+
+    /**
+     * Obtiene la URL intended limpiando rutas AJAX/polling
+     * que no deben ser destino post-verificacion.
+     */
+    private function safeIntendedUrl(): string
+    {
+        $intended = session()->pull('url.intended', route('dashboard'));
+
+        if (str_contains($intended, '/call/') ||
+            str_contains($intended, '/api/') ||
+            str_contains($intended, '/poll') ||
+            str_contains($intended, '/presence') ||
+            str_contains($intended, '/unread')) {
+            return route('dashboard');
+        }
+
+        return $intended;
     }
 }
