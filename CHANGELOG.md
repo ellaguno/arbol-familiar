@@ -5,6 +5,18 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.4] - 2026-02-27
+
+### Corregido
+- **Fix redirect a /call/poll tras verificacion de email**: `redirect()->intended()` capturaba URLs de polling AJAX guardadas en sesion, redirigiendo al usuario a JSON crudo en lugar del dashboard
+- Nuevo helper `safeIntendedUrl()` filtra rutas AJAX/polling (`/call/`, `/api/`, `/poll`, `/presence`, `/unread`)
+- Usuarios recien verificados que no han completado primer login son redirigidos a pagina de bienvenida en lugar del dashboard
+
+### Actualizado
+- Version a 2.6.4 en `config/mi-familia.php` y `composer.json`
+
+---
+
 ## [2.6.3] - 2026-02-26
 
 ### Cambiado
