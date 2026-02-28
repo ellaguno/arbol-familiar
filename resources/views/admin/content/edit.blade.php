@@ -21,58 +21,103 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.content.update', $group) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.content.update', $group) }}" method="POST" enctype="multipart/form-data"
+              x-data="{ lang: 'es' }">
             @csrf
             @method('PUT')
 
+            {{-- Language tabs --}}
+            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                <button type="button" @click="lang = 'es'"
+                        :class="lang === 'es' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                        class="px-4 py-2.5 font-medium text-sm transition-colors">
+                    {{ __('Español') }}
+                </button>
+                <button type="button" @click="lang = 'en'"
+                        :class="lang === 'en' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                        class="px-4 py-2.5 font-medium text-sm transition-colors">
+                    English
+                </button>
+            </div>
+
             <div class="space-y-6">
+                @php
+                    $translatableTypes = ['text', 'textarea', 'html'];
+                @endphp
+
                 @foreach($settings as $key => $setting)
                     <div class="card">
                         <div class="card-body">
-                            <label for="settings_{{ $key }}" class="form-label text-base">
+                            <label class="form-label text-base">
                                 {{ __(str_replace('_', ' ', ucfirst($key))) }}
                                 <span class="text-xs text-theme-muted ml-2">({{ $setting->type }})</span>
                             </label>
 
-                            @if($setting->type === 'boolean')
+                            @if(in_array($setting->type, $translatableTypes) && $key !== 'feature_images_shape')
+                                {{-- TRANSLATABLE: show per-language inputs --}}
+
+                                {{-- Spanish --}}
+                                <div x-show="lang === 'es'">
+                                    @if($setting->type === 'text')
+                                        <input type="text"
+                                               name="settings_es_{{ $key }}"
+                                               value="{{ old('settings_es_' . $key, $settingsEs[$key]->value ?? '') }}"
+                                               class="form-input">
+                                    @elseif($setting->type === 'textarea')
+                                        <textarea name="settings_es_{{ $key }}"
+                                                  rows="4"
+                                                  class="form-input resize-y">{{ old('settings_es_' . $key, $settingsEs[$key]->value ?? '') }}</textarea>
+                                    @elseif($setting->type === 'html')
+                                        <textarea name="settings_es_{{ $key }}"
+                                                  rows="8"
+                                                  class="form-input resize-y font-mono text-sm">{{ old('settings_es_' . $key, $settingsEs[$key]->value ?? '') }}</textarea>
+                                        <p class="text-xs text-theme-muted mt-1">{{ __('Se permite HTML. Los enlaces, imagenes y estilos se renderizaran directamente.') }}</p>
+                                    @endif
+                                </div>
+
+                                {{-- English --}}
+                                <div x-show="lang === 'en'">
+                                    @if($setting->type === 'text')
+                                        <input type="text"
+                                               name="settings_en_{{ $key }}"
+                                               value="{{ old('settings_en_' . $key, $settingsEn[$key]->value ?? '') }}"
+                                               placeholder="{{ __('Traduccion en ingles') }}"
+                                               class="form-input">
+                                    @elseif($setting->type === 'textarea')
+                                        <textarea name="settings_en_{{ $key }}"
+                                                  rows="4"
+                                                  placeholder="{{ __('Traduccion en ingles') }}"
+                                                  class="form-input resize-y">{{ old('settings_en_' . $key, $settingsEn[$key]->value ?? '') }}</textarea>
+                                    @elseif($setting->type === 'html')
+                                        <textarea name="settings_en_{{ $key }}"
+                                                  rows="8"
+                                                  placeholder="{{ __('Traduccion en ingles') }}"
+                                                  class="form-input resize-y font-mono text-sm">{{ old('settings_en_' . $key, $settingsEn[$key]->value ?? '') }}</textarea>
+                                        <p class="text-xs text-theme-muted mt-1">{{ __('Se permite HTML. Los enlaces, imagenes y estilos se renderizaran directamente.') }}</p>
+                                    @endif
+                                </div>
+
+                            @elseif($setting->type === 'boolean')
+                                {{-- SHARED: boolean --}}
                                 <label class="flex items-center gap-3 cursor-pointer">
-                                    <input type="hidden" name="settings_{{ $key }}" value="0">
+                                    <input type="hidden" name="settings_es_{{ $key }}" value="0">
                                     <input type="checkbox"
-                                           name="settings_{{ $key }}"
-                                           id="settings_{{ $key }}"
+                                           name="settings_es_{{ $key }}"
                                            value="1"
                                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
-                                           {{ old('settings_' . $key, $setting->value) ? 'checked' : '' }}>
+                                           {{ old('settings_es_' . $key, $setting->value) ? 'checked' : '' }}>
                                     <span class="text-theme-secondary">{{ __('Activado') }}</span>
                                 </label>
 
                             @elseif($key === 'feature_images_shape')
-                                <select name="settings_{{ $key }}" id="settings_{{ $key }}" class="form-input">
-                                    <option value="round" {{ old('settings_' . $key, $setting->value) === 'round' ? 'selected' : '' }}>{{ __('Redondas') }}</option>
-                                    <option value="square" {{ old('settings_' . $key, $setting->value) === 'square' ? 'selected' : '' }}>{{ __('Cuadradas') }}</option>
+                                {{-- SHARED: shape selector --}}
+                                <select name="settings_es_{{ $key }}" class="form-input">
+                                    <option value="round" {{ old('settings_es_' . $key, $setting->value) === 'round' ? 'selected' : '' }}>{{ __('Redondas') }}</option>
+                                    <option value="square" {{ old('settings_es_' . $key, $setting->value) === 'square' ? 'selected' : '' }}>{{ __('Cuadradas') }}</option>
                                 </select>
 
-                            @elseif($setting->type === 'text')
-                                <input type="text"
-                                       name="settings_{{ $key }}"
-                                       id="settings_{{ $key }}"
-                                       value="{{ old('settings_' . $key, $setting->value) }}"
-                                       class="form-input">
-
-                            @elseif($setting->type === 'textarea')
-                                <textarea name="settings_{{ $key }}"
-                                          id="settings_{{ $key }}"
-                                          rows="4"
-                                          class="form-input resize-y">{{ old('settings_' . $key, $setting->value) }}</textarea>
-
-                            @elseif($setting->type === 'html')
-                                <textarea name="settings_{{ $key }}"
-                                          id="settings_{{ $key }}"
-                                          rows="8"
-                                          class="form-input resize-y font-mono text-sm">{{ old('settings_' . $key, $setting->value) }}</textarea>
-                                <p class="text-xs text-theme-muted mt-1">{{ __('Se permite HTML. Los enlaces, imagenes y estilos se renderizaran directamente.') }}</p>
-
                             @elseif($setting->type === 'image')
+                                {{-- SHARED: image --}}
                                 <div class="space-y-3">
                                     @if($setting->value)
                                         <div class="flex items-center gap-4">
@@ -80,25 +125,24 @@
                                                 <img src="{{ asset($setting->value) }}"
                                                      alt="{{ $key }}"
                                                      class="w-full h-full object-cover"
-                                                     onerror="this.parentElement.innerHTML='<div class=\'flex items-center justify-center w-full h-full text-gray-400 text-xs\'>{{ __("Sin imagen") }}</div>'">
+                                                     onerror="this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center w-full h-full text-gray-400 text-xs&quot;>{{ __("Sin imagen") }}</div>'">
                                             </div>
                                             <span class="text-sm text-theme-muted">{{ $setting->value }}</span>
                                         </div>
                                     @endif
                                     <input type="file"
-                                           name="settings_{{ $key }}"
-                                           id="settings_{{ $key }}"
+                                           name="settings_es_{{ $key }}"
                                            accept="image/*"
                                            class="block w-full text-sm text-theme-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 dark:hover:file:bg-blue-900/50">
                                     <p class="text-xs text-theme-muted">{{ __('Deja vacio para mantener la imagen actual. Max 2MB.') }}</p>
                                 </div>
 
                             @elseif($setting->type === 'color')
+                                {{-- SHARED: color --}}
                                 <div class="flex items-center gap-3">
                                     <input type="color"
-                                           name="settings_{{ $key }}"
-                                           id="settings_{{ $key }}"
-                                           value="{{ old('settings_' . $key, $setting->value) }}"
+                                           name="settings_es_{{ $key }}"
+                                           value="{{ old('settings_es_' . $key, $setting->value) }}"
                                            class="h-10 w-20 rounded border border-theme cursor-pointer">
                                     <input type="text"
                                            value="{{ $setting->value }}"

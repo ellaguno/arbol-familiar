@@ -5,6 +5,22 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.7] - 2026-02-28
+
+### Agregado
+- **Soporte multiidioma en contenido editable**: Columna `language` en `site_settings` permite almacenar versiones ES/EN de textos
+- Tabs Español/English en panel admin `/admin/content` para editar contenido en ambos idiomas
+- Campos traducibles (text, textarea, html) se duplican por idioma; imagenes, booleans y colores se comparten
+- Fallback automatico: si no hay version en ingles, el usuario ve la version en español
+- Cache independiente por idioma con invalidacion cruzada al guardar
+- Registros en ingles en SiteSettingsSeeder para welcome, welcome_first, login, mail y footer
+- ~90 traducciones de la pagina de ayuda agregadas a `lang/en.json`
+
+### Actualizado
+- Version a 2.6.7 en `config/mi-familia.php` y `composer.json`
+
+---
+
 ## [2.6.6] - 2026-02-28
 
 ### Agregado

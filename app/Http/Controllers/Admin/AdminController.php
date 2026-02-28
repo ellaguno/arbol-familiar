@@ -816,7 +816,8 @@ class AdminController extends Controller
             abort(404);
         }
 
-        $settings = SiteSetting::where('group', $group)->get()->keyBy('key');
+        $settingsEs = SiteSetting::where('group', $group)->where('language', 'es')->get()->keyBy('key');
+        $settingsEn = SiteSetting::where('group', $group)->where('language', 'en')->get()->keyBy('key');
 
         $groupNames = [
             'welcome' => __('Pagina de bienvenida'),
@@ -829,7 +830,10 @@ class AdminController extends Controller
         return view('admin.content.edit', [
             'group' => $group,
             'groupName' => $groupNames[$group] ?? $group,
-            'settings' => $settings,
+            'settings' => $settingsEs,
+            'settingsEs' => $settingsEs,
+            'settingsEn' => $settingsEn,
+            'languages' => config('mi-familia.languages'),
         ]);
     }
 
@@ -843,21 +847,35 @@ class AdminController extends Controller
             abort(404);
         }
 
-        $settings = SiteSetting::where('group', $group)->get();
+        // Types that are shared (not translatable)
+        $sharedTypes = ['boolean', 'image', 'color', 'json'];
+
+        $settings = SiteSetting::where('group', $group)->where('language', 'es')->get();
 
         foreach ($settings as $setting) {
-            $fieldName = "settings_{$setting->key}";
+            if (in_array($setting->type, $sharedTypes)) {
+                // Shared fields: single input, save to ES only (EN inherits via fallback)
+                $fieldName = "settings_es_{$setting->key}";
 
-            if ($setting->type === 'image') {
-                // Handle file upload
-                if ($request->hasFile($fieldName)) {
-                    $file = $request->file($fieldName);
-                    $path = $file->store('content', 'public');
-                    SiteSetting::set($group, $setting->key, 'storage/' . $path, 'image');
+                if ($setting->type === 'image') {
+                    if ($request->hasFile($fieldName)) {
+                        $file = $request->file($fieldName);
+                        $path = $file->store('content', 'public');
+                        SiteSetting::set($group, $setting->key, 'storage/' . $path, 'image', 'es');
+                    }
+                } else {
+                    if ($request->has($fieldName)) {
+                        SiteSetting::set($group, $setting->key, $request->input($fieldName), $setting->type, 'es');
+                    }
                 }
             } else {
-                if ($request->has($fieldName)) {
-                    SiteSetting::set($group, $setting->key, $request->input($fieldName), $setting->type);
+                // Translatable fields: save both languages
+                foreach (['es', 'en'] as $lang) {
+                    $fieldName = "settings_{$lang}_{$setting->key}";
+
+                    if ($request->has($fieldName)) {
+                        SiteSetting::set($group, $setting->key, $request->input($fieldName), $setting->type, $lang);
+                    }
                 }
             }
         }
