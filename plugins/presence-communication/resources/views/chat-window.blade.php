@@ -8,7 +8,16 @@
             {{-- Lista de conversaciones --}}
             <div class="card">
                 <div class="card-body">
-                    <h2 class="text-lg font-semibold text-theme mb-4">{{ __('Conversaciones') }}</h2>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-theme">{{ __('Conversaciones') }}</h2>
+                        <button @click="showCreateGroup = true"
+                                class="p-1.5 rounded-full hover:bg-theme-secondary/20 text-theme-secondary hover:text-mf-primary transition-colors"
+                                title="{{ __('Crear grupo') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </button>
+                    </div>
 
                     {{-- Familia en linea --}}
                     <div class="mb-4" x-show="familyUsers.length > 0">
@@ -97,7 +106,7 @@
                         </div>
                     </div>
 
-                    {{-- Conversaciones recientes --}}
+                    {{-- Conversaciones recientes (directas + grupos mezclados) --}}
                     <h3 class="text-sm font-medium text-theme-secondary mb-2">{{ __('Recientes') }}</h3>
                     <div x-show="loadingConversations" class="text-center py-4">
                         <svg class="animate-spin h-5 w-5 mx-auto text-theme-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -106,16 +115,33 @@
                         </svg>
                     </div>
                     <div class="space-y-1">
-                        <template x-for="conv in conversations" :key="'conv-' + conv.user_id">
-                            <button @click="selectUser(conv.user_id, conv.name, conv.photo)"
+                        <template x-for="conv in allConversations" :key="(conv.type || 'direct') + '-' + (conv.group_id || conv.user_id)">
+                            <button @click="conv.type === 'group' ? selectGroup(conv.group_id, conv.name, conv.participants) : selectUser(conv.user_id, conv.name, conv.photo)"
                                     class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-theme-secondary/20 transition-colors text-left"
-                                    :class="{ 'bg-mf-primary/10': selectedUserId === conv.user_id }">
-                                <template x-if="conv.photo">
-                                    <img :src="conv.photo" class="w-8 h-8 rounded-full object-cover">
+                                    :class="{
+                                        'bg-mf-primary/10': conv.type === 'group'
+                                            ? (chatMode === 'group' && selectedGroupId === conv.group_id)
+                                            : (chatMode === 'direct' && selectedUserId === conv.user_id)
+                                    }">
+                                {{-- Avatar de grupo --}}
+                                <template x-if="conv.type === 'group'">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                    </div>
                                 </template>
-                                <template x-if="!conv.photo">
-                                    <div class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm font-bold"
-                                         x-text="conv.name.charAt(0).toUpperCase()">
+                                {{-- Avatar individual --}}
+                                <template x-if="conv.type !== 'group'">
+                                    <div>
+                                        <template x-if="conv.photo">
+                                            <img :src="conv.photo" class="w-8 h-8 rounded-full object-cover">
+                                        </template>
+                                        <template x-if="!conv.photo">
+                                            <div class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm font-bold"
+                                                 x-text="conv.name.charAt(0).toUpperCase()">
+                                            </div>
+                                        </template>
                                     </div>
                                 </template>
                                 <div class="flex-1 min-w-0">
@@ -126,7 +152,12 @@
                                               x-text="conv.unread_count"></span>
                                     </div>
                                     <p class="text-xs text-theme-secondary truncate" x-show="conv.last_message"
-                                       x-text="conv.last_message ? (conv.last_message.is_mine ? '{{ __('Tu') }}: ' : '') + conv.last_message.message : ''">
+                                       x-text="conv.last_message
+                                           ? (conv.type === 'group'
+                                               ? (conv.last_message.is_mine ? '{{ __('Tu') }}: ' : conv.last_message.sender_name.split(' ')[0] + ': ')
+                                               : (conv.last_message.is_mine ? '{{ __('Tu') }}: ' : ''))
+                                             + (conv.last_message ? conv.last_message.message : '')
+                                           : ''">
                                     </p>
                                 </div>
                             </button>
@@ -137,7 +168,7 @@
 
             {{-- Area de mensajes --}}
             <div class="lg:col-span-2 card relative"
-                 @dragenter.prevent="if(selectedUserId){dragCounter++;isDraggingFile=true}"
+                 @dragenter.prevent="if(selectedUserId||selectedGroupId){dragCounter++;isDraggingFile=true}"
                  @dragleave.prevent="dragCounter--;if(dragCounter<=0){isDraggingFile=false;dragCounter=0}"
                  @dragover.prevent
                  @drop.prevent="handleFileDrop($event)">
@@ -152,8 +183,8 @@
                     </div>
                 </div>
                 <div class="card-body flex flex-col" style="min-height: 500px;">
-                    {{-- Header del chat --}}
-                    <div x-show="selectedUserId" class="flex items-center justify-between pb-4 border-b border-theme">
+                    {{-- Header del chat: modo directo --}}
+                    <div x-show="chatMode === 'direct' && selectedUserId" class="flex items-center justify-between pb-4 border-b border-theme">
                         <div class="flex items-center gap-3">
                             <template x-if="selectedUserPhoto">
                                 <img :src="selectedUserPhoto" class="w-10 h-10 rounded-full object-cover">
@@ -189,8 +220,57 @@
                         </div>
                     </div>
 
+                    {{-- Header del chat: modo grupo --}}
+                    <div x-show="chatMode === 'group' && selectedGroupId" class="flex items-center justify-between pb-4 border-b border-theme">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-theme" x-text="selectedUserName"></h3>
+                                <span class="text-xs text-theme-secondary" x-text="groupParticipants.length + ' {{ __('participantes') }}'"></span>
+                            </div>
+                        </div>
+                        <button @click="showGroupInfo = !showGroupInfo"
+                                class="p-2 rounded-full hover:bg-theme-secondary/20 transition-colors"
+                                :class="showGroupInfo ? 'text-mf-primary' : 'text-theme-secondary'"
+                                title="{{ __('Info del grupo') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Panel info de grupo --}}
+                    <div x-show="showGroupInfo && chatMode === 'group'" x-cloak
+                         class="border-b border-theme py-3 space-y-3">
+                        <div class="space-y-1 max-h-40 overflow-y-auto">
+                            <template x-for="p in groupParticipants" :key="'gp-' + p.id">
+                                <div class="flex items-center gap-2 px-2 py-1">
+                                    <template x-if="p.photo">
+                                        <img :src="p.photo" class="w-6 h-6 rounded-full object-cover">
+                                    </template>
+                                    <template x-if="!p.photo">
+                                        <div class="w-6 h-6 rounded-full bg-gray-400 text-white flex items-center justify-center text-xs font-bold"
+                                             x-text="p.name.charAt(0).toUpperCase()"></div>
+                                    </template>
+                                    <span class="text-sm text-theme" x-text="p.name"></span>
+                                    <span x-show="p.role === 'admin'" class="text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-full">Admin</span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="flex items-center gap-2 px-2">
+                            <button @click="leaveCurrentGroup()"
+                                    class="text-xs text-red-500 hover:text-red-700 transition-colors">
+                                {{ __('Salir del grupo') }}
+                            </button>
+                        </div>
+                    </div>
+
                     {{-- Seleccionar conversacion --}}
-                    <div x-show="!selectedUserId" class="flex-1 flex items-center justify-center">
+                    <div x-show="!selectedUserId && !selectedGroupId" class="flex-1 flex items-center justify-center">
                         <div class="text-center text-theme-secondary">
                             <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -200,7 +280,7 @@
                     </div>
 
                     {{-- Banner: solicitud de chat necesaria --}}
-                    <div x-show="selectedUserId && chatAuthStatus === 'none'" x-cloak
+                    <div x-show="chatMode === 'direct' && selectedUserId && chatAuthStatus === 'none'" x-cloak
                          class="mx-1 mt-3 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                         <div class="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +291,7 @@
                     </div>
 
                     {{-- Banner: solicitud pendiente --}}
-                    <div x-show="selectedUserId && chatAuthStatus === 'pending'" x-cloak
+                    <div x-show="chatMode === 'direct' && selectedUserId && chatAuthStatus === 'pending'" x-cloak
                          class="mx-1 mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                         <div class="flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-200">
                             <svg class="w-5 h-5 flex-shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,7 +302,7 @@
                     </div>
 
                     {{-- Mensajes --}}
-                    <div x-show="selectedUserId" x-ref="messagesContainer"
+                    <div x-show="selectedUserId || selectedGroupId" x-ref="messagesContainer"
                          class="chat-scrollbar flex-1 overflow-y-auto py-4 pr-1 space-y-3"
                          style="max-height: calc(100vh - 380px); min-height: 200px; scrollbar-width: thin; scrollbar-color: rgba(156,163,175,0.4) transparent;">
                         <div x-show="loadingMessages" class="text-center py-4">
@@ -238,6 +318,12 @@
                                      :class="msg.is_mine
                                          ? 'bg-mf-primary text-white rounded-br-none'
                                          : 'bg-theme-secondary/20 text-theme rounded-bl-none'">
+                                    {{-- Nombre del sender en grupo --}}
+                                    <template x-if="chatMode === 'group' && !msg.is_mine">
+                                        <p class="text-xs font-semibold mb-1"
+                                           :class="msg.is_mine ? 'text-white/80' : 'text-purple-600 dark:text-purple-400'"
+                                           x-text="msg.sender_name ? msg.sender_name.split(' ')[0] : ''"></p>
+                                    </template>
                                     {{-- Imagen adjunta --}}
                                     <template x-if="msg.attachment_url">
                                         <div class="mb-1">
@@ -267,12 +353,12 @@
 
                     {{-- Input de mensaje --}}
                     {{-- Formulario: estado pendiente --}}
-                    <div x-show="selectedUserId && chatAuthStatus === 'pending'" x-cloak class="pt-4 border-t border-theme text-center py-3">
+                    <div x-show="chatMode === 'direct' && selectedUserId && chatAuthStatus === 'pending'" x-cloak class="pt-4 border-t border-theme text-center py-3">
                         <p class="text-sm text-theme-secondary">{{ __('Esperando respuesta a tu solicitud de chat...') }}</p>
                     </div>
 
                     {{-- Formulario: estado normal o solicitud --}}
-                    <div x-show="selectedUserId && chatAuthStatus !== 'pending'" class="pt-4 border-t border-theme">
+                    <div x-show="(selectedUserId || selectedGroupId) && chatAuthStatus !== 'pending'" class="pt-4 border-t border-theme">
                         {{-- Preview de adjunto --}}
                         <div x-show="attachmentPreviewUrl" x-cloak class="pb-2 flex items-center gap-3">
                             <div class="relative">
@@ -435,6 +521,104 @@
                              :style="'transform: scale(' + lightboxZoom + ') translate(' + lightboxPanX + 'px, ' + lightboxPanY + 'px)'"
                              @click.stop="if (lightboxZoom === 1) { lightboxZoomIn(); } else if (!lightboxPanning) { lightboxZoomReset(); }"
                              @dblclick.stop="lightboxZoom === 1 ? lightboxZoomTo(3) : lightboxZoomReset()">
+                    </div>
+                </div>
+            </template>
+
+            {{-- Modal: Crear grupo --}}
+            <template x-teleport="body">
+                <div x-show="showCreateGroup" x-cloak
+                     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                     @click.self="showCreateGroup = false">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl max-h-[85vh] flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-theme">{{ __('Crear grupo') }}</h3>
+                            <button @click="showCreateGroup = false" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {{-- Nombre del grupo --}}
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-theme-secondary mb-1">{{ __('Nombre del grupo') }}</label>
+                            <input type="text" x-model="newGroupName" maxlength="100"
+                                   class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-theme text-sm focus:ring-mf-primary focus:border-mf-primary"
+                                   placeholder="{{ __('Ej: Familia Llaguno') }}">
+                        </div>
+
+                        {{-- Lista de usuarios seleccionables --}}
+                        <div class="mb-4 flex-1 overflow-hidden">
+                            <label class="block text-sm font-medium text-theme-secondary mb-1">{{ __('Participantes') }}</label>
+                            <div class="space-y-1 max-h-60 overflow-y-auto chat-scrollbar">
+                                {{-- Familia --}}
+                                <template x-for="user in familyUsers" :key="'cg-fam-' + user.id">
+                                    <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-secondary/10 cursor-pointer">
+                                        <input type="checkbox" :value="user.id"
+                                               x-model.number="newGroupParticipants"
+                                               class="rounded border-gray-300 text-mf-primary focus:ring-mf-primary">
+                                        <template x-if="user.photo">
+                                            <img :src="user.photo" class="w-6 h-6 rounded-full object-cover">
+                                        </template>
+                                        <template x-if="!user.photo">
+                                            <div class="w-6 h-6 rounded-full bg-mf-primary text-white flex items-center justify-center text-xs font-bold"
+                                                 x-text="user.name.charAt(0).toUpperCase()"></div>
+                                        </template>
+                                        <span class="text-sm text-theme" x-text="user.name"></span>
+                                        <span class="text-[10px] text-green-600 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded-full">{{ __('Familia') }}</span>
+                                    </label>
+                                </template>
+                                {{-- Comunidad --}}
+                                <template x-for="user in communityUsers" :key="'cg-com-' + user.id">
+                                    <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-secondary/10 cursor-pointer">
+                                        <input type="checkbox" :value="user.id"
+                                               x-model.number="newGroupParticipants"
+                                               class="rounded border-gray-300 text-mf-primary focus:ring-mf-primary">
+                                        <template x-if="user.photo">
+                                            <img :src="user.photo" class="w-6 h-6 rounded-full object-cover">
+                                        </template>
+                                        <template x-if="!user.photo">
+                                            <div class="w-6 h-6 rounded-full bg-gray-400 text-white flex items-center justify-center text-xs font-bold"
+                                                 x-text="user.name.charAt(0).toUpperCase()"></div>
+                                        </template>
+                                        <span class="text-sm text-theme" x-text="user.name"></span>
+                                    </label>
+                                </template>
+                                {{-- Publico --}}
+                                <template x-for="user in publicUsers" :key="'cg-pub-' + user.id">
+                                    <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-theme-secondary/10 cursor-pointer">
+                                        <input type="checkbox" :value="user.id"
+                                               x-model.number="newGroupParticipants"
+                                               class="rounded border-gray-300 text-mf-primary focus:ring-mf-primary">
+                                        <template x-if="user.photo">
+                                            <img :src="user.photo" class="w-6 h-6 rounded-full object-cover">
+                                        </template>
+                                        <template x-if="!user.photo">
+                                            <div class="w-6 h-6 rounded-full bg-blue-400 text-white flex items-center justify-center text-xs font-bold"
+                                                 x-text="user.name.charAt(0).toUpperCase()"></div>
+                                        </template>
+                                        <span class="text-sm text-theme" x-text="user.name"></span>
+                                    </label>
+                                </template>
+                                <p x-show="familyUsers.length === 0 && communityUsers.length === 0 && publicUsers.length === 0"
+                                   class="text-sm text-theme-secondary text-center py-4">
+                                    {{ __('No hay usuarios en linea') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Seleccionados count + boton crear --}}
+                        <div class="flex items-center justify-between pt-3 border-t border-theme">
+                            <span class="text-xs text-theme-secondary"
+                                  x-text="newGroupParticipants.length + ' {{ __('seleccionados') }}'"></span>
+                            <button @click="submitCreateGroup()"
+                                    :disabled="creatingGroup || !newGroupName.trim() || newGroupParticipants.length === 0"
+                                    class="px-4 py-2 bg-mf-primary text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span x-show="!creatingGroup">{{ __('Crear grupo') }}</span>
+                                <span x-show="creatingGroup">{{ __('Creando...') }}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -627,6 +811,17 @@
                         </div>
                     </div>
 
+                    {{-- Warning: mas de 4 participantes --}}
+                    <div x-show="Object.keys(peers).length + 1 > 4" x-cloak
+                         class="mx-4 mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <div class="flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-200">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                            <span>{{ __('Mas de 4 participantes pueden afectar la calidad de la llamada.') }}</span>
+                        </div>
+                    </div>
+
                     {{-- Controles de llamada --}}
                     <div class="bg-gray-800/90 px-6 py-4">
                         {{-- Participantes y timer --}}
@@ -659,8 +854,7 @@
                                 </svg>
                             </button>
                             {{-- Agregar participante --}}
-                            <button x-show="Object.keys(peers).length < 3"
-                                    @click="showAddParticipant = !showAddParticipant"
+                            <button @click="showAddParticipant = !showAddParticipant"
                                     class="w-12 h-12 rounded-full flex items-center justify-center transition-colors"
                                     :class="showAddParticipant ? 'bg-purple-500 text-white' : 'bg-gray-600 text-white hover:bg-gray-500'"
                                     title="{{ __('Agregar participante') }}">
@@ -759,6 +953,17 @@
             chatAuthStatus: 'family',
             authChecking: false,
             isCurrentUserAdmin: {{ Auth::user()->isAdmin() ? 'true' : 'false' }},
+
+            // Chat grupal
+            chatMode: 'direct', // 'direct' | 'group'
+            selectedGroupId: null,
+            groupParticipants: [],
+            allConversations: [],
+            showCreateGroup: false,
+            showGroupInfo: false,
+            newGroupName: '',
+            newGroupParticipants: [],
+            creatingGroup: false,
 
             // Emoji picker
             showEmojiPicker: false,
@@ -921,6 +1126,12 @@
                     if (!response.ok) return;
                     const data = await response.json();
                     this.conversations = data.conversations || [];
+                    const groups = data.groups || [];
+
+                    // Merge directas + grupos, ordenados por ultimo mensaje
+                    const direct = this.conversations.map(c => ({...c, type: 'direct', _sort: c.last_message?.created_at || ''}));
+                    const grp = groups.map(g => ({...g, type: 'group', _sort: g.last_message?.created_at || ''}));
+                    this.allConversations = [...direct, ...grp].sort((a, b) => b._sort.localeCompare(a._sort));
                 } catch (e) {
                     console.error('Error fetching conversations:', e);
                 } finally {
@@ -929,6 +1140,9 @@
             },
 
             async selectUser(userId, userName, photo) {
+                this.chatMode = 'direct';
+                this.selectedGroupId = null;
+                this.showGroupInfo = false;
                 this.selectedUserId = userId;
                 this.selectedUserName = userName;
                 this.selectedUserPhoto = photo || null;
@@ -961,6 +1175,111 @@
 
                 // Poll para nuevos mensajes cada 5s
                 this.messagePollInterval = setInterval(() => this.fetchMessages(), 5000);
+            },
+
+            async selectGroup(groupId, groupName, participants) {
+                this.chatMode = 'group';
+                this.selectedUserId = null;
+                this.selectedGroupId = groupId;
+                this.selectedUserName = groupName;
+                this.selectedUserPhoto = null;
+                this.groupParticipants = participants || [];
+                this.messages = [];
+                this.loadingMessages = true;
+                this.chatAuthStatus = 'family';
+                this.showGroupInfo = false;
+
+                if (this.messagePollInterval) {
+                    clearInterval(this.messagePollInterval);
+                }
+
+                await this.fetchGroupMessages();
+                this.messagePollInterval = setInterval(() => this.fetchGroupMessages(), 5000);
+            },
+
+            async fetchGroupMessages() {
+                if (!this.selectedGroupId) return;
+                try {
+                    const response = await fetch(`/chat/group/${this.selectedGroupId}/messages`);
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    const oldCount = this.messages.length;
+                    const oldLastId = oldCount > 0 ? this.messages[oldCount - 1].id : 0;
+                    this.messages = data.messages || [];
+
+                    if (!this.loadingMessages && this.messages.length > oldCount) {
+                        const hasNewIncoming = this.messages.some(m => m.id > oldLastId && !m.is_mine);
+                        if (hasNewIncoming && typeof window.ChatNotificationSound !== 'undefined') {
+                            window.ChatNotificationSound.play();
+                        }
+                    }
+
+                    this.loadingMessages = false;
+                    this.$nextTick(() => {
+                        const container = this.$refs.messagesContainer;
+                        if (container) container.scrollTop = container.scrollHeight;
+                    });
+                } catch (e) {
+                    this.loadingMessages = false;
+                }
+            },
+
+            async submitCreateGroup() {
+                if (!this.newGroupName.trim() || this.newGroupParticipants.length === 0 || this.creatingGroup) return;
+                this.creatingGroup = true;
+                try {
+                    const response = await fetch('/chat/group/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            name: this.newGroupName.trim(),
+                            participant_ids: this.newGroupParticipants,
+                        }),
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.group) {
+                        this.showCreateGroup = false;
+                        this.newGroupName = '';
+                        this.newGroupParticipants = [];
+                        await this.fetchConversations();
+                        this.selectGroup(data.group.id, data.group.name, []);
+                    } else {
+                        alert(data.error || '{{ __("Error al crear el grupo") }}');
+                    }
+                } catch (e) {
+                    alert('{{ __("Error al crear el grupo") }}');
+                } finally {
+                    this.creatingGroup = false;
+                }
+            },
+
+            async leaveCurrentGroup() {
+                if (!this.selectedGroupId) return;
+                if (!confirm('{{ __("¿Seguro que deseas salir del grupo?") }}')) return;
+                try {
+                    const response = await fetch(`/chat/group/${this.selectedGroupId}/leave`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                    });
+                    if (response.ok) {
+                        this.selectedGroupId = null;
+                        this.chatMode = 'direct';
+                        this.selectedUserName = '';
+                        this.messages = [];
+                        this.showGroupInfo = false;
+                        if (this.messagePollInterval) clearInterval(this.messagePollInterval);
+                        await this.fetchConversations();
+                    }
+                } catch (e) {
+                    console.error('Error leaving group:', e);
+                }
             },
 
             async fetchMessages() {
@@ -997,7 +1316,6 @@
                 this.sending = true;
                 try {
                     const formData = new FormData();
-                    formData.append('recipient_id', this.selectedUserId);
                     if (this.newMessage.trim()) {
                         formData.append('message', this.newMessage.trim());
                     }
@@ -1005,7 +1323,15 @@
                         formData.append('attachment', this.attachmentFile);
                     }
 
-                    const response = await fetch('{{ route("chat.send") }}', {
+                    let url;
+                    if (this.chatMode === 'group' && this.selectedGroupId) {
+                        url = `/chat/group/${this.selectedGroupId}/send`;
+                    } else {
+                        formData.append('recipient_id', this.selectedUserId);
+                        url = '{{ route("chat.send") }}';
+                    }
+
+                    const response = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -1851,6 +2177,14 @@
              */
             async addParticipantToCall(userId) {
                 if (!this.roomId) return;
+
+                // Advertencia si ya hay 4+ participantes
+                const currentCount = Object.keys(this.peers).length + 1;
+                if (currentCount >= 4) {
+                    if (!confirm('{{ __("Agregar mas de 4 participantes puede afectar la calidad. ¿Continuar?") }}')) {
+                        return;
+                    }
+                }
 
                 try {
                     const res = await fetch('{{ route("call.room.add") }}', {

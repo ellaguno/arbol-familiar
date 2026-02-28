@@ -5,6 +5,31 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.6] - 2026-02-28
+
+### Agregado
+- **Chat grupal**: Crear grupos de chat con multiples participantes, enviar mensajes visibles para todos los miembros
+- Tablas `chat_groups`, `chat_group_participants`, `chat_group_read_status` para gestion de grupos
+- Columna `chat_group_id` en `chat_messages` para mensajes grupales (recipient_id nullable)
+- Modelos `ChatGroup`, `ChatGroupParticipant`, `ChatGroupReadStatus` siguiendo patron de WebrtcRoom
+- 7 endpoints nuevos: crear grupo, mensajes de grupo, enviar a grupo, marcar leido, agregar participante, salir, info
+- Modal de creacion de grupo con seleccion de participantes (verificacion de autorizacion por participante)
+- Grupos mezclados con conversaciones directas en sidebar "Recientes", ordenados por ultimo mensaje
+- Header de grupo con icono morado, conteo de participantes y panel de info
+- Nombre del sender visible en mensajes grupales no-propios
+- Roles admin/member: solo admins pueden agregar participantes, promocion automatica al salir
+- Read tracking grupal via watermark (`last_read_message_id`) por eficiencia
+- **Advertencia en llamadas >4 participantes**: Banner amarillo y confirm al agregar 5to participante
+- Boton "Agregar participante" siempre visible en llamadas (antes se ocultaba con 3+ peers)
+
+### Corregido
+- Guards `!response.ok` en `menu-indicator.blade.php` para prevenir errores 429 (mismo patron del fix anterior)
+
+### Actualizado
+- Version a 2.6.6 en `config/mi-familia.php` y `composer.json`
+
+---
+
 ## [2.6.5] - 2026-02-27
 
 ### Agregado

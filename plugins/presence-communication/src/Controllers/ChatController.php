@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Plugin\PresenceCommunication\Events\ChatMessageSent;
 use Plugin\PresenceCommunication\Models\ChatAuthorization;
+use Plugin\PresenceCommunication\Models\ChatGroup;
+use Plugin\PresenceCommunication\Models\ChatGroupReadStatus;
 use Plugin\PresenceCommunication\Models\ChatMessage;
 use Plugin\PresenceCommunication\Traits\ChecksFamilyRelation;
 
@@ -34,9 +36,11 @@ class ChatController extends Controller
     {
         $userId = Auth::id();
 
-        // Obtener los usuarios con los que se ha conversado
-        $conversations = ChatMessage::where('sender_id', $userId)
-            ->orWhere('recipient_id', $userId)
+        // Obtener los usuarios con los que se ha conversado (solo 1-a-1)
+        $conversations = ChatMessage::whereNull('chat_group_id')
+            ->where(function ($q) use ($userId) {
+                $q->where('sender_id', $userId)->orWhere('recipient_id', $userId);
+            })
             ->orderByDesc('created_at')
             ->get()
             ->map(function ($msg) use ($userId) {
@@ -82,7 +86,55 @@ class ChatController extends Controller
             ];
         }
 
-        return response()->json(['conversations' => $result]);
+        // Obtener grupos activos del usuario
+        $groups = ChatGroup::active()
+            ->whereHas('participantRecords', function ($q) use ($userId) {
+                $q->where('user_id', $userId)->whereNull('left_at');
+            })
+            ->with(['participantRecords' => function ($q) {
+                $q->active()->with('user.person');
+            }])
+            ->get()
+            ->map(function ($group) use ($userId) {
+                $lastMessage = ChatMessage::forGroup($group->id)
+                    ->orderByDesc('created_at')
+                    ->with('sender.person')
+                    ->first();
+
+                $participants = $group->participantRecords
+                    ->map(function ($p) {
+                        $person = $p->user->person ?? null;
+                        return [
+                            'id' => $p->user_id,
+                            'name' => $person ? $person->full_name : (__('Usuario') . ' #' . $p->user_id),
+                            'photo' => ($person && $person->photo_path) ? Storage::url($person->photo_path) : null,
+                        ];
+                    });
+
+                $senderPerson = $lastMessage?->sender?->person;
+
+                return [
+                    'type' => 'group',
+                    'group_id' => $group->id,
+                    'name' => $group->name,
+                    'participants' => $participants,
+                    'participant_count' => $participants->count(),
+                    'last_message' => $lastMessage ? [
+                        'sender_name' => $senderPerson ? $senderPerson->full_name : __('Usuario'),
+                        'message' => $lastMessage->message
+                            ? Str::limit($lastMessage->message, 50)
+                            : ($lastMessage->hasAttachment() ? __('[Imagen]') : ''),
+                        'created_at' => $lastMessage->created_at->toISOString(),
+                        'is_mine' => $lastMessage->sender_id === $userId,
+                    ] : null,
+                    'unread_count' => $group->getUnreadCountFor($userId),
+                ];
+            });
+
+        return response()->json([
+            'conversations' => $result,
+            'groups' => $groups,
+        ]);
     }
 
     /**
@@ -361,15 +413,29 @@ class ChatController extends Controller
     }
 
     /**
-     * Obtener conteo de mensajes no leidos.
+     * Obtener conteo de mensajes no leidos (directos + grupales).
      */
     public function unreadCount(): JsonResponse
     {
-        $count = ChatMessage::where('recipient_id', Auth::id())
+        $userId = Auth::id();
+
+        // Directos
+        $directCount = ChatMessage::where('recipient_id', $userId)
             ->unread()
             ->count();
 
-        return response()->json(['count' => $count]);
+        // Grupales
+        $groupCount = 0;
+        $groups = ChatGroup::active()
+            ->whereHas('participantRecords', function ($q) use ($userId) {
+                $q->where('user_id', $userId)->whereNull('left_at');
+            })->get();
+
+        foreach ($groups as $group) {
+            $groupCount += $group->getUnreadCountFor($userId);
+        }
+
+        return response()->json(['count' => $directCount + $groupCount]);
     }
 
     /**
@@ -404,5 +470,337 @@ class ChatController extends Controller
             });
 
         return response()->json(['messages' => $messages]);
+    }
+
+    // =====================================================================
+    // CHAT GRUPAL
+    // =====================================================================
+
+    /**
+     * Crear un grupo de chat.
+     */
+    public function createGroup(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'participant_ids' => 'required|array|min:1',
+            'participant_ids.*' => 'integer|exists:users,id',
+        ]);
+
+        $currentUser = Auth::user();
+        $participantIds = collect($request->input('participant_ids'))
+            ->reject(fn ($id) => $id == $currentUser->id)
+            ->unique()
+            ->values();
+
+        if ($participantIds->isEmpty()) {
+            return response()->json(['error' => __('Debes agregar al menos un participante.')], 422);
+        }
+
+        // Verificar autorizacion con cada participante
+        foreach ($participantIds as $pid) {
+            if (!$this->canChatWith($currentUser, (int) $pid)) {
+                $user = User::with('person')->find($pid);
+                $name = $user?->person?->full_name ?? (__('Usuario') . ' #' . $pid);
+                return response()->json([
+                    'error' => __('No tienes autorizacion para chatear con :name.', ['name' => $name]),
+                ], 403);
+            }
+        }
+
+        $group = ChatGroup::create([
+            'name' => $request->input('name'),
+            'created_by' => $currentUser->id,
+        ]);
+
+        // Creador es admin
+        $group->addParticipant($currentUser->id, 'admin');
+
+        // Agregar participantes
+        foreach ($participantIds as $pid) {
+            $group->addParticipant((int) $pid);
+        }
+
+        return response()->json([
+            'group' => [
+                'id' => $group->id,
+                'name' => $group->name,
+            ],
+        ]);
+    }
+
+    /**
+     * Obtener mensajes de un grupo.
+     */
+    public function groupMessages(int $groupId): JsonResponse
+    {
+        $currentUserId = Auth::id();
+        $group = ChatGroup::active()->findOrFail($groupId);
+
+        if (!$group->hasParticipant($currentUserId)) {
+            return response()->json(['error' => __('No perteneces a este grupo.')], 403);
+        }
+
+        $messages = ChatMessage::forGroup($groupId)
+            ->with('sender.person')
+            ->orderBy('created_at')
+            ->limit(100)
+            ->get()
+            ->map(function ($msg) use ($currentUserId) {
+                $senderPerson = $msg->sender->person ?? null;
+                $senderPhoto = ($senderPerson && $senderPerson->photo_path)
+                    ? Storage::url($senderPerson->photo_path)
+                    : null;
+
+                return [
+                    'id' => $msg->id,
+                    'sender_id' => $msg->sender_id,
+                    'message' => $msg->message,
+                    'attachment_url' => $msg->attachment_url,
+                    'attachment_type' => $msg->attachment_type,
+                    'is_mine' => $msg->sender_id === $currentUserId,
+                    'created_at' => $msg->created_at->toISOString(),
+                    'sender_name' => $senderPerson ? $senderPerson->full_name : (__('Usuario') . ' #' . ($msg->sender->id ?? '')),
+                    'sender_photo' => $senderPhoto,
+                ];
+            });
+
+        // Actualizar watermark de lectura
+        $lastMessage = $messages->last();
+        if ($lastMessage) {
+            ChatGroupReadStatus::updateOrCreate(
+                ['group_id' => $groupId, 'user_id' => $currentUserId],
+                ['last_read_message_id' => $lastMessage['id'], 'last_read_at' => now()]
+            );
+        }
+
+        return response()->json(['messages' => $messages]);
+    }
+
+    /**
+     * Enviar mensaje a un grupo.
+     */
+    public function sendGroupMessage(Request $request, int $groupId): JsonResponse
+    {
+        $request->validate([
+            'message' => 'nullable|string|max:2000',
+            'attachment' => 'nullable|file|image|mimes:jpg,jpeg,png,gif,webp|max:3072',
+        ]);
+
+        if (!$request->filled('message') && !$request->hasFile('attachment')) {
+            return response()->json(['error' => __('Escribe un mensaje o adjunta una imagen.')], 422);
+        }
+
+        $currentUserId = Auth::id();
+        $group = ChatGroup::active()->findOrFail($groupId);
+
+        if (!$group->hasParticipant($currentUserId)) {
+            return response()->json(['error' => __('No perteneces a este grupo.')], 403);
+        }
+
+        $attachmentPath = null;
+        $attachmentType = null;
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $attachmentPath = $file->store('chat-attachments', 'public');
+            $attachmentType = $file->getMimeType();
+        }
+
+        $chatMessage = ChatMessage::create([
+            'sender_id' => $currentUserId,
+            'recipient_id' => null,
+            'chat_group_id' => $groupId,
+            'message' => $request->input('message'),
+            'attachment_path' => $attachmentPath,
+            'attachment_type' => $attachmentType,
+        ]);
+
+        $chatMessage->load('sender.person');
+        $senderPerson = $chatMessage->sender->person ?? null;
+
+        return response()->json([
+            'message' => [
+                'id' => $chatMessage->id,
+                'sender_id' => $chatMessage->sender_id,
+                'chat_group_id' => $groupId,
+                'message' => $chatMessage->message,
+                'attachment_url' => $chatMessage->attachment_url,
+                'attachment_type' => $chatMessage->attachment_type,
+                'is_mine' => true,
+                'created_at' => $chatMessage->created_at->toISOString(),
+                'sender_name' => $senderPerson ? $senderPerson->full_name : (__('Usuario') . ' #' . $chatMessage->sender->id),
+                'sender_photo' => ($senderPerson && $senderPerson->photo_path)
+                    ? Storage::url($senderPerson->photo_path) : null,
+            ],
+        ]);
+    }
+
+    /**
+     * Marcar mensajes de grupo como leidos.
+     */
+    public function markGroupRead(int $groupId): JsonResponse
+    {
+        $currentUserId = Auth::id();
+        $group = ChatGroup::active()->findOrFail($groupId);
+
+        if (!$group->hasParticipant($currentUserId)) {
+            return response()->json(['error' => __('No perteneces a este grupo.')], 403);
+        }
+
+        $lastMessage = ChatMessage::forGroup($groupId)
+            ->orderByDesc('id')
+            ->first();
+
+        if ($lastMessage) {
+            ChatGroupReadStatus::updateOrCreate(
+                ['group_id' => $groupId, 'user_id' => $currentUserId],
+                ['last_read_message_id' => $lastMessage->id, 'last_read_at' => now()]
+            );
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    /**
+     * Agregar participante a un grupo (solo admin).
+     */
+    public function addGroupParticipant(Request $request, int $groupId): JsonResponse
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+
+        $currentUser = Auth::user();
+        $group = ChatGroup::active()->findOrFail($groupId);
+
+        if (!$group->isAdmin($currentUser->id)) {
+            return response()->json(['error' => __('Solo los administradores pueden agregar participantes.')], 403);
+        }
+
+        $newUserId = (int) $request->input('user_id');
+
+        if ($group->hasParticipant($newUserId)) {
+            return response()->json(['error' => __('El usuario ya esta en el grupo.')], 422);
+        }
+
+        if ($group->isFull()) {
+            return response()->json([
+                'error' => __('El grupo esta lleno (maximo :max participantes).', ['max' => $group->max_participants]),
+            ], 422);
+        }
+
+        if (!$this->canChatWith($currentUser, $newUserId)) {
+            return response()->json(['error' => __('No tienes autorizacion para chatear con este usuario.')], 403);
+        }
+
+        $group->addParticipant($newUserId);
+
+        return response()->json([
+            'status' => 'ok',
+            'participants' => $group->getParticipantIds(),
+        ]);
+    }
+
+    /**
+     * Salir de un grupo.
+     */
+    public function leaveGroup(int $groupId): JsonResponse
+    {
+        $currentUserId = Auth::id();
+        $group = ChatGroup::active()->findOrFail($groupId);
+
+        if (!$group->hasParticipant($currentUserId)) {
+            return response()->json(['error' => __('No perteneces a este grupo.')], 403);
+        }
+
+        $wasAdmin = $group->isAdmin($currentUserId);
+        $group->removeParticipant($currentUserId);
+
+        // Si era admin, promover al miembro activo mas antiguo
+        if ($wasAdmin) {
+            $remainingAdmins = $group->participantRecords()
+                ->active()
+                ->where('role', 'admin')
+                ->count();
+
+            if ($remainingAdmins === 0) {
+                $oldest = $group->participantRecords()
+                    ->active()
+                    ->orderBy('joined_at')
+                    ->first();
+
+                if ($oldest) {
+                    $oldest->update(['role' => 'admin']);
+                }
+            }
+        }
+
+        // Si no quedan participantes, archivar el grupo
+        if ($group->activeParticipantCount() === 0) {
+            $group->update(['status' => ChatGroup::STATUS_ARCHIVED]);
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    /**
+     * Obtener informacion de un grupo.
+     */
+    public function groupInfo(int $groupId): JsonResponse
+    {
+        $currentUserId = Auth::id();
+        $group = ChatGroup::active()->findOrFail($groupId);
+
+        if (!$group->hasParticipant($currentUserId)) {
+            return response()->json(['error' => __('No perteneces a este grupo.')], 403);
+        }
+
+        $participants = $group->participantRecords()
+            ->active()
+            ->with('user.person')
+            ->get()
+            ->map(function ($p) {
+                $person = $p->user->person ?? null;
+                return [
+                    'id' => $p->user_id,
+                    'name' => $person ? $person->full_name : (__('Usuario') . ' #' . $p->user_id),
+                    'photo' => ($person && $person->photo_path) ? Storage::url($person->photo_path) : null,
+                    'role' => $p->role,
+                ];
+            });
+
+        return response()->json([
+            'group' => [
+                'id' => $group->id,
+                'name' => $group->name,
+                'created_by' => $group->created_by,
+                'participant_count' => $participants->count(),
+                'max_participants' => $group->max_participants,
+                'is_admin' => $group->isAdmin($currentUserId),
+            ],
+            'participants' => $participants,
+        ]);
+    }
+
+    /**
+     * Verificar si el usuario actual puede chatear con otro.
+     */
+    private function canChatWith(User $currentUser, int $otherUserId): bool
+    {
+        if ($currentUser->isAdmin()) {
+            return true;
+        }
+
+        $otherUser = User::with('person')->find($otherUserId);
+        if (!$otherUser) {
+            return false;
+        }
+
+        if ($this->isFamilyOf($currentUser->person, $otherUser->person)) {
+            return true;
+        }
+
+        return ChatAuthorization::isAuthorized($currentUser->id, $otherUserId);
     }
 }

@@ -223,6 +223,7 @@ function menuPresenceIndicator() {
         async fetchCount() {
             try {
                 const response = await fetch('{{ route("presence.online") }}');
+                if (!response.ok) return;
                 const data = await response.json();
                 this.onlineCount = data.count || 0;
             } catch (e) {}
@@ -231,6 +232,7 @@ function menuPresenceIndicator() {
         async fetchUnread() {
             try {
                 const response = await fetch('{{ route("chat.unread-count") }}');
+                if (!response.ok) return;
                 const data = await response.json();
                 const newCount = data.count || 0;
 
@@ -254,6 +256,7 @@ function menuPresenceIndicator() {
         async fetchPopupMessages() {
             try {
                 const response = await fetch('{{ route("chat.unread-messages") }}');
+                if (!response.ok) return;
                 const data = await response.json();
                 this.popupMessages = data.messages || [];
             } catch (e) {}
@@ -275,6 +278,7 @@ function menuPresenceIndicator() {
         async pollCalls() {
             try {
                 const res = await fetch('{{ route("call.poll") }}');
+                if (!res.ok) return;
                 const data = await res.json();
                 const signals = data.signals || [];
 

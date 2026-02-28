@@ -21,6 +21,15 @@ Route::middleware(['web', 'auth', 'verified'])->group(function () {
     Route::get('/chat/unread-messages', [ChatController::class, 'unreadMessages'])->name('chat.unread-messages')->middleware('throttle:30,1,chat');
     Route::get('/chat/auth-status/{userId}', [ChatController::class, 'checkAuthStatus'])->name('chat.auth-status')->middleware('throttle:30,1,chat');
 
+    // Chat grupal (bucket propio: chat / chat-send)
+    Route::post('/chat/group/create', [ChatController::class, 'createGroup'])->name('chat.group.create')->middleware('throttle:10,1,chat');
+    Route::get('/chat/group/{groupId}/messages', [ChatController::class, 'groupMessages'])->name('chat.group.messages')->middleware('throttle:30,1,chat');
+    Route::post('/chat/group/{groupId}/send', [ChatController::class, 'sendGroupMessage'])->name('chat.group.send')->middleware('throttle:20,1,chat-send');
+    Route::post('/chat/group/{groupId}/mark-read', [ChatController::class, 'markGroupRead'])->name('chat.group.mark-read')->middleware('throttle:30,1,chat');
+    Route::post('/chat/group/{groupId}/add-participant', [ChatController::class, 'addGroupParticipant'])->name('chat.group.add-participant')->middleware('throttle:10,1,chat');
+    Route::post('/chat/group/{groupId}/leave', [ChatController::class, 'leaveGroup'])->name('chat.group.leave')->middleware('throttle:10,1,chat');
+    Route::get('/chat/group/{groupId}/info', [ChatController::class, 'groupInfo'])->name('chat.group.info')->middleware('throttle:30,1,chat');
+
     // WebRTC Calls (bucket propio: webrtc)
     Route::post('/call/initiate', [WebRTCController::class, 'initiateCall'])->name('call.initiate')->middleware('throttle:10,1,webrtc');
     Route::post('/call/respond', [WebRTCController::class, 'respondCall'])->name('call.respond')->middleware('throttle:10,1,webrtc');

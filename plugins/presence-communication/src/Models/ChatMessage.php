@@ -11,6 +11,7 @@ class ChatMessage extends Model
     protected $fillable = [
         'sender_id',
         'recipient_id',
+        'chat_group_id',
         'message',
         'attachment_path',
         'attachment_type',
@@ -29,6 +30,11 @@ class ChatMessage extends Model
     public function recipient()
     {
         return $this->belongsTo(User::class, 'recipient_id');
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(ChatGroup::class, 'chat_group_id');
     }
 
     public function getAttachmentUrlAttribute(): ?string
@@ -63,6 +69,14 @@ class ChatMessage extends Model
     public function scopeUnread($query)
     {
         return $query->whereNull('read_at');
+    }
+
+    /**
+     * Scope: mensajes de un grupo.
+     */
+    public function scopeForGroup($query, int $groupId)
+    {
+        return $query->where('chat_group_id', $groupId);
     }
 
     /**
