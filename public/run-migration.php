@@ -42,9 +42,19 @@ try {
         echo Artisan::output();
     }
 
+    // Ejecutar seeder de SiteSettings (inserta nuevos, no duplica existentes)
+    echo "\n--- SiteSettingsSeeder ---\n";
+    Artisan::call('db:seed', ['--class' => 'SiteSettingsSeeder', '--force' => true]);
+    echo Artisan::output();
+
     // Limpiar vistas compiladas
     echo "\n--- Limpiando vistas compiladas ---\n";
     Artisan::call('view:clear');
+    echo Artisan::output();
+
+    // Limpiar cache
+    echo "\n--- Limpiando cache ---\n";
+    Artisan::call('cache:clear');
     echo Artisan::output();
 
     echo "\n=== Migraciones completadas ===\n";

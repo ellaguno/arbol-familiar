@@ -53,12 +53,15 @@
 
     @php
         $sc = isset($siteSettings) ? $siteSettings : null;
+        $heroShow = $sc ? $sc->content('welcome', 'hero_show', '1') : '1';
+        $loginPosition = $sc ? $sc->content('welcome', 'login_position', 'left') : 'left';
+        $showDescription = $sc ? $sc->content('welcome', 'show_description', '1') : '1';
+        $showRegister = $sc ? $sc->content('welcome', 'show_register', '1') : '1';
+        $showFeatures = $sc ? $sc->content('welcome', 'show_features', '1') : '1';
+        $showFreeSection = $sc ? $sc->content('welcome', 'show_free_section', '1') : '1';
     @endphp
 
     <!-- Hero con imagen -->
-    @php
-        $heroShow = $sc ? $sc->content('welcome', 'hero_show', '1') : '1';
-    @endphp
     @if($heroShow)
         <section class="relative overflow-hidden">
             <!-- Imagen de fondo (usa su altura natural) -->
@@ -76,9 +79,11 @@
     <!-- Contenido principal -->
     <section class="bg-gradient-to-b from-theme to-theme-card py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-12 items-start">
-                <!-- Lado izquierdo - Contenido -->
-                <div>
+            <div class="grid {{ $showDescription ? 'lg:grid-cols-2' : '' }} gap-12 items-start">
+
+                {{-- Descripcion: solo si está activa, con orden segun login_position --}}
+                @if($showDescription)
+                <div style="{{ $loginPosition === 'left' ? 'order: 2;' : 'order: 1;' }}">
                     <!-- Logo -->
                     <div class="mb-6 flex justify-center lg:space-around">
                         <img src="{{ asset($sc ? $sc->content('welcome', 'logo_image', 'images/logo.png') : 'images/logo.png') }}" alt="{{ config('app.name') }}" class="h-24 md:h-32 object-contain"
@@ -101,9 +106,10 @@
                         </p>
                     </div>
                 </div>
+                @endif
 
-                <!-- Lado derecho - Login y Registro -->
-                <div class="space-y-4">
+                {{-- Login y Registro --}}
+                <div class="space-y-4 {{ $showDescription ? '' : 'max-w-md mx-auto' }}" style="{{ $showDescription ? ($loginPosition === 'left' ? 'order: 1;' : 'order: 2;') : '' }}">
                     <!-- Caja de Login -->
                     <div class="bg-theme-card rounded-lg shadow-lg p-6">
                         <h3 class="text-lg font-semibold text-theme mb-4">{{ $sc ? $sc->content('welcome', 'login_title', __('¡Hola! Inicia tu sesión')) : __('¡Hola! Inicia tu sesión') }}</h3>
@@ -163,6 +169,7 @@
                     </div>
 
                     <!-- Caja de Registro -->
+                    @if($showRegister)
                     <div class="rounded-lg p-6 text-center" style="background-color: var(--mf-primary, #3b82f6);">
                         <p class="text-white mb-3">{{ $sc ? $sc->content('welcome', 'register_question', __('¿Todavía no estás registrado?')) : __('¿Todavía no estás registrado?') }}</p>
                         <a href="{{ route('register') }}" class="w-full btn-accent">
@@ -172,11 +179,13 @@
                             {{ $sc ? $sc->content('welcome', 'register_tagline', __('Disfruta tu origen y vive la historia. Compártelo con los miembros de tu familia.')) : __('Disfruta tu origen y vive la historia.') }}
                         </p>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
     </section>
 
+    @if($showFeatures)
     <!-- Espaciador para las imagenes que salen (solo desktop) -->
     <div class="hidden md:block h-20 bg-theme-card"></div>
 
@@ -233,8 +242,10 @@
 
     <!-- Espaciador inferior (solo desktop) -->
     <div class="hidden md:block h-20 bg-theme-secondary"></div>
+    @endif
 
     <!-- Seccion: Uso libre -->
+    @if($showFreeSection)
     <section class="py-12 border-b-4 border-theme bg-theme">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-8 items-center">
@@ -256,6 +267,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     <x-footer />
 

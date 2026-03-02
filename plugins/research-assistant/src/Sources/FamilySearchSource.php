@@ -44,7 +44,13 @@ class FamilySearchSource implements GenealogySourceInterface
         // Always include search URLs as fallback/supplement
         $results[] = $this->generateRecordSearchUrl($filters, __('Buscar registros historicos'));
         $results[] = $this->generateTreeSearchUrl($filters, __('Buscar en arboles genealogicos'));
-        $results[] = $this->generateCatalogSearchUrl($query, __('Buscar en catalogo'));
+
+        // For catalog, prefer person name over the research query
+        $catalogQuery = !empty($filters['name']) ? $filters['name'] : $query;
+        if (!empty($filters['birth_place'])) {
+            $catalogQuery .= ' ' . $filters['birth_place'];
+        }
+        $results[] = $this->generateCatalogSearchUrl($catalogQuery, __('Buscar en catalogo'));
 
         return $results;
     }
@@ -364,9 +370,10 @@ class FamilySearchSource implements GenealogySourceInterface
     }
 
     /**
-     * Generate URL for historical records search.
+     * Build common name/date/place params from filters for FamilySearch URLs.
+     * Falls back to 'name' field if given_name/surname are empty.
      */
-    protected function generateRecordSearchUrl(array $filters, string $description): array
+    protected function buildNameParams(array $filters): array
     {
         $params = [];
 
@@ -376,19 +383,46 @@ class FamilySearchSource implements GenealogySourceInterface
         if (!empty($filters['surname'])) {
             $params['q.surname'] = $filters['surname'];
         }
+
+        // Fallback: if no given_name/surname, try to extract from full name
+        if (empty($params) && !empty($filters['name'])) {
+            $nameParts = explode(' ', trim($filters['name']), 2);
+            if (!empty($nameParts[0])) {
+                $params['q.givenName'] = $nameParts[0];
+            }
+            if (!empty($nameParts[1])) {
+                $params['q.surname'] = $nameParts[1];
+            }
+        }
+
+        // Matronymic as mother's surname (useful for Latin American records)
+        if (!empty($filters['matronymic']) && empty($filters['mother_name'])) {
+            $params['q.motherSurname'] = $filters['matronymic'];
+        }
+
+        return $params;
+    }
+
+    /**
+     * Generate URL for historical records search.
+     */
+    protected function generateRecordSearchUrl(array $filters, string $description): array
+    {
+        $params = $this->buildNameParams($filters);
+
         if (!empty($filters['birth_place'])) {
             $params['q.birthLikePlace'] = $filters['birth_place'];
         }
         if (!empty($filters['birth_year'])) {
-            $params['q.birthLikeDate.from'] = $filters['birth_year'] - 5;
-            $params['q.birthLikeDate.to'] = $filters['birth_year'] + 5;
+            $params['q.birthLikeDate.from'] = (int) $filters['birth_year'] - 5;
+            $params['q.birthLikeDate.to'] = (int) $filters['birth_year'] + 5;
         }
         if (!empty($filters['death_place'])) {
             $params['q.deathLikePlace'] = $filters['death_place'];
         }
         if (!empty($filters['death_year'])) {
-            $params['q.deathLikeDate.from'] = $filters['death_year'] - 5;
-            $params['q.deathLikeDate.to'] = $filters['death_year'] + 5;
+            $params['q.deathLikeDate.from'] = (int) $filters['death_year'] - 5;
+            $params['q.deathLikeDate.to'] = (int) $filters['death_year'] + 5;
         }
         if (!empty($filters['father_name'])) {
             $params['q.fatherGivenName'] = $filters['father_name'];
@@ -421,20 +455,14 @@ class FamilySearchSource implements GenealogySourceInterface
      */
     protected function generateTreeSearchUrl(array $filters, string $description): array
     {
-        $params = [];
+        $params = $this->buildNameParams($filters);
 
-        if (!empty($filters['given_name'])) {
-            $params['q.givenName'] = $filters['given_name'];
-        }
-        if (!empty($filters['surname'])) {
-            $params['q.surname'] = $filters['surname'];
-        }
         if (!empty($filters['birth_place'])) {
             $params['q.birthLikePlace'] = $filters['birth_place'];
         }
         if (!empty($filters['birth_year'])) {
-            $params['q.birthLikeDate.from'] = $filters['birth_year'] - 10;
-            $params['q.birthLikeDate.to'] = $filters['birth_year'] + 10;
+            $params['q.birthLikeDate.from'] = (int) $filters['birth_year'] - 10;
+            $params['q.birthLikeDate.to'] = (int) $filters['birth_year'] + 10;
         }
 
         $url = $this->baseUrl . '/tree/find/name';

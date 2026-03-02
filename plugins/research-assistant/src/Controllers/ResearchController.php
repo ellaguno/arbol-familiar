@@ -58,10 +58,26 @@ class ResearchController extends Controller
 
     /**
      * Show search form for a specific person.
+     * If there's already a pending/processing session, redirect to it.
      */
     public function searchPerson(Person $person)
     {
         $this->authorize('view', $person);
+
+        // Redirect to active session if one exists
+        $activeSession = ResearchSession::where('user_id', Auth::id())
+            ->where('person_id', $person->id)
+            ->whereIn('status', [
+                ResearchSession::STATUS_PENDING,
+                ResearchSession::STATUS_SEARCHING,
+                ResearchSession::STATUS_ANALYZING,
+            ])
+            ->first();
+
+        if ($activeSession) {
+            return redirect()->route('research.session', $activeSession)
+                ->with('info', __('Ya hay una investigacion en curso para esta persona.'));
+        }
 
         $aiService = new AIService($this->pluginSettings);
         $defaultProvider = $this->pluginSettings['ai_provider'] ?? 'openrouter';
@@ -112,6 +128,23 @@ class ResearchController extends Controller
             return back()->withErrors([
                 'query' => __('El proveedor de IA no esta configurado. Por favor contacta al administrador.'),
             ])->withInput();
+        }
+
+        // Check if there's already a pending/processing session for this person by this user
+        if ($request->person_id) {
+            $existing = ResearchSession::where('user_id', Auth::id())
+                ->where('person_id', $request->person_id)
+                ->whereIn('status', [
+                    ResearchSession::STATUS_PENDING,
+                    ResearchSession::STATUS_SEARCHING,
+                    ResearchSession::STATUS_ANALYZING,
+                ])
+                ->first();
+
+            if ($existing) {
+                return redirect()->route('research.session', $existing)
+                    ->with('info', __('Ya hay una investigacion en curso para esta persona.'));
+            }
         }
 
         // Create research session

@@ -36,7 +36,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">1</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('Primeros pasos') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('Despues de crear tu cuenta y verificar tu correo electronico, seras recibido con una pantalla de bienvenida que te explica los conceptos basicos de la plataforma.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Que puedes hacer:') }}</h3>
@@ -62,7 +62,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">2</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('Tu perfil') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('Tu perfil es el punto de partida de tu arbol genealogico. Aqui defines tu informacion personal que sera el centro de tu arbol.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Informacion que puedes agregar:') }}</h3>
@@ -92,7 +92,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">3</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('El arbol genealogico') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('El arbol genealogico es una representacion visual de tu familia. Tu apareces en el centro, con tus ancestros hacia arriba y tus descendientes hacia abajo.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Como navegar el arbol:') }}</h3>
@@ -123,7 +123,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">4</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('Agregar familiares') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('Puedes agregar familiares de dos formas: desde el arbol visual o desde el formulario de personas.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Desde el arbol:') }}</h3>
@@ -160,7 +160,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">5</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('Privacidad y consentimiento') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('Esta plataforma respeta la privacidad de todos. Por eso, antes de compartir informacion de personas vivas, se requiere su consentimiento.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Niveles de privacidad:') }}</h3>
@@ -187,7 +187,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">6</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('Sistema de mensajes') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('Puedes comunicarte con otros miembros de la comunidad a traves del sistema de mensajes interno.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Tipos de mensajes:') }}</h3>
@@ -213,7 +213,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">7</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('Importar y exportar datos') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('La plataforma soporta el formato GEDCOM, el estandar internacional para intercambio de datos genealogicos.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Importar datos:') }}</h3>
@@ -245,7 +245,7 @@
                         <span class="w-10 h-10 bg-mf-primary text-white rounded-full flex items-center justify-center font-bold">8</span>
                         <h2 class="text-2xl font-bold text-theme">{{ __('Buscar en la comunidad') }}</h2>
                     </div>
-                    <div class="prose max-w-none text-theme-secondary">
+                    <div class="prose dark:prose-invert max-w-none text-theme-secondary">
                         <p>{{ __('La funcion de busqueda te permite encontrar personas y posibles conexiones familiares dentro de la comunidad.') }}</p>
 
                         <h3 class="text-lg font-semibold text-theme mt-6 mb-2">{{ __('Tipos de busqueda:') }}</h3>

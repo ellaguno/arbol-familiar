@@ -4,20 +4,41 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class SiteSetting extends Model
 {
     protected $fillable = ['group', 'key', 'value', 'type', 'language'];
 
     /**
+     * Check if the 'language' column exists (cached per-request).
+     */
+    protected static function hasLanguageColumn(): bool
+    {
+        static $hasColumn = null;
+        if ($hasColumn === null) {
+            $hasColumn = Schema::hasColumn('site_settings', 'language');
+        }
+        return $hasColumn;
+    }
+
+    /**
      * Get all settings for a group as key => value collection.
      * Filters by locale with fallback to 'es' for missing keys.
+     * Gracefully works before the language migration has run.
      */
     public static function getByGroup(string $group, ?string $lang = null): array
     {
-        $lang = $lang ?? app()->getLocale();
+        $hasLang = static::hasLanguageColumn();
+        $lang = $hasLang ? ($lang ?? app()->getLocale()) : 'es';
 
-        return Cache::remember("site_settings.{$group}.{$lang}", 3600, function () use ($group, $lang) {
+        return Cache::remember("site_settings.{$group}.{$lang}", 3600, function () use ($group, $lang, $hasLang) {
+            if (!$hasLang) {
+                return static::where('group', $group)
+                    ->pluck('value', 'key')
+                    ->toArray();
+            }
+
             if ($lang === 'es') {
                 return static::where('group', $group)
                     ->where('language', 'es')
@@ -63,10 +84,12 @@ class SiteSetting extends Model
     {
         $lang = $lang ?? 'es';
 
-        static::updateOrCreate(
-            ['group' => $group, 'key' => $key, 'language' => $lang],
-            ['value' => $value, 'type' => $type]
-        );
+        $match = ['group' => $group, 'key' => $key];
+        if (static::hasLanguageColumn()) {
+            $match['language'] = $lang;
+        }
+
+        static::updateOrCreate($match, ['value' => $value, 'type' => $type]);
 
         // Invalidate cache for both languages
         Cache::forget("site_settings.{$group}.es");

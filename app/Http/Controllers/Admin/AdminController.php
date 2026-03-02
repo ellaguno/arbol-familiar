@@ -849,11 +849,13 @@ class AdminController extends Controller
 
         // Types that are shared (not translatable)
         $sharedTypes = ['boolean', 'image', 'color', 'json'];
+        // Keys that are shared regardless of type (selectors, not translatable text)
+        $sharedKeys = ['feature_images_shape', 'login_position'];
 
         $settings = SiteSetting::where('group', $group)->where('language', 'es')->get();
 
         foreach ($settings as $setting) {
-            if (in_array($setting->type, $sharedTypes)) {
+            if (in_array($setting->type, $sharedTypes) || in_array($setting->key, $sharedKeys)) {
                 // Shared fields: single input, save to ES only (EN inherits via fallback)
                 $fieldName = "settings_es_{$setting->key}";
 

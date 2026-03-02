@@ -29,12 +29,12 @@
             {{-- Language tabs --}}
             <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
                 <button type="button" @click="lang = 'es'"
-                        :class="lang === 'es' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                        :class="lang === 'es' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
                         class="px-4 py-2.5 font-medium text-sm transition-colors">
                     {{ __('Español') }}
                 </button>
                 <button type="button" @click="lang = 'en'"
-                        :class="lang === 'en' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                        :class="lang === 'en' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
                         class="px-4 py-2.5 font-medium text-sm transition-colors">
                     English
                 </button>
@@ -50,10 +50,12 @@
                         <div class="card-body">
                             <label class="form-label text-base">
                                 {{ __(str_replace('_', ' ', ucfirst($key))) }}
-                                <span class="text-xs text-theme-muted ml-2">({{ $setting->type }})</span>
+                                @if(!in_array($key, ['feature_images_shape', 'login_position']))
+                                    <span class="text-xs text-theme-muted ml-2">({{ $setting->type }})</span>
+                                @endif
                             </label>
 
-                            @if(in_array($setting->type, $translatableTypes) && $key !== 'feature_images_shape')
+                            @if(in_array($setting->type, $translatableTypes) && !in_array($key, ['feature_images_shape', 'login_position']))
                                 {{-- TRANSLATABLE: show per-language inputs --}}
 
                                 {{-- Spanish --}}
@@ -108,6 +110,13 @@
                                            {{ old('settings_es_' . $key, $setting->value) ? 'checked' : '' }}>
                                     <span class="text-theme-secondary">{{ __('Activado') }}</span>
                                 </label>
+
+                            @elseif($key === 'login_position')
+                                {{-- SHARED: login position selector --}}
+                                <select name="settings_es_{{ $key }}" class="form-input">
+                                    <option value="left" {{ old('settings_es_' . $key, $setting->value) === 'left' ? 'selected' : '' }}>{{ __('Izquierda') }}</option>
+                                    <option value="right" {{ old('settings_es_' . $key, $setting->value) === 'right' ? 'selected' : '' }}>{{ __('Derecha') }}</option>
+                                </select>
 
                             @elseif($key === 'feature_images_shape')
                                 {{-- SHARED: shape selector --}}

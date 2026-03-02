@@ -34,7 +34,7 @@
 
                         <p>
                             {{ __('Si tienes alguna duda, visita la seccion') }}
-                            <a href="{{ route('help') }}" class="underline" style="color: var(--mf-primary, #3b82f6);">{{ __('Como usar Mi Familia?') }}</a>
+                            <a href="{{ route('help') }}" class="underline" style="color: var(--mf-primary, #3b82f6);">{{ __('¿Como usar Mi Familia?') }}</a>
                             {{ __('Donde encontraras respuestas a las dudas mas comunes.') }}
                         </p>
                     </div>
@@ -110,14 +110,14 @@
                         </div>
 
                         {{-- Seccion: ¿Ya existes en el arbol? (v2.6.0) --}}
-                        <div class="p-5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                            <h4 class="font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                        <div class="p-5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg" style="padding:10px;">
+                            <h4 class="font-semibold  mb-2" style="color: var(--mf-primary, #3b82f6);">
                                 <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                                 {{ __('¿Ya existes en el arbol?') }}
                             </h4>
-                            <p class="text-sm text-amber-700 dark:text-amber-400 mb-3">
+                            <p class="text-sm text-amber-500 dark:text-amber-100 mb-3">
                                 {{ __('Si alguien ya te agrego al arbol genealogico, puedes buscarte y vincular tu cuenta a ese perfil existente en lugar de crear uno nuevo.') }}
                             </p>
                             <a href="{{ route('search.index', ['search' => $user->person?->patronymic]) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border border-amber-400 text-amber-800 dark:text-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors">

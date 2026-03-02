@@ -1365,8 +1365,8 @@
                                 </span>
                                </button>`
                             : person.hasEmail && person.consentStatus === 'approved'
-                                ? `<span class="block w-full py-2.5 px-4 border-2 border-yellow-500 text-yellow-600 text-center text-sm font-medium rounded-lg">{{ __('Invitacion aceptada') }}</span>`
-                                : `<a href="${person.url}/edit" class="block w-full py-2.5 px-4 border-2 border-gray-400 text-gray-500 text-center text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                ? `<span class="block w-full py-2.5 px-4 border-2 border-yellow-500 dark:border-yellow-600 text-yellow-600 dark:text-yellow-400 text-center text-sm font-medium rounded-lg">{{ __('Invitacion aceptada') }}</span>`
+                                : `<a href="${person.url}/edit" class="block w-full py-2.5 px-4 border-2 border-gray-400 dark:border-gray-500 text-gray-500 dark:text-gray-400 text-center text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                                     <span class="flex items-center justify-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>

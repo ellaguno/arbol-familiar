@@ -13,6 +13,7 @@ class SiteSettingsSeeder extends Seeder
             // =============================================
             // Welcome page (ES)
             // =============================================
+            ['group' => 'welcome', 'key' => 'login_position', 'value' => 'left', 'type' => 'text', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'hero_show', 'value' => '1', 'type' => 'boolean', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'hero_image', 'value' => 'images/hero-beach.jpg', 'type' => 'image', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'logo_image', 'value' => 'images/logo.png', 'type' => 'image', 'language' => 'es'],
@@ -24,6 +25,10 @@ class SiteSettingsSeeder extends Seeder
             ['group' => 'welcome', 'key' => 'register_cta', 'value' => '¡Da click aquí y únete!', 'type' => 'text', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'register_question', 'value' => '¿Todavía no estás registrado?', 'type' => 'text', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'register_tagline', 'value' => 'Disfruta tu origen y vive la historia. Compártelo con los miembros de tu familia.', 'type' => 'textarea', 'language' => 'es'],
+            ['group' => 'welcome', 'key' => 'show_description', 'value' => '1', 'type' => 'boolean', 'language' => 'es'],
+            ['group' => 'welcome', 'key' => 'show_register', 'value' => '1', 'type' => 'boolean', 'language' => 'es'],
+            ['group' => 'welcome', 'key' => 'show_features', 'value' => '1', 'type' => 'boolean', 'language' => 'es'],
+            ['group' => 'welcome', 'key' => 'show_free_section', 'value' => '1', 'type' => 'boolean', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'feature_images_shape', 'value' => 'round', 'type' => 'text', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'feature_1_title', 'value' => '¡Solo necesitas empezar!', 'type' => 'text', 'language' => 'es'],
             ['group' => 'welcome', 'key' => 'feature_1_text', 'value' => 'Es muy sencillo, ingresa primero tus datos y después podrás añadir a tus padres, abuelos, hermanos, hijos y demás familiares. Una vez agregados podrás invitarlos a participar en tu árbol y compartir información, imágenes y documentos de su historia.', 'type' => 'textarea', 'language' => 'es'],
