@@ -555,4 +555,109 @@ class ToolsController extends Controller
 
         return null;
     }
+
+    // ========================================================================
+    // Marcar fallecidos por edad
+    // ========================================================================
+
+    public function markDeceased()
+    {
+        $currentYear = now()->year;
+        $cutoffYear = $currentYear - 100;
+
+        // Personas marcadas como vivas con 100+ años
+        $centenarians = Person::where('is_living', true)
+            ->where(function ($q) use ($cutoffYear) {
+                $q->where(function ($sub) use ($cutoffYear) {
+                    $sub->whereNotNull('birth_date')
+                        ->whereYear('birth_date', '<=', $cutoffYear);
+                })->orWhere(function ($sub) use ($cutoffYear) {
+                    $sub->whereNull('birth_date')
+                        ->whereNotNull('birth_year')
+                        ->where('birth_year', '<=', $cutoffYear);
+                });
+            })
+            ->orderBy('birth_year')
+            ->orderBy('birth_date')
+            ->get();
+
+        $proposals = [];
+
+        foreach ($centenarians as $person) {
+            $hasExactDate = $person->birth_date !== null;
+            $age = $this->calculateDeceasedAge($person, $currentYear);
+
+            $proposals[$person->id] = [
+                'person' => $person,
+                'age' => $age,
+                'reason' => __('Tiene :age anos', ['age' => $age]),
+                'confidence' => $hasExactDate ? 'alta' : 'media',
+            ];
+
+            // Buscar ancestros vivos de este centenario
+            $ancestorIds = $person->getAllAncestorIds();
+            if (!empty($ancestorIds)) {
+                $livingAncestors = Person::whereIn('id', $ancestorIds)
+                    ->where('is_living', true)
+                    ->get();
+
+                foreach ($livingAncestors as $ancestor) {
+                    if (!isset($proposals[$ancestor->id])) {
+                        $ancestorAge = $this->calculateDeceasedAge($ancestor, $currentYear);
+                        $proposals[$ancestor->id] = [
+                            'person' => $ancestor,
+                            'age' => $ancestorAge,
+                            'reason' => __('Es ancestro de :name (:age anos)', [
+                                'name' => $person->first_name . ' ' . $person->patronymic,
+                                'age' => $age,
+                            ]),
+                            'confidence' => $hasExactDate ? 'alta' : 'baja',
+                        ];
+                    }
+                }
+            }
+        }
+
+        $byConfidence = ['alta' => [], 'media' => [], 'baja' => []];
+        foreach ($proposals as $p) {
+            $byConfidence[$p['confidence']][] = $p;
+        }
+
+        return view('admin.tools.mark-deceased', [
+            'byConfidence' => $byConfidence,
+            'totalFound' => count($proposals),
+            'totalAlta' => count($byConfidence['alta']),
+            'totalMedia' => count($byConfidence['media']),
+            'totalBaja' => count($byConfidence['baja']),
+            'totalLiving' => Person::where('is_living', true)->count(),
+        ]);
+    }
+
+    public function applyMarkDeceased(Request $request)
+    {
+        $personIds = $request->input('mark', []);
+        $applied = 0;
+
+        foreach ($personIds as $id) {
+            $person = Person::find($id);
+            if ($person && $person->is_living) {
+                $person->update(['is_living' => false]);
+                $applied++;
+            }
+        }
+
+        return redirect()->route('admin.tools.mark-deceased')
+            ->with('success', __('Se marcaron :count personas como fallecidas.', ['count' => $applied]));
+    }
+
+    private function calculateDeceasedAge(Person $person, int $currentYear): ?int
+    {
+        if ($person->birth_date) {
+            return $person->birth_date->age;
+        }
+        if ($person->birth_year) {
+            return $currentYear - $person->birth_year;
+        }
+        return null;
+    }
 }

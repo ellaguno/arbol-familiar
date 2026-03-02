@@ -405,6 +405,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/tools/duplicates/compare/{personA}/{personB}', [ToolsController::class, 'compareDuplicates'])->name('tools.duplicates.compare');
         Route::post('/tools/duplicates/merge', [ToolsController::class, 'mergeDuplicates'])->name('tools.duplicates.merge');
         Route::post('/tools/duplicates/delete', [ToolsController::class, 'deleteDuplicate'])->name('tools.duplicates.delete');
+        Route::get('/tools/mark-deceased', [ToolsController::class, 'markDeceased'])->name('tools.mark-deceased');
+        Route::post('/tools/mark-deceased', [ToolsController::class, 'applyMarkDeceased'])->name('tools.mark-deceased.apply');
 
         // Reportes
         Route::get('/reports', [ReportController::class, 'index'])->name('reports');

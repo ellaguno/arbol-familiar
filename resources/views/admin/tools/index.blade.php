@@ -52,6 +52,24 @@
                     </p>
                 </div>
             </a>
+            <!-- Marcar fallecidos -->
+            <a href="{{ route('admin.tools.mark-deceased') }}" class="card hover:shadow-md transition-shadow">
+                <div class="card-body">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="w-12 h-12 bg-slate-100 dark:bg-slate-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-theme text-lg">{{ __('Marcar fallecidos') }}</h3>
+                        </div>
+                    </div>
+                    <p class="text-sm text-theme-muted">
+                        {{ __('Detecta personas marcadas como vivas que por edad (100+ anos) o por ser ancestros de centenarios deben estar como fallecidas.') }}
+                    </p>
+                </div>
+            </a>
         </div>
     </div>
 </x-app-layout>
