@@ -601,7 +601,7 @@ class MessageController extends Controller
             return;
         }
 
-        $mergeResult = \App\Http\Controllers\PersonController::mergePersons($sourcePerson, $targetPerson);
+        $mergeResult = app(\App\Services\RelationshipService::class)->mergePersons($sourcePerson, $targetPerson);
 
         \App\Models\ActivityLog::log('persons_merged', $requestingUser, $targetPerson, [
             'source_person_id' => $message->related_person_id,
@@ -683,29 +683,29 @@ class MessageController extends Controller
             return;
         }
 
-        $personController = app(PersonController::class);
+        $relationships = app(\App\Services\RelationshipService::class);
 
         try {
             switch ($relationshipType) {
                 case 'father':
                     // targetPerson es padre de claimingPerson
-                    $personController->addParentRelationship($claimingPerson, $targetPerson, 'M');
+                    $relationships->addParentRelationship($claimingPerson, $targetPerson, 'M');
                     break;
                 case 'mother':
                     // targetPerson es madre de claimingPerson
-                    $personController->addParentRelationship($claimingPerson, $targetPerson, 'F');
+                    $relationships->addParentRelationship($claimingPerson, $targetPerson, 'F');
                     break;
                 case 'child':
                     // targetPerson es hijo de claimingPerson
-                    $personController->addChildRelationship($claimingPerson, $targetPerson);
+                    $relationships->addChildRelationship($claimingPerson, $targetPerson);
                     break;
                 case 'sibling':
                     // targetPerson es hermano de claimingPerson
-                    $personController->addSiblingRelationship($claimingPerson, $targetPerson);
+                    $relationships->addSiblingRelationship($claimingPerson, $targetPerson);
                     break;
                 case 'spouse':
                     // targetPerson es conyuge de claimingPerson
-                    $personController->addSpouseRelationship($claimingPerson, $targetPerson, [
+                    $relationships->addSpouseRelationship($claimingPerson, $targetPerson, [
                         'family_status' => 'married',
                     ]);
                     break;
