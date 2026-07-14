@@ -60,6 +60,47 @@ class Media extends Model
     }
 
     /**
+     * Determina si un usuario puede ver este archivo, aplicando la privacidad
+     * del recurso al que pertenece (persona, familia o evento). Centraliza la
+     * logica usada por MediaController y por la ruta /storage/{path}.
+     */
+    public function canBeViewedBy(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        // El creador siempre puede ver su archivo.
+        if ($this->created_by === $user->id) {
+            return true;
+        }
+
+        // Media de una persona: usar la privacidad de la persona.
+        if ($this->mediable_type === Person::class && $this->mediable_id) {
+            $person = Person::find($this->mediable_id);
+            return $person ? $person->canBeViewedBy($user) : false;
+        }
+
+        // Media de una familia: visible si algun conyuge es visible.
+        if ($this->mediable_type === Family::class && $this->mediable_id) {
+            $family = Family::find($this->mediable_id);
+            if (!$family) {
+                return false;
+            }
+            return ($family->husband && $family->husband->canBeViewedBy($user))
+                || ($family->wife && $family->wife->canBeViewedBy($user));
+        }
+
+        // Media de un evento: usar la privacidad de la persona del evento.
+        if ($this->mediable_type === Event::class && $this->mediable_id) {
+            $event = Event::find($this->mediable_id);
+            return $event && $event->person ? $event->person->canBeViewedBy($user) : false;
+        }
+
+        return false;
+    }
+
+    /**
      * Verifica si es una imagen.
      */
     public function isImage(): bool

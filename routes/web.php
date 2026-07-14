@@ -57,6 +57,21 @@ Route::get('/storage/{path}', function ($path) {
         abort(404);
     }
 
+    // Control de acceso por privacidad: si el archivo pertenece a un media o a
+    // la foto de una persona, respetar su nivel de privacidad. Los archivos que
+    // no corresponden a ningun recurso (contenido de sitio: hero, banners,
+    // imagenes de contenido) siguen accesibles para cualquier usuario autenticado.
+    $user = auth()->user();
+    $media = \App\Models\Media::where('file_path', $path)->first();
+    if ($media) {
+        abort_unless($media->canBeViewedBy($user), 403);
+    } else {
+        $person = \App\Models\Person::where('photo_path', $path)->first();
+        if ($person) {
+            abort_unless($person->canBeViewedBy($user), 403);
+        }
+    }
+
     $mimeType = mime_content_type($fullPath);
 
     return response()->file($fullPath, [

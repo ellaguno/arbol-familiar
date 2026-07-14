@@ -320,22 +320,9 @@ class MediaController extends Controller
      */
     protected function authorizeView(Media $media): void
     {
-        $user = auth()->user();
-
-        // El creador del media siempre puede verlo
-        if ($media->created_by === $user->id) {
-            return;
+        if (!$media->canBeViewedBy(auth()->user())) {
+            abort(403, 'No tienes permiso para ver este archivo.');
         }
-
-        // Si el media esta asociado a una persona, usar la logica de privacidad de la persona
-        if ($media->mediable_type === Person::class && $media->mediable_id) {
-            $person = Person::find($media->mediable_id);
-            if ($person && $person->canBeViewedBy($user)) {
-                return;
-            }
-        }
-
-        abort(403, 'No tienes permiso para ver este archivo.');
     }
 
     /**

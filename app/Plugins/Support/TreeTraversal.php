@@ -65,11 +65,15 @@ class TreeTraversal
     /**
      * Obtiene ancestros recursivamente (estructura de arbol para D3.js).
      */
-    public function getAncestors(Person $person, int $generations, int $level = 1): array
+    public function getAncestors(Person $person, int $generations, int $level = 1, array $visited = []): array
     {
-        if ($level > $generations) {
+        // Guardia de ciclos por rama: corta si esta persona ya esta en la cadena
+        // de ascendencia actual (dato ciclico), sin bloquear el pedigree collapse
+        // legitimo (un mismo ancestro alcanzable por dos lineas distintas).
+        if ($level > $generations || in_array($person->id, $visited, true)) {
             return [];
         }
+        $visited[] = $person->id;
 
         $ancestors = [];
         $family = $person->familiesAsChild()->with(['husband', 'wife'])->first();
@@ -79,7 +83,7 @@ class TreeTraversal
                 $father = $this->personToNode($family->husband);
                 $father['relation'] = 'father';
                 $father['level'] = $level;
-                $father['ancestors'] = $this->getAncestors($family->husband, $generations, $level + 1);
+                $father['ancestors'] = $this->getAncestors($family->husband, $generations, $level + 1, $visited);
                 $ancestors[] = $father;
             }
 
@@ -87,7 +91,7 @@ class TreeTraversal
                 $mother = $this->personToNode($family->wife);
                 $mother['relation'] = 'mother';
                 $mother['level'] = $level;
-                $mother['ancestors'] = $this->getAncestors($family->wife, $generations, $level + 1);
+                $mother['ancestors'] = $this->getAncestors($family->wife, $generations, $level + 1, $visited);
                 $ancestors[] = $mother;
             }
         }
@@ -98,11 +102,13 @@ class TreeTraversal
     /**
      * Obtiene descendientes recursivamente (estructura de arbol para D3.js).
      */
-    public function getDescendants(Person $person, int $generations, int $level = 1): array
+    public function getDescendants(Person $person, int $generations, int $level = 1, array $visited = []): array
     {
-        if ($level > $generations) {
+        // Guardia de ciclos por rama (persona descendiente de si misma).
+        if ($level > $generations || in_array($person->id, $visited, true)) {
             return [];
         }
+        $visited[] = $person->id;
 
         $descendants = [];
         $families = $person->familiesAsSpouse()->with(['husband', 'wife', 'children'])->get();
@@ -121,7 +127,7 @@ class TreeTraversal
             foreach ($family->children as $child) {
                 $childNode = $this->personToNode($child);
                 $childNode['level'] = $level;
-                $childNode['descendants'] = $this->getDescendants($child, $generations, $level + 1);
+                $childNode['descendants'] = $this->getDescendants($child, $generations, $level + 1, $visited);
                 $familyNode['children'][] = $childNode;
             }
 
@@ -134,14 +140,16 @@ class TreeTraversal
     /**
      * Construye datos para vista de abanico.
      */
-    public function buildFanData(Person $person, int $generations): array
+    public function buildFanData(Person $person, int $generations, array $visited = []): array
     {
         $data = [
             'name' => $person->full_name,
             'data' => $this->personToNode($person),
         ];
 
-        if ($generations > 0) {
+        // Guardia de ciclos por rama.
+        if ($generations > 0 && !in_array($person->id, $visited, true)) {
+            $visited[] = $person->id;
             $family = $person->familiesAsChild()->with(['husband', 'wife'])->first();
 
             if ($family) {
@@ -152,11 +160,11 @@ class TreeTraversal
                 $children = [];
 
                 if ($family->husband) {
-                    $children[] = $this->buildFanData($family->husband, $generations - 1);
+                    $children[] = $this->buildFanData($family->husband, $generations - 1, $visited);
                 }
 
                 if ($family->wife) {
-                    $children[] = $this->buildFanData($family->wife, $generations - 1);
+                    $children[] = $this->buildFanData($family->wife, $generations - 1, $visited);
                 }
 
                 if (!empty($children)) {
@@ -172,7 +180,7 @@ class TreeTraversal
      * Construye arbol de descendientes compatible con d3.hierarchy().
      * Incluye conyuges como _spouses en cada nodo.
      */
-    public function buildDescendantTree(Person $person, int $generations): array
+    public function buildDescendantTree(Person $person, int $generations, array $visited = []): array
     {
         $node = [
             'name' => $person->shouldProtectMinorData() ? $person->first_name : $person->full_name,
@@ -181,9 +189,11 @@ class TreeTraversal
             'children' => [],
         ];
 
-        if ($generations <= 0) {
+        // Guardia de ciclos por rama (persona descendiente de si misma).
+        if ($generations <= 0 || in_array($person->id, $visited, true)) {
             return $node;
         }
+        $visited[] = $person->id;
 
         $families = $person->familiesAsSpouse()->with(['husband', 'wife', 'children'])->get();
 
@@ -197,7 +207,7 @@ class TreeTraversal
             }
 
             foreach ($family->children as $child) {
-                $node['children'][] = $this->buildDescendantTree($child, $generations - 1);
+                $node['children'][] = $this->buildDescendantTree($child, $generations - 1, $visited);
             }
         }
 
@@ -231,11 +241,13 @@ class TreeTraversal
     /**
      * Recolecta ancestros recursivamente en una coleccion plana.
      */
-    protected function collectAncestors(Person $person, int $level, int $maxGenerations, Collection &$results): void
+    protected function collectAncestors(Person $person, int $level, int $maxGenerations, Collection &$results, array $visited = []): void
     {
-        if ($level > $maxGenerations) {
+        // Guardia de ciclos por rama.
+        if ($level > $maxGenerations || in_array($person->id, $visited, true)) {
             return;
         }
+        $visited[] = $person->id;
 
         $family = $person->familiesAsChild()->with(['husband', 'wife'])->first();
 
@@ -246,24 +258,26 @@ class TreeTraversal
         if ($family->husband) {
             $family->husband->setAttribute('generation', $level);
             $results->push($family->husband);
-            $this->collectAncestors($family->husband, $level + 1, $maxGenerations, $results);
+            $this->collectAncestors($family->husband, $level + 1, $maxGenerations, $results, $visited);
         }
 
         if ($family->wife) {
             $family->wife->setAttribute('generation', $level);
             $results->push($family->wife);
-            $this->collectAncestors($family->wife, $level + 1, $maxGenerations, $results);
+            $this->collectAncestors($family->wife, $level + 1, $maxGenerations, $results, $visited);
         }
     }
 
     /**
      * Recolecta descendientes recursivamente en una coleccion plana.
      */
-    protected function collectDescendants(Person $person, int $level, int $maxGenerations, Collection &$results): void
+    protected function collectDescendants(Person $person, int $level, int $maxGenerations, Collection &$results, array $visited = []): void
     {
-        if ($level > $maxGenerations) {
+        // Guardia de ciclos por rama.
+        if ($level > $maxGenerations || in_array($person->id, $visited, true)) {
             return;
         }
+        $visited[] = $person->id;
 
         $families = $person->familiesAsSpouse()->with(['children'])->get();
 
@@ -271,7 +285,7 @@ class TreeTraversal
             foreach ($family->children as $child) {
                 $child->setAttribute('generation', $level);
                 $results->push($child);
-                $this->collectDescendants($child, $level + 1, $maxGenerations, $results);
+                $this->collectDescendants($child, $level + 1, $maxGenerations, $results, $visited);
             }
         }
     }
