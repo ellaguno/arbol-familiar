@@ -197,8 +197,10 @@
     </div>
 
     @push('scripts')
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.min.js"></script>
+    {{-- D3 v7 + d3-flextree bundleados por Vite (antes cargados desde CDN). Se
+         ejecutan como modulo deferred, disponible en window.d3 antes de que el
+         arbol inicialice en DOMContentLoaded. --}}
+    @vite('resources/js/tree-vendor.js')
     <script>
         const rootPersonId = {{ $person->id }};
         const apiUrl = '{{ route("tree.api.data", $person) }}';
