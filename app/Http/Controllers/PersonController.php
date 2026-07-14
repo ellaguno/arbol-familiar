@@ -349,11 +349,9 @@ class PersonController extends Controller
             return back()->with('error', 'Elimina las relaciones familiares primero.');
         }
 
-        // Eliminar foto si existe
-        if ($person->photo_path) {
-            Storage::disk('public')->delete($person->photo_path);
-        }
-
+        // Soft delete: la persona se marca como eliminada (reversible). Se
+        // conservan la foto y sus archivos por si se restaura; la limpieza
+        // fisica solo debe hacerse en un borrado permanente (forceDelete).
         ActivityLog::log('person_deleted', $user, $person);
 
         $person->delete();
