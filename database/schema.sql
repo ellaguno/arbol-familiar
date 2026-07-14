@@ -1,4 +1,19 @@
+-- ============================================================================
+-- Mi Familia - Esquema de base de datos
+-- ============================================================================
+-- GENERADO AUTOMATICAMENTE desde las migraciones (php artisan migrate).
+-- Fecha: 2026-07-14
+-- No editar a mano: regenerar con mysqldump --no-data desde una BD migrada.
+-- Incluye los datos de la tabla 'migrations' para que la BD quede marcada
+-- como totalmente migrada (un 'php artisan migrate' posterior sera no-op).
+-- ============================================================================
+
 /*M!999999\- enable the sandbox mode */ 
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -21,7 +36,9 @@ CREATE TABLE `activity_log` (
   PRIMARY KEY (`id`),
   KEY `activity_log_user_id_index` (`user_id`),
   KEY `activity_log_action_index` (`action`),
-  KEY `activity_log_created_at_index` (`created_at`)
+  KEY `activity_log_created_at_index` (`created_at`),
+  KEY `activity_user_date_idx` (`user_id`,`created_at`),
+  KEY `activity_action_idx` (`action`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `events`;
@@ -82,6 +99,7 @@ CREATE TABLE `families` (
   KEY `families_wife_id_index` (`wife_id`),
   KEY `idx_families_spouses` (`husband_id`,`wife_id`),
   KEY `families_created_by_foreign` (`created_by`),
+  KEY `families_marriage_date_idx` (`marriage_date`),
   CONSTRAINT `families_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
   CONSTRAINT `families_husband_id_foreign` FOREIGN KEY (`husband_id`) REFERENCES `persons` (`id`) ON DELETE SET NULL,
   CONSTRAINT `families_wife_id_foreign` FOREIGN KEY (`wife_id`) REFERENCES `persons` (`id`) ON DELETE SET NULL
@@ -116,7 +134,7 @@ CREATE TABLE `invitations` (
   `status` enum('pending','sent','accepted','declined','expired') NOT NULL DEFAULT 'pending',
   `sent_at` timestamp NULL DEFAULT NULL,
   `responded_at` timestamp NULL DEFAULT NULL,
-  `expires_at` timestamp NOT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `invitations_token_unique` (`token`),
@@ -133,8 +151,9 @@ DROP TABLE IF EXISTS `media`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `media` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `mediable_type` varchar(100) NOT NULL COMMENT 'App\\Models\\Person o App\\Models\\User',
-  `mediable_id` bigint(20) unsigned NOT NULL,
+  `mediable_type` varchar(100) DEFAULT NULL COMMENT 'App\\Models\\Person o App\\Models\\User',
+  `mediable_id` bigint(20) unsigned DEFAULT NULL,
+  `event_id` bigint(20) unsigned DEFAULT NULL,
   `type` enum('image','document','link') NOT NULL,
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
@@ -151,7 +170,25 @@ CREATE TABLE `media` (
   KEY `idx_media_mediable` (`mediable_type`,`mediable_id`),
   KEY `media_type_index` (`type`),
   KEY `media_created_by_index` (`created_by`),
-  CONSTRAINT `media_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+  KEY `media_event_id_index` (`event_id`),
+  CONSTRAINT `media_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
+  CONSTRAINT `media_event_id_foreign` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `message_recipients`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `message_recipients` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `message_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `read_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `message_recipients_message_id_user_id_unique` (`message_id`,`user_id`),
+  KEY `idx_mr_user_inbox` (`user_id`,`deleted_at`,`read_at`),
+  CONSTRAINT `message_recipients_message_id_foreign` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `message_recipients_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `messages`;
@@ -160,11 +197,14 @@ DROP TABLE IF EXISTS `messages`;
 CREATE TABLE `messages` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `sender_id` bigint(20) unsigned DEFAULT NULL COMMENT 'NULL para mensajes del sistema',
-  `recipient_id` bigint(20) unsigned NOT NULL,
-  `type` enum('invitation','consent_request','relationship_found','general','system','person_claim','person_merge') NOT NULL,
+  `recipient_id` bigint(20) unsigned DEFAULT NULL,
+  `type` enum('invitation','consent_request','relationship_found','general','system','person_claim','person_merge','family_edit_request','broadcast','relationship_claim','chat_request') DEFAULT NULL,
+  `broadcast_scope` varchar(20) DEFAULT NULL,
   `subject` varchar(255) NOT NULL,
   `body` text NOT NULL,
   `related_person_id` bigint(20) unsigned DEFAULT NULL,
+  `claiming_person_id` bigint(20) unsigned DEFAULT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
   `action_required` tinyint(1) NOT NULL DEFAULT 0,
   `action_status` enum('pending','accepted','denied','expired') DEFAULT NULL,
   `action_taken_at` timestamp NULL DEFAULT NULL,
@@ -172,13 +212,17 @@ CREATE TABLE `messages` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `messages_recipient_id_index` (`recipient_id`),
-  KEY `idx_messages_unread` (`recipient_id`,`read_at`),
   KEY `messages_type_index` (`type`),
   KEY `messages_sender_id_index` (`sender_id`),
-  KEY `idx_messages_action` (`recipient_id`,`action_required`,`action_status`),
   KEY `messages_related_person_id_foreign` (`related_person_id`),
-  CONSTRAINT `messages_recipient_id_foreign` FOREIGN KEY (`recipient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  KEY `messages_inbox_idx` (`recipient_id`,`deleted_at`,`read_at`),
+  KEY `messages_sent_idx` (`sender_id`,`created_at`),
+  KEY `messages_recipient_id_index` (`recipient_id`),
+  KEY `idx_messages_unread` (`recipient_id`,`read_at`),
+  KEY `idx_messages_action` (`recipient_id`,`action_required`,`action_status`),
+  KEY `messages_claiming_person_id_foreign` (`claiming_person_id`),
+  CONSTRAINT `messages_claiming_person_id_foreign` FOREIGN KEY (`claiming_person_id`) REFERENCES `persons` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `messages_recipient_id_foreign` FOREIGN KEY (`recipient_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `messages_related_person_id_foreign` FOREIGN KEY (`related_person_id`) REFERENCES `persons` (`id`) ON DELETE SET NULL,
   CONSTRAINT `messages_sender_id_foreign` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -191,7 +235,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -201,6 +245,28 @@ CREATE TABLE `password_reset_tokens` (
   `token` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `person_edit_permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `person_edit_permissions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `person_id` bigint(20) unsigned NOT NULL COMMENT 'Persona que puede ser editada',
+  `user_id` bigint(20) unsigned NOT NULL COMMENT 'Usuario que tiene permiso de edición',
+  `granted_by` bigint(20) unsigned NOT NULL COMMENT 'Usuario que otorgó el permiso',
+  `relationship_type` enum('father','mother','spouse','child','sibling','other') NOT NULL COMMENT 'Tipo de relación con la persona',
+  `granted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_person_edit_permission` (`person_id`,`user_id`),
+  KEY `person_edit_permissions_user_id_index` (`user_id`),
+  KEY `person_edit_permissions_granted_by_index` (`granted_by`),
+  CONSTRAINT `person_edit_permissions_granted_by_foreign` FOREIGN KEY (`granted_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `person_edit_permissions_person_id_foreign` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `person_edit_permissions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `personal_access_tokens`;
@@ -234,11 +300,18 @@ CREATE TABLE `persons` (
   `matronymic` varchar(100) DEFAULT NULL COMMENT 'Apellido materno',
   `nickname` varchar(100) DEFAULT NULL,
   `gender` enum('M','F','U') NOT NULL DEFAULT 'U' COMMENT 'M=Masculino, F=Femenino, U=Desconocido',
+  `marital_status` enum('single','married','common_law','divorced','widowed') DEFAULT NULL COMMENT 'Estado civil',
   `birth_date` date DEFAULT NULL,
+  `birth_year` smallint(6) DEFAULT NULL,
+  `birth_month` tinyint(4) DEFAULT NULL,
+  `birth_day` tinyint(4) DEFAULT NULL,
   `birth_date_approx` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Fecha aproximada',
   `birth_place` varchar(255) DEFAULT NULL,
   `birth_country` varchar(100) DEFAULT NULL,
   `death_date` date DEFAULT NULL,
+  `death_year` smallint(6) DEFAULT NULL,
+  `death_month` tinyint(4) DEFAULT NULL,
+  `death_day` tinyint(4) DEFAULT NULL,
   `death_date_approx` tinyint(1) NOT NULL DEFAULT 0,
   `death_place` varchar(255) DEFAULT NULL,
   `death_country` varchar(100) DEFAULT NULL,
@@ -247,15 +320,18 @@ CREATE TABLE `persons` (
   `residence_place` varchar(255) DEFAULT NULL,
   `residence_country` varchar(100) DEFAULT NULL,
   `occupation` varchar(255) DEFAULT NULL,
+  `biography` text DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL COMMENT 'Email de contacto',
   `phone` varchar(50) DEFAULT NULL,
   `has_ethnic_heritage` tinyint(1) NOT NULL DEFAULT 0,
-  `heritage_region` enum('central','dalmatia','slavonia','istria','other','unknown') DEFAULT NULL,
+  `heritage_region` enum('region_1','region_2','region_3','region_4','other','unknown') DEFAULT NULL,
   `origin_town` varchar(255) DEFAULT NULL COMMENT 'Poblacion de origen',
   `migration_decade` varchar(20) DEFAULT NULL COMMENT 'Decada de migracion',
   `migration_destination` varchar(100) DEFAULT NULL COMMENT 'Primer pais de destino',
+  `heritage_family_member_name` varchar(200) DEFAULT NULL COMMENT 'Nombre del familiar con herencia etnica',
+  `heritage_family_relationship` varchar(50) DEFAULT NULL COMMENT 'Tipo de relacion con el familiar con herencia etnica',
   `photo_path` varchar(500) DEFAULT NULL,
-  `privacy_level` enum('private','family','community','public') NOT NULL DEFAULT 'family',
+  `privacy_level` varchar(30) NOT NULL DEFAULT 'extended_family',
   `consent_status` enum('pending','approved','denied','not_required') NOT NULL DEFAULT 'not_required',
   `consent_requested_at` timestamp NULL DEFAULT NULL,
   `consent_responded_at` timestamp NULL DEFAULT NULL,
@@ -270,10 +346,32 @@ CREATE TABLE `persons` (
   KEY `persons_is_living_index` (`is_living`),
   KEY `persons_created_by_index` (`created_by`),
   KEY `persons_updated_by_foreign` (`updated_by`),
+  KEY `persons_privacy_created_idx` (`privacy_level`,`created_by`),
   FULLTEXT KEY `idx_persons_fulltext` (`first_name`,`patronymic`,`matronymic`),
   CONSTRAINT `persons_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
   CONSTRAINT `persons_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `persons_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `plugins`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `plugins` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `slug` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `version` varchar(20) NOT NULL DEFAULT '0.0.0',
+  `author` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('enabled','disabled','error') NOT NULL DEFAULT 'disabled',
+  `installed` tinyint(1) NOT NULL DEFAULT 0,
+  `settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`settings`)),
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `enabled_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `plugins_slug_unique` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `sessions`;
@@ -290,6 +388,23 @@ CREATE TABLE `sessions` (
   KEY `sessions_user_id_index` (`user_id`),
   KEY `sessions_last_activity_index` (`last_activity`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `site_settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `site_settings` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `group` varchar(50) NOT NULL,
+  `key` varchar(100) NOT NULL,
+  `value` text DEFAULT NULL,
+  `type` varchar(20) NOT NULL DEFAULT 'text',
+  `language` varchar(5) NOT NULL DEFAULT 'es',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `site_settings_group_key_language_unique` (`group`,`key`,`language`),
+  KEY `site_settings_group_index` (`group`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `surname_variants`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -313,7 +428,7 @@ DROP TABLE IF EXISTS `tree_access`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tree_access` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `owner_id` bigint(20) unsigned NOT NULL COMMENT 'Dueno del arbol',
+  `owner_id` bigint(20) unsigned NOT NULL COMMENT 'Dueño del árbol',
   `accessor_id` bigint(20) unsigned NOT NULL COMMENT 'Usuario con acceso',
   `access_level` enum('view_basic','view_full','edit') NOT NULL DEFAULT 'view_basic',
   `include_documents` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Puede ver documentos e imagenes',
@@ -336,6 +451,7 @@ CREATE TABLE `users` (
   `person_id` bigint(20) unsigned DEFAULT NULL COMMENT 'Referencia a la persona que representa este usuario',
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   `language` enum('es','en') NOT NULL DEFAULT 'es',
+  `theme_preference` varchar(10) NOT NULL DEFAULT 'default',
   `privacy_level` enum('direct_family','extended_family','selected_users','community') NOT NULL DEFAULT 'direct_family',
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `confirmation_code` varchar(10) DEFAULT NULL,
@@ -357,23 +473,69 @@ CREATE TABLE `users` (
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+
+-- ---------------------------------------------------------------------------
+-- Datos de la tabla 'migrations' (estado de migraciones aplicadas)
+-- ---------------------------------------------------------------------------
 /*M!999999\- enable the sandbox mode */ 
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (1,'2014_10_12_000000_create_users_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (2,'2014_10_12_100000_create_password_reset_tokens_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (3,'2019_08_19_000000_create_failed_jobs_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (4,'2019_12_14_000001_create_personal_access_tokens_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (5,'2024_01_01_000001_create_persons_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (6,'2024_01_01_000002_create_families_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (7,'2024_01_01_000003_create_family_children_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (8,'2024_01_01_000004_create_surname_variants_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (9,'2024_01_01_000005_create_media_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (10,'2024_01_01_000006_create_messages_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (11,'2024_01_01_000007_create_invitations_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (12,'2024_01_01_000008_create_tree_access_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (13,'2024_01_01_000009_create_events_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (14,'2024_01_01_000010_create_sessions_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (15,'2024_01_01_000011_create_activity_log_table',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (16,'2024_01_01_000012_add_foreign_keys',1);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (17,'2025_12_11_182400_add_is_admin_to_users_table',2);
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+LOCK TABLES `migrations` WRITE;
+/*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
+INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1);
+INSERT INTO `migrations` VALUES (2,'2014_10_12_100000_create_password_reset_tokens_table',1);
+INSERT INTO `migrations` VALUES (3,'2019_08_19_000000_create_failed_jobs_table',1);
+INSERT INTO `migrations` VALUES (4,'2019_12_14_000001_create_personal_access_tokens_table',1);
+INSERT INTO `migrations` VALUES (5,'2024_01_01_000001_create_persons_table',1);
+INSERT INTO `migrations` VALUES (6,'2024_01_01_000002_create_families_table',1);
+INSERT INTO `migrations` VALUES (7,'2024_01_01_000003_create_family_children_table',1);
+INSERT INTO `migrations` VALUES (8,'2024_01_01_000004_create_surname_variants_table',1);
+INSERT INTO `migrations` VALUES (9,'2024_01_01_000005_create_media_table',1);
+INSERT INTO `migrations` VALUES (10,'2024_01_01_000006_create_messages_table',1);
+INSERT INTO `migrations` VALUES (11,'2024_01_01_000007_create_invitations_table',1);
+INSERT INTO `migrations` VALUES (12,'2024_01_01_000008_create_tree_access_table',1);
+INSERT INTO `migrations` VALUES (13,'2024_01_01_000009_create_events_table',1);
+INSERT INTO `migrations` VALUES (14,'2024_01_01_000010_create_sessions_table',1);
+INSERT INTO `migrations` VALUES (15,'2024_01_01_000011_create_activity_log_table',1);
+INSERT INTO `migrations` VALUES (16,'2024_01_01_000012_add_foreign_keys',1);
+INSERT INTO `migrations` VALUES (17,'2025_12_16_000001_add_performance_indexes',1);
+INSERT INTO `migrations` VALUES (18,'2025_12_18_000001_create_person_edit_permissions_table',1);
+INSERT INTO `migrations` VALUES (19,'2026_02_04_100000_create_site_settings_table',1);
+INSERT INTO `migrations` VALUES (20,'2026_02_04_200000_seed_footer_site_settings',1);
+INSERT INTO `migrations` VALUES (21,'2026_02_04_300000_seed_heritage_site_settings',1);
+INSERT INTO `migrations` VALUES (22,'2026_02_04_400001_seed_theme_site_settings',1);
+INSERT INTO `migrations` VALUES (23,'2026_02_04_500000_seed_navigation_site_settings',1);
+INSERT INTO `migrations` VALUES (24,'2026_02_04_600000_create_plugins_table',1);
+INSERT INTO `migrations` VALUES (25,'2026_02_20_000001_add_event_id_to_media_table',1);
+INSERT INTO `migrations` VALUES (26,'2026_02_20_000002_add_hero_show_setting',1);
+INSERT INTO `migrations` VALUES (27,'2026_02_21_000001_add_broadcast_messaging',1);
+INSERT INTO `migrations` VALUES (28,'2026_02_21_100000_backfill_date_components',1);
+INSERT INTO `migrations` VALUES (29,'2026_02_24_000001_add_new_user_claim_flows',1);
+INSERT INTO `migrations` VALUES (30,'2026_02_27_000001_add_chat_request_to_messages',1);
+INSERT INTO `migrations` VALUES (31,'2026_02_28_100000_add_language_to_site_settings',1);
+INSERT INTO `migrations` VALUES (32,'2026_07_14_000001_add_biography_to_persons_table',1);
+/*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+

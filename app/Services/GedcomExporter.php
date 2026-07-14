@@ -20,6 +20,14 @@ class GedcomExporter
      */
     public function export(array $options = []): string
     {
+        // La exportacion carga las personas y construye toda la salida en memoria;
+        // elevar limites de tiempo/memoria de forma best-effort para no ser cortado
+        // en hosting compartido con arboles grandes.
+        @set_time_limit(0);
+        if ((int) preg_replace('/[^0-9]/', '', (string) ini_get('memory_limit')) < 512) {
+            @ini_set('memory_limit', '512M');
+        }
+
         $this->output = [];
         $this->personIds = [];
         $this->familyIds = [];

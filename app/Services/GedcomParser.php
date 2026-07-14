@@ -280,6 +280,15 @@ class GedcomParser
      */
     public function import(string $content, array $options = []): array
     {
+        // La importacion procesa todo el archivo en memoria dentro de una sola
+        // transaccion; en hosting compartido (cPanel) el limite de tiempo/memoria
+        // por defecto puede cortar el proceso. Elevar limites de forma best-effort
+        // (si el host los tiene bloqueados, se ignora sin romper).
+        @set_time_limit(0);
+        if ((int) preg_replace('/[^0-9]/', '', (string) ini_get('memory_limit')) < 512) {
+            @ini_set('memory_limit', '512M');
+        }
+
         $data = $this->parse($content);
 
         if (!empty($data['errors'])) {

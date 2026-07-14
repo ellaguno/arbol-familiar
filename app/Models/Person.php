@@ -54,6 +54,7 @@ class Person extends Model
         'residence_place',
         'residence_country',
         'occupation',
+        'biography',
         'email',
         'phone',
         'has_ethnic_heritage',
