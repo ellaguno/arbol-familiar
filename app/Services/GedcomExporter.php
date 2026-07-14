@@ -64,6 +64,14 @@ class GedcomExporter
     {
         $query = Person::with(['events', 'familiesAsChild', 'familiesAsHusband', 'familiesAsWife']);
 
+        // Restringir la exportacion a las personas que el usuario puede ver
+        // (mismos niveles de privacidad que el resto de la app). Los admin
+        // gestionan todos los datos y exportan sin restriccion.
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            $query->visibleTo($user);
+        }
+
         // Filtrar por IDs especificos
         if (!empty($this->options['person_ids'])) {
             $query->whereIn('id', $this->options['person_ids']);

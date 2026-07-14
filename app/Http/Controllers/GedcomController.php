@@ -250,19 +250,27 @@ class GedcomController extends Controller
      */
     public function export()
     {
-        // Obtener persona del usuario como punto de partida predeterminado
-        $userPerson = Auth::user()->person;
+        $user = Auth::user();
 
-        // Obtener todas las personas para selector
-        $persons = Person::orderBy('patronymic')
+        // Obtener persona del usuario como punto de partida predeterminado
+        $userPerson = $user->person;
+
+        // Selector y estadisticas restringidos a las personas visibles para el
+        // usuario (los admin gestionan todos los datos y ven el total).
+        $isAdmin = $user->isAdmin();
+
+        $persons = (($isAdmin) ? Person::query() : Person::query()->visibleTo($user))
+            ->orderBy('patronymic')
             ->orderBy('first_name')
             ->get();
 
+        $statsBase = fn () => $isAdmin ? Person::query() : Person::query()->visibleTo($user);
+
         // Estadisticas
         $stats = [
-            'total_persons' => Person::count(),
-            'total_living' => Person::where('is_living', true)->count(),
-            'total_deceased' => Person::where('is_living', false)->count(),
+            'total_persons' => $statsBase()->count(),
+            'total_living' => $statsBase()->where('is_living', true)->count(),
+            'total_deceased' => $statsBase()->where('is_living', false)->count(),
         ];
 
         return view('gedcom.export', compact('userPerson', 'persons', 'stats'));
@@ -348,6 +356,9 @@ class GedcomController extends Controller
      */
     public function exportTree(Person $person, Request $request)
     {
+        // Solo se puede exportar el arbol de una persona que el usuario puede ver.
+        abort_unless($person->canBeViewedBy(Auth::user()), 403);
+
         $generations = $request->input('generations', 10);
 
         $options = [

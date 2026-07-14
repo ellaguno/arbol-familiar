@@ -21,61 +21,9 @@ class PersonController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = Person::query();
 
-        // Obtener IDs de familia directa, extendida y linaje si el usuario tiene persona asociada
-        $directFamilyIds = [];
-        $extendedFamilyIds = [];
-        $lineageIds = [];
-        if ($user->person_id && $user->person) {
-            $directFamilyIds = $user->person->directFamilyIds;
-            $extendedFamilyIds = $user->person->extendedFamilyIds;
-            // Linaje directo: ascendentes y descendientes SIEMPRE visibles sin importar privacidad
-            $lineageIds = array_unique(array_merge(
-                $user->person->getAllAncestorIds(),
-                $user->person->getAllDescendantIds()
-            ));
-        }
-
-        // Filtrar por privacidad según los 4 niveles
-        $query->where(function ($q) use ($user, $directFamilyIds, $extendedFamilyIds, $lineageIds) {
-            // Personas creadas por el usuario (siempre visibles)
-            $q->where('created_by', $user->id);
-
-            // Usuario puede ver su propio perfil
-            if ($user->person_id) {
-                $q->orWhere('id', $user->person_id);
-            }
-
-            // Linaje directo: ascendentes y descendientes SIEMPRE visibles
-            // independientemente del nivel de privacidad (requerimiento del cliente)
-            if (!empty($lineageIds)) {
-                $q->orWhereIn('id', $lineageIds);
-            }
-
-            // Personas con nivel 'community' (visibles para todos los registrados)
-            $q->orWhere('privacy_level', 'community');
-
-            // Personas con nivel 'selected_users' o 'extended_family' que son familia extendida
-            if (!empty($extendedFamilyIds)) {
-                $q->orWhere(function ($subQ) use ($extendedFamilyIds) {
-                    $subQ->whereIn('privacy_level', ['extended_family', 'selected_users'])
-                         ->whereIn('id', $extendedFamilyIds);
-                });
-            }
-
-            // Personas con nivel 'direct_family' que son familia directa del usuario
-            if (!empty($directFamilyIds)) {
-                $q->orWhere(function ($subQ) use ($directFamilyIds) {
-                    $subQ->where('privacy_level', 'direct_family')
-                         ->whereIn('id', $directFamilyIds);
-                });
-            }
-
-            // Personas con nivel 'selected_users' aparecen en la lista (nombre visible)
-            // para permitir que envien solicitudes de acceso
-            $q->orWhere('privacy_level', 'selected_users');
-        });
+        // Filtrar por privacidad según los 4 niveles (scope reutilizable en Person)
+        $query = Person::query()->visibleTo($user);
 
         // Busqueda por nombre (inteligente)
         if ($request->filled('search')) {

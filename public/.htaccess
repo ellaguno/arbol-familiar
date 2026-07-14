@@ -1,3 +1,13 @@
+# Bloquear la ejecucion directa de cualquier .php que no sea el front
+# controller. Evita que scripts de mantenimiento sueltos (migraciones,
+# seeders, generacion de key) sean ejecutables por web si se suben por error.
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+<Files "index.php">
+    Require all granted
+</Files>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

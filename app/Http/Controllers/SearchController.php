@@ -54,7 +54,8 @@ class SearchController extends Controller
         $results = [];
 
         // Buscar personas (busqueda inteligente)
-        $persons = Person::searchByName($query)
+        $persons = $this->visiblePersons()
+            ->searchByName($query)
             ->limit(5)
             ->get();
 
@@ -72,12 +73,15 @@ class SearchController extends Controller
         }
 
         // Buscar familias (busqueda inteligente)
-        $families = Family::with(['husband', 'wife'])
-            ->whereHas('husband', function ($q) use ($query) {
-                $q->searchByName($query);
-            })
-            ->orWhereHas('wife', function ($q) use ($query) {
-                $q->searchByName($query);
+        $families = $this->visibleFamilies()
+            ->with(['husband', 'wife'])
+            ->where(function ($q) use ($query) {
+                $q->whereHas('husband', function ($sub) use ($query) {
+                    $sub->searchByName($query);
+                })
+                ->orWhereHas('wife', function ($sub) use ($query) {
+                    $sub->searchByName($query);
+                });
             })
             ->limit(3)
             ->get();
@@ -94,7 +98,8 @@ class SearchController extends Controller
         }
 
         // Buscar lugares
-        $places = Person::select('birth_place')
+        $places = $this->visiblePersons()
+            ->select('birth_place')
             ->where('birth_place', 'like', "%{$query}%")
             ->whereNotNull('birth_place')
             ->distinct()
@@ -156,7 +161,8 @@ class SearchController extends Controller
      */
     protected function searchPersons(string $query)
     {
-        return Person::where(function ($q) use ($query) {
+        return $this->visiblePersons()
+            ->where(function ($q) use ($query) {
                 // Busqueda inteligente por nombre
                 $q->where(function ($nameQuery) use ($query) {
                     (new Person)->scopeSearchByName($nameQuery, $query);
@@ -176,7 +182,8 @@ class SearchController extends Controller
      */
     protected function searchFamilies(string $query)
     {
-        return Family::with(['husband', 'wife'])
+        return $this->visibleFamilies()
+            ->with(['husband', 'wife'])
             ->where(function ($q) use ($query) {
                 $q->where('marriage_place', 'like', "%{$query}%")
                   ->orWhereHas('husband', function ($sub) use ($query) {
@@ -194,20 +201,20 @@ class SearchController extends Controller
      */
     protected function searchPlaces(string $query)
     {
-        // Obtener lugares unicos de varias fuentes
-        $birthPlaces = Person::select('birth_place as place')
+        // Obtener lugares unicos de varias fuentes (solo de registros visibles)
+        $birthPlaces = $this->visiblePersons()->select('birth_place as place')
             ->where('birth_place', 'like', "%{$query}%")
             ->whereNotNull('birth_place');
 
-        $deathPlaces = Person::select('death_place as place')
+        $deathPlaces = $this->visiblePersons()->select('death_place as place')
             ->where('death_place', 'like', "%{$query}%")
             ->whereNotNull('death_place');
 
-        $marriagePlaces = Family::select('marriage_place as place')
+        $marriagePlaces = $this->visibleFamilies()->select('marriage_place as place')
             ->where('marriage_place', 'like', "%{$query}%")
             ->whereNotNull('marriage_place');
 
-        $eventPlaces = Event::select('place')
+        $eventPlaces = $this->visibleEvents()->select('place')
             ->where('place', 'like', "%{$query}%")
             ->whereNotNull('place');
 
@@ -222,15 +229,18 @@ class SearchController extends Controller
             ->unique()
             ->values();
 
-        // Para cada lugar, obtener el conteo de personas y eventos
+        // Para cada lugar, obtener el conteo de personas y eventos (visibles)
         $placesWithCounts = $places->map(function ($place) {
-            $personCount = Person::where('birth_place', $place)
-                ->orWhere('death_place', $place)
+            $personCount = $this->visiblePersons()
+                ->where(function ($q) use ($place) {
+                    $q->where('birth_place', $place)
+                      ->orWhere('death_place', $place);
+                })
                 ->count();
 
-            $familyCount = Family::where('marriage_place', $place)->count();
+            $familyCount = $this->visibleFamilies()->where('marriage_place', $place)->count();
 
-            $eventCount = Event::where('place', $place)->count();
+            $eventCount = $this->visibleEvents()->where('place', $place)->count();
 
             return [
                 'name' => $place,
@@ -249,7 +259,8 @@ class SearchController extends Controller
      */
     protected function searchEvents(string $query)
     {
-        return Event::with('person')
+        return $this->visibleEvents()
+            ->with('person')
             ->where(function ($q) use ($query) {
                 $q->where('place', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")
@@ -264,7 +275,8 @@ class SearchController extends Controller
      */
     protected function searchMedia(string $query)
     {
-        return Media::with('mediable')
+        return $this->visibleMedia()
+            ->with('mediable')
             ->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%");
@@ -279,14 +291,14 @@ class SearchController extends Controller
     protected function searchSurnames(string $query)
     {
         // Buscar apellidos en personas (usando patronymic como apellido principal)
-        $surnames = Person::select('patronymic')
+        $surnames = $this->visiblePersons()->select('patronymic')
             ->where('patronymic', 'like', "%{$query}%")
             ->whereNotNull('patronymic')
             ->distinct()
             ->orderBy('patronymic')
             ->get()
             ->map(function ($person) {
-                $count = Person::where('patronymic', $person->patronymic)->count();
+                $count = $this->visiblePersons()->where('patronymic', $person->patronymic)->count();
                 $variants = SurnameVariant::where('original_surname', $person->patronymic)
                     ->orWhere('variant_1', $person->patronymic)
                     ->orWhere('variant_2', $person->patronymic)
@@ -305,9 +317,12 @@ class SearchController extends Controller
             ->orWhere('variant_2', 'like', "%{$query}%")
             ->get()
             ->map(function ($variant) {
-                $count = Person::where('patronymic', $variant->original_surname)
-                    ->orWhere('patronymic', $variant->variant_1)
-                    ->orWhere('patronymic', $variant->variant_2)
+                $count = $this->visiblePersons()
+                    ->where(function ($q) use ($variant) {
+                        $q->where('patronymic', $variant->original_surname)
+                          ->orWhere('patronymic', $variant->variant_1)
+                          ->orWhere('patronymic', $variant->variant_2);
+                    })
                     ->count();
 
                 return [
@@ -331,28 +346,37 @@ class SearchController extends Controller
     protected function getResultCounts(string $query): array
     {
         return [
-            'persons' => Person::searchByName($query)->count(),
-            'families' => Family::where('marriage_place', 'like', "%{$query}%")
-                ->orWhereHas('husband', function ($q) use ($query) {
-                    $q->searchByName($query);
-                })
-                ->orWhereHas('wife', function ($q) use ($query) {
-                    $q->searchByName($query);
+            'persons' => $this->visiblePersons()->searchByName($query)->count(),
+            'families' => $this->visibleFamilies()
+                ->where(function ($q) use ($query) {
+                    $q->where('marriage_place', 'like', "%{$query}%")
+                      ->orWhereHas('husband', function ($sub) use ($query) {
+                          $sub->searchByName($query);
+                      })
+                      ->orWhereHas('wife', function ($sub) use ($query) {
+                          $sub->searchByName($query);
+                      });
                 })
                 ->count(),
-            'places' => Person::select('birth_place')
+            'places' => $this->visiblePersons()->select('birth_place')
                 ->where('birth_place', 'like', "%{$query}%")
                 ->distinct()
                 ->count() +
-                Person::select('death_place')
+                $this->visiblePersons()->select('death_place')
                 ->where('death_place', 'like', "%{$query}%")
                 ->distinct()
                 ->count(),
-            'events' => Event::where('place', 'like', "%{$query}%")
-                ->orWhere('description', 'like', "%{$query}%")
+            'events' => $this->visibleEvents()
+                ->where(function ($q) use ($query) {
+                    $q->where('place', 'like', "%{$query}%")
+                      ->orWhere('description', 'like', "%{$query}%");
+                })
                 ->count(),
-            'media' => Media::where('title', 'like', "%{$query}%")
-                ->orWhere('description', 'like', "%{$query}%")
+            'media' => $this->visibleMedia()
+                ->where(function ($q) use ($query) {
+                    $q->where('title', 'like', "%{$query}%")
+                      ->orWhere('description', 'like', "%{$query}%");
+                })
                 ->count(),
         ];
     }
@@ -423,7 +447,7 @@ class SearchController extends Controller
         $results = null;
 
         if ($request->filled('search')) {
-            $query = Person::query();
+            $query = Person::query()->visibleTo(Auth::user());
 
             // Nombre
             if ($request->filled('first_name')) {
@@ -501,5 +525,54 @@ class SearchController extends Controller
         session()->forget('recent_searches');
 
         return back()->with('success', __('Historial de busqueda limpiado.'));
+    }
+
+    /**
+     * Consulta de personas restringida a las que el usuario puede ver
+     * (mismos 4 niveles de privacidad que el listado de personas).
+     */
+    protected function visiblePersons()
+    {
+        return Person::query()->visibleTo(Auth::user());
+    }
+
+    /**
+     * Consulta de familias restringida a las que tienen al menos un cónyuge
+     * visible para el usuario.
+     */
+    protected function visibleFamilies()
+    {
+        $user = Auth::user();
+
+        return Family::where(function ($q) use ($user) {
+            $q->whereHas('husband', fn ($h) => $h->visibleTo($user))
+              ->orWhereHas('wife', fn ($w) => $w->visibleTo($user));
+        });
+    }
+
+    /**
+     * Consulta de eventos restringida a los de personas visibles.
+     */
+    protected function visibleEvents()
+    {
+        $user = Auth::user();
+
+        return Event::whereHas('person', fn ($q) => $q->visibleTo($user));
+    }
+
+    /**
+     * Consulta de media restringida a la asociada a personas/familias visibles.
+     */
+    protected function visibleMedia()
+    {
+        $user = Auth::user();
+
+        return Media::where(function ($q) use ($user) {
+            $q->whereHasMorph('mediable', [Person::class], fn ($p) => $p->visibleTo($user))
+              ->orWhereHasMorph('mediable', [Family::class], function ($f) use ($user) {
+                  $f->whereHas('husband', fn ($h) => $h->visibleTo($user))
+                    ->orWhereHas('wife', fn ($w) => $w->visibleTo($user));
+              });
+        });
     }
 }
