@@ -22,3 +22,8 @@ yarn-error.log
 *.sql.bak
 manifest.json
 /.claude
+
+# Informes internos (no deben publicarse en el repo)
+AUDIT_REPORT.md
+AUDIT_*.md
+PROJECT_SIZE_REPORT.*
