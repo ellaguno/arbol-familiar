@@ -63,6 +63,14 @@ class SocialAuthService
             $existingUser = User::where('email', $email)->first();
 
             if ($existingUser) {
+                // No vincular a una cuenta existente si el proveedor no confirma
+                // que el email esta verificado: de lo contrario, un proveedor que
+                // devuelva un email no verificado (controlado por un atacante)
+                // permitiria tomar control de una cuenta con contraseña.
+                if (!$this->providerEmailIsVerified($provider, $socialiteUser)) {
+                    throw new \Exception(__('Tu proveedor no confirma que este correo este verificado, por lo que no podemos vincularlo a una cuenta existente. Inicia sesion con tu contraseña y vincula la cuenta desde tu perfil.'));
+                }
+
                 $this->linkAccountToUser($existingUser, $provider, $socialiteUser);
 
                 ActivityLog::log('oauth_login', $existingUser, null, [
@@ -115,7 +123,10 @@ class SocialAuthService
                 'password' => Hash::make(Str::random(32)),
                 'language' => app()->getLocale(),
                 'privacy_level' => 'extended_family',
-                'email_verified_at' => ($this->settings['auto_verify_email'] ?? true) ? now() : null,
+                // Solo auto-verificar el email si el proveedor confirma que esta
+                // verificado (no confiar ciegamente en el email del proveedor).
+                'email_verified_at' => (($this->settings['auto_verify_email'] ?? true)
+                    && $this->providerEmailIsVerified($provider, $socialiteUser)) ? now() : null,
                 'first_login_completed' => false,
             ]);
 
@@ -163,6 +174,49 @@ class SocialAuthService
         }
 
         $account->update($data);
+    }
+
+    /**
+     * ¿El proveedor OAuth confirma que el email esta verificado?
+     *
+     * Solo se debe vincular a una cuenta existente (o auto-verificar) cuando el
+     * proveedor lo garantiza. Google puede devolver emails NO verificados
+     * (email_verified=false), lo que sin esta comprobacion permitiria account
+     * takeover. Facebook y Microsoft solo entregan el email de la identidad
+     * verificada de la cuenta.
+     */
+    protected function providerEmailIsVerified(string $provider, SocialiteUser $socialiteUser): bool
+    {
+        if (empty($socialiteUser->getEmail())) {
+            return false;
+        }
+
+        // Datos crudos del proveedor (no forman parte del contrato de Socialite).
+        $raw = [];
+        if (method_exists($socialiteUser, 'getRaw')) {
+            $raw = $socialiteUser->getRaw() ?? [];
+        } elseif (isset($socialiteUser->user) && is_array($socialiteUser->user)) {
+            $raw = $socialiteUser->user;
+        }
+
+        switch ($provider) {
+            case 'google':
+                // Confiar solo si el flag es explicitamente verdadero.
+                $flag = $raw['email_verified'] ?? $raw['verified_email'] ?? null;
+                return $flag === true || $flag === 'true' || $flag === 1 || $flag === '1';
+
+            case 'facebook':
+                // Facebook solo devuelve el email cuando esta verificado.
+                return true;
+
+            case 'microsoft':
+                // El email es la identidad verificada de la cuenta Microsoft.
+                return true;
+
+            default:
+                // Proveedor desconocido: ser conservador.
+                return false;
+        }
     }
 
     protected function splitName(string $fullName): array
