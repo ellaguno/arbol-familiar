@@ -8,6 +8,7 @@ use App\Models\FamilyChild;
 use App\Models\Message;
 use App\Models\Person;
 use App\Models\User;
+use App\Http\Requests\PersonRequest;
 use App\Services\RelationshipService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -150,9 +151,9 @@ class PersonController extends Controller
     /**
      * Almacena una nueva persona.
      */
-    public function store(Request $request)
+    public function store(PersonRequest $request)
     {
-        $validated = $this->validatePerson($request);
+        $validated = $request->personData();
         $user = auth()->user();
 
         $person = Person::create([
@@ -295,11 +296,11 @@ class PersonController extends Controller
     /**
      * Actualiza una persona.
      */
-    public function update(Request $request, Person $person)
+    public function update(PersonRequest $request, Person $person)
     {
         $this->authorizeEdit($person);
 
-        $validated = $this->validatePerson($request, $person);
+        $validated = $request->personData();
         $user = auth()->user();
 
         // Guardar email anterior para comparar
@@ -694,83 +695,6 @@ class PersonController extends Controller
     }
 
     /**
-     * Valida los datos de persona.
-     */
-    protected function validatePerson(Request $request, ?Person $person = null): array
-    {
-        $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:100'],
-            'patronymic' => ['required', 'string', 'max:100'],
-            'matronymic' => ['nullable', 'string', 'max:100'],
-            'nickname' => ['nullable', 'string', 'max:100'],
-            'gender' => ['required', 'in:M,F,U,O'],
-            'marital_status' => ['nullable', 'in:single,married,common_law,divorced,widowed'],
-            'birth_year' => ['nullable', 'integer', 'min:1000', 'max:' . date('Y')],
-            'birth_month' => ['nullable', 'integer', 'min:1', 'max:12'],
-            'birth_day' => ['nullable', 'integer', 'min:1', 'max:31'],
-            'birth_date_approx' => ['boolean'],
-            'birth_place' => ['nullable', 'string', 'max:255'],
-            'birth_country' => ['nullable', 'string', 'max:100'],
-            'death_year' => ['nullable', 'integer', 'min:1000', 'max:' . date('Y')],
-            'death_month' => ['nullable', 'integer', 'min:1', 'max:12'],
-            'death_day' => ['nullable', 'integer', 'min:1', 'max:31'],
-            'death_date_approx' => ['boolean'],
-            'death_place' => ['nullable', 'string', 'max:255'],
-            'death_country' => ['nullable', 'string', 'max:100'],
-            'is_living' => ['boolean'],
-            'is_minor' => ['boolean'],
-            'residence_place' => ['nullable', 'string', 'max:255'],
-            'residence_country' => ['nullable', 'string', 'max:100'],
-            'occupation' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'has_ethnic_heritage' => ['nullable', 'boolean'],
-            'heritage_region' => ['nullable', 'string', 'max:100'],
-            'origin_town' => ['nullable', 'string', 'max:255'],
-            'migration_decade' => ['nullable', 'string', 'max:10'],
-            'migration_destination' => ['nullable', 'string', 'max:255'],
-            'privacy_level' => ['required', 'in:direct_family,extended_family,selected_users,community'],
-        ], [
-            'first_name.required' => 'El nombre es obligatorio.',
-            'patronymic.required' => 'El apellido paterno es obligatorio.',
-            'gender.required' => 'El genero es obligatorio.',
-        ]);
-
-        // Construir birth_date si tenemos todos los componentes
-        if (!empty($validated['birth_year']) && !empty($validated['birth_month']) && !empty($validated['birth_day'])) {
-            $validated['birth_date'] = sprintf(
-                '%04d-%02d-%02d',
-                $validated['birth_year'],
-                $validated['birth_month'],
-                $validated['birth_day']
-            );
-        } else {
-            $validated['birth_date'] = null;
-        }
-
-        // Construir death_date si tenemos todos los componentes
-        if (!empty($validated['death_year']) && !empty($validated['death_month']) && !empty($validated['death_day'])) {
-            $validated['death_date'] = sprintf(
-                '%04d-%02d-%02d',
-                $validated['death_year'],
-                $validated['death_month'],
-                $validated['death_day']
-            );
-        } else {
-            $validated['death_date'] = null;
-        }
-
-        // Limpiar valores vacíos para campos numéricos
-        foreach (['birth_year', 'birth_month', 'birth_day', 'death_year', 'death_month', 'death_day'] as $field) {
-            if (empty($validated[$field])) {
-                $validated[$field] = null;
-            }
-        }
-
-        return $validated;
-    }
-
-    /**
      * Verifica si el usuario puede ver la persona.
      * Usa el método canBeViewedBy del modelo Person que implementa
      * los 4 niveles de privacidad.
@@ -778,9 +702,7 @@ class PersonController extends Controller
      */
     protected function authorizeView(Person $person): void
     {
-        $user = auth()->user();
-
-        if (!$person->canBeViewedBy($user)) {
+        if (\Illuminate\Support\Facades\Gate::denies('view', $person)) {
             $previousUrl = url()->previous();
             $currentUrl = url()->current();
             $redirectUrl = ($previousUrl && $previousUrl !== $currentUrl)
@@ -800,52 +722,14 @@ class PersonController extends Controller
      */
     protected function authorizeEdit(Person $person): void
     {
-        $user = auth()->user();
+        // La logica vive en PersonPolicy::update. Se usa Gate::inspect para
+        // conservar el mensaje especifico de la negacion y lanzar un 403 (que
+        // el Handler convierte en redirect con toast), como antes.
+        $response = \Illuminate\Support\Facades\Gate::inspect('update', $person);
 
-        // Si es menor de edad y tiene padres registrados con cuenta,
-        // solo los padres pueden editar (no el creador original)
-        if ($person->is_minor_calculated && $this->relationships->minorHasRegisteredParents($person)) {
-            // Los padres registrados pueden editar
-            if ($user->person_id && $this->relationships->isParentOf($user->person_id, $person)) {
-                return;
-            }
-
-            // El menor vinculado puede editar su propio perfil (si tiene cuenta)
-            if ($user->person_id === $person->id) {
-                return;
-            }
-
-            // Admin siempre puede
-            if ($user->is_admin) {
-                return;
-            }
-
-            abort(403, 'Solo los padres registrados pueden editar el perfil de un menor.');
+        if ($response->denied()) {
+            abort(403, $response->message() ?: __('No tienes permiso para editar esta persona.'));
         }
-
-        // Para no-menores, lógica normal:
-
-        // El creador puede editar
-        if ($person->created_by === $user->id) {
-            return;
-        }
-
-        // Usuario puede editar su propio perfil
-        if ($user->person_id === $person->id) {
-            return;
-        }
-
-        // Personas con consentimiento aprobado pueden editarse si estan vinculadas
-        if ($person->consent_status === 'approved' && $person->user_id === $user->id) {
-            return;
-        }
-
-        // Verificar permisos de edición otorgados (familia directa)
-        if ($person->canBeEditedBy($user->id)) {
-            return;
-        }
-
-        abort(403, 'No tienes permiso para editar esta persona.');
     }
 
     /**
