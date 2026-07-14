@@ -58,6 +58,7 @@ CREATE TABLE `events` (
   KEY `events_person_id_index` (`person_id`),
   KEY `events_family_id_index` (`family_id`),
   KEY `events_type_index` (`type`),
+  KEY `events_date_index` (`date`),
   CONSTRAINT `events_family_id_foreign` FOREIGN KEY (`family_id`) REFERENCES `families` (`id`) ON DELETE CASCADE,
   CONSTRAINT `events_person_id_foreign` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -158,6 +159,7 @@ CREATE TABLE `media` (
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `file_path` varchar(500) DEFAULT NULL,
+  `thumbnail_path` varchar(500) DEFAULT NULL,
   `file_name` varchar(255) DEFAULT NULL,
   `file_size` int(10) unsigned DEFAULT NULL COMMENT 'Tamano en bytes',
   `mime_type` varchar(100) DEFAULT NULL,
@@ -235,7 +237,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -331,6 +333,7 @@ CREATE TABLE `persons` (
   `heritage_family_member_name` varchar(200) DEFAULT NULL COMMENT 'Nombre del familiar con herencia etnica',
   `heritage_family_relationship` varchar(50) DEFAULT NULL COMMENT 'Tipo de relacion con el familiar con herencia etnica',
   `photo_path` varchar(500) DEFAULT NULL,
+  `photo_thumbnail_path` varchar(500) DEFAULT NULL,
   `privacy_level` varchar(30) NOT NULL DEFAULT 'extended_family',
   `consent_status` enum('pending','approved','denied','not_required') NOT NULL DEFAULT 'not_required',
   `consent_requested_at` timestamp NULL DEFAULT NULL,
@@ -339,6 +342,7 @@ CREATE TABLE `persons` (
   `updated_by` bigint(20) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `persons_user_id_index` (`user_id`),
   KEY `idx_persons_names` (`first_name`,`patronymic`),
@@ -347,6 +351,8 @@ CREATE TABLE `persons` (
   KEY `persons_created_by_index` (`created_by`),
   KEY `persons_updated_by_foreign` (`updated_by`),
   KEY `persons_privacy_created_idx` (`privacy_level`,`created_by`),
+  KEY `persons_patronymic_index` (`patronymic`),
+  KEY `persons_gender_index` (`gender`),
   FULLTEXT KEY `idx_persons_fulltext` (`first_name`,`patronymic`,`matronymic`),
   CONSTRAINT `persons_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
   CONSTRAINT `persons_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
@@ -528,6 +534,9 @@ INSERT INTO `migrations` VALUES (29,'2026_02_24_000001_add_new_user_claim_flows'
 INSERT INTO `migrations` VALUES (30,'2026_02_27_000001_add_chat_request_to_messages',1);
 INSERT INTO `migrations` VALUES (31,'2026_02_28_100000_add_language_to_site_settings',1);
 INSERT INTO `migrations` VALUES (32,'2026_07_14_000001_add_biography_to_persons_table',1);
+INSERT INTO `migrations` VALUES (33,'2026_07_14_000002_add_thumbnail_paths',1);
+INSERT INTO `migrations` VALUES (34,'2026_07_14_000003_add_softdeletes_to_persons',1);
+INSERT INTO `migrations` VALUES (35,'2026_07_14_000004_add_more_performance_indexes',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
