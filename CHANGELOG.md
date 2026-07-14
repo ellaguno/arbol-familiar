@@ -5,6 +5,33 @@ Todos los cambios notables en este proyecto seran documentados en este archivo.
 El formato esta basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.6.9] - 2026-03-02
+
+### Agregado
+- **Herramienta "Marcar fallecidos"** (admin): detecta personas vivas con 100+ años (centenarios directos y sus ancestros marcados como vivos)
+- Clasificación por confianza (alta/media/baja) según la precisión de la fecha de nacimiento
+- Selección en lote con checkboxes; solo marca `is_living=false` (sin fijar `death_date`)
+
+### Actualizado
+- Version a 2.6.9 en `config/mi-familia.php` y `composer.json`
+
+---
+
+## [2.6.8] - 2026-03-02
+
+### Agregado
+- Selector de posición del formulario de login (izquierda/derecha) en el panel admin
+- Mejoras en el plugin research-assistant y su integración con FamilySearch
+- Mejoras en las páginas de bienvenida e imágenes de ayuda (nuevas capturas)
+
+### Corregido
+- Modo oscuro: `dark:prose-invert` en ayuda e info de ancestros; variantes `dark:` faltantes en admin/content, media/create, gedcom/preview y tree/view
+
+### Actualizado
+- Version a 2.6.8 en `config/mi-familia.php` y `composer.json`
+
+---
+
 ## [2.6.7] - 2026-02-28
 
 ### Agregado

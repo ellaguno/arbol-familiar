@@ -1,6 +1,6 @@
 # Mi Familia
 
-**Version:** 2.0.0
+**Version:** 2.6.9
 
 Generic open-source genealogy platform for documenting, preserving, and sharing family history. Built with modern web technologies and designed for collaborative genealogy work.
 
