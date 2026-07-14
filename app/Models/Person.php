@@ -65,6 +65,7 @@ class Person extends Model
         'heritage_family_member_name',
         'heritage_family_relationship',
         'photo_path',
+        'photo_thumbnail_path',
         'privacy_level',
         'consent_status',
         'consent_requested_at',
@@ -207,6 +208,23 @@ class Person extends Model
             $name .= ' ' . $this->matronymic;
         }
         return $name;
+    }
+
+    /**
+     * URL del thumbnail de la foto. Si no hay thumbnail generado (fotos
+     * antiguas), cae de vuelta a la foto completa; null si no hay foto.
+     */
+    public function getPhotoThumbnailUrlAttribute(): ?string
+    {
+        if ($this->photo_thumbnail_path) {
+            return asset('storage/' . $this->photo_thumbnail_path);
+        }
+
+        if ($this->photo_path) {
+            return asset('storage/' . $this->photo_path);
+        }
+
+        return null;
     }
 
     /**

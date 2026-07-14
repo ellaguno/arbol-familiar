@@ -102,7 +102,7 @@
                                     <a href="{{ route('persons.show', $person) }}" class="block p-4 hover:bg-theme-secondary transition-colors">
                                         <div class="flex items-center gap-4">
                                             @if($person->photo_path)
-                                                <img src="{{ Storage::url($person->photo_path) }}" class="w-12 h-12 rounded-full object-cover">
+                                                <img src="{{ $person->photo_thumbnail_url }}" class="w-12 h-12 rounded-full object-cover">
                                             @else
                                                 <div class="w-12 h-12 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 flex items-center justify-center">
                                                     <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 font-bold">

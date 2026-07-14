@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Event;
 use App\Models\Media;
 use App\Models\Person;
+use App\Services\ThumbnailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -97,11 +98,13 @@ class MediaController extends Controller
             $file = $request->file('file');
             $mimeType = $file->getMimeType();
 
+            $thumbnailPath = null;
             if ($validated['type'] === 'image') {
                 if (!str_starts_with($mimeType, 'image/')) {
                     return back()->withErrors(['file' => 'El archivo debe ser una imagen.'])->withInput();
                 }
                 $path = $file->store('media/images', 'public');
+                $thumbnailPath = app(ThumbnailService::class)->generate($path, 'media/thumbnails');
             } else {
                 $allowedDocTypes = [
                     'application/pdf',
@@ -123,6 +126,7 @@ class MediaController extends Controller
                 'title' => $validated['title'] ?? $file->getClientOriginalName(),
                 'description' => $validated['description'] ?? null,
                 'file_path' => $path,
+                'thumbnail_path' => $thumbnailPath,
                 'file_name' => $file->getClientOriginalName(),
                 'file_size' => $file->getSize(),
                 'mime_type' => $mimeType,
@@ -245,10 +249,11 @@ class MediaController extends Controller
 
         $user = auth()->user();
 
-        // Eliminar archivo fisico
+        // Eliminar archivo fisico y su thumbnail
         if ($media->file_path) {
             Storage::disk('public')->delete($media->file_path);
         }
+        app(ThumbnailService::class)->delete($media->thumbnail_path);
 
         ActivityLog::log('media_deleted', $user, null, [
             'media_id' => $media->id,

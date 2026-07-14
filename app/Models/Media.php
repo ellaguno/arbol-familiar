@@ -20,6 +20,7 @@ class Media extends Model
         'title',
         'description',
         'file_path',
+        'thumbnail_path',
         'file_name',
         'file_size',
         'mime_type',
@@ -138,6 +139,19 @@ class Media extends Model
         }
 
         return null;
+    }
+
+    /**
+     * URL del thumbnail. Si no hay thumbnail generado (imagenes antiguas),
+     * cae de vuelta a la imagen completa.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if ($this->isImage() && $this->thumbnail_path) {
+            return Storage::url($this->thumbnail_path);
+        }
+
+        return $this->url;
     }
 
     /**

@@ -142,7 +142,7 @@
                                 <!-- Foto -->
                                 <div class="flex-shrink-0">
                                     @if($person->photo_path)
-                                        <img src="{{ Storage::url($person->photo_path) }}"
+                                        <img src="{{ $person->photo_thumbnail_url }}"
                                              alt="{{ $person->full_name }}"
                                              class="w-16 h-16 rounded-full object-cover">
                                     @else

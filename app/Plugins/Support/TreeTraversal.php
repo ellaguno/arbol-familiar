@@ -48,7 +48,7 @@ class TreeTraversal
             'isLiving' => $person->is_living,
             'isMinor' => $person->is_minor_calculated,
             'isProtected' => $isProtectedMinor,
-            'photo' => $isProtectedMinor ? null : ($person->photo_path ? asset('storage/' . $person->photo_path) : null),
+            'photo' => $isProtectedMinor ? null : $person->photo_thumbnail_url,
             'hasEthnicHeritage' => $person->has_ethnic_heritage,
             'url' => route('persons.show', $person),
             'hasFather' => $hasFather,

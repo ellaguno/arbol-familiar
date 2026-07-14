@@ -379,14 +379,21 @@ class PersonController extends Controller
         ]);
 
         $user = auth()->user();
+        $thumbnailService = app(\App\Services\ThumbnailService::class);
 
-        // Eliminar foto anterior
+        // Eliminar foto anterior y su thumbnail
         if ($person->photo_path) {
             Storage::disk('public')->delete($person->photo_path);
         }
+        $thumbnailService->delete($person->photo_thumbnail_path);
 
         $path = $request->file('photo')->store('photos/persons', 'public');
-        $person->update(['photo_path' => $path, 'updated_by' => $user->id]);
+        $thumbnailPath = $thumbnailService->generate($path, 'photos/persons/thumbnails');
+        $person->update([
+            'photo_path' => $path,
+            'photo_thumbnail_path' => $thumbnailPath,
+            'updated_by' => $user->id,
+        ]);
 
         ActivityLog::log('person_photo_updated', $user, $person);
 
@@ -395,6 +402,7 @@ class PersonController extends Controller
             return response()->json([
                 'success' => true,
                 'photo' => asset('storage/' . $path),
+                'thumbnail' => $person->photo_thumbnail_url,
                 'message' => 'Foto actualizada.',
             ]);
         }
@@ -413,7 +421,12 @@ class PersonController extends Controller
 
         if ($person->photo_path) {
             Storage::disk('public')->delete($person->photo_path);
-            $person->update(['photo_path' => null, 'updated_by' => $user->id]);
+            app(\App\Services\ThumbnailService::class)->delete($person->photo_thumbnail_path);
+            $person->update([
+                'photo_path' => null,
+                'photo_thumbnail_path' => null,
+                'updated_by' => $user->id,
+            ]);
 
             ActivityLog::log('person_photo_deleted', $user, $person);
         }
@@ -1843,9 +1856,10 @@ class PersonController extends Controller
             }
         }
 
-        // Si source tiene foto y target no, transferir
+        // Si source tiene foto y target no, transferir (con su thumbnail)
         if (empty($target->photo_path) && !empty($source->photo_path)) {
             $target->photo_path = $source->photo_path;
+            $target->photo_thumbnail_path = $source->photo_thumbnail_path;
             $merged['fields'][] = 'photo_path';
         }
 

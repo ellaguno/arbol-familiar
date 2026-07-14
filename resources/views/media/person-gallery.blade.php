@@ -25,7 +25,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div class="flex items-center gap-4">
                 @if($person->photo_path)
-                    <img src="{{ Storage::url($person->photo_path) }}" class="w-16 h-16 rounded-full object-cover">
+                    <img src="{{ $person->photo_thumbnail_url }}" class="w-16 h-16 rounded-full object-cover">
                 @else
                     <div class="w-16 h-16 rounded-full bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-100 dark:bg-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-900/30 flex items-center justify-center">
                         <span class="text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-600 dark:text-{{ $person->gender === 'M' ? 'blue' : 'pink' }}-400 font-bold text-xl">{{ substr($person->first_name, 0, 1) }}</span>
@@ -80,7 +80,7 @@
                         <a href="{{ route('media.show', $item) }}" class="block">
                             @if($item->isImage())
                                 <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                    <img src="{{ $item->url }}" alt="{{ $item->title }}"
+                                    <img src="{{ $item->thumbnail_url }}" alt="{{ $item->title }}"
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                                 </div>
                             @elseif($item->isDocument())

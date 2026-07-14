@@ -52,7 +52,7 @@
                     <div class="card-body">
                         <div class="flex items-start gap-6">
                             @if($person && $person->photo_path)
-                                <img src="{{ Storage::url($person->photo_path) }}" alt="{{ $person->full_name }}"
+                                <img src="{{ $person->photo_thumbnail_url }}" alt="{{ $person->full_name }}"
                                      class="avatar avatar-xl">
                             @else
                                 <div class="avatar avatar-xl bg-mf-primary text-white flex items-center justify-center text-2xl font-bold">

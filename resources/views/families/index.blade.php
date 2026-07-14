@@ -57,7 +57,7 @@
                                 @if($family->husband)
                                     <div class="text-center">
                                         @if($family->husband->photo_path)
-                                            <img src="{{ Storage::url($family->husband->photo_path) }}" class="w-16 h-16 rounded-full object-cover mx-auto">
+                                            <img src="{{ $family->husband->photo_thumbnail_url }}" class="w-16 h-16 rounded-full object-cover mx-auto">
                                         @else
                                             <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto">
                                                 <span class="text-blue-600 dark:text-blue-400 font-bold text-xl">{{ substr($family->husband->first_name, 0, 1) }}</span>
@@ -76,7 +76,7 @@
                                 @if($family->wife)
                                     <div class="text-center">
                                         @if($family->wife->photo_path)
-                                            <img src="{{ Storage::url($family->wife->photo_path) }}" class="w-16 h-16 rounded-full object-cover mx-auto">
+                                            <img src="{{ $family->wife->photo_thumbnail_url }}" class="w-16 h-16 rounded-full object-cover mx-auto">
                                         @else
                                             <div class="w-16 h-16 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center mx-auto">
                                                 <span class="text-pink-600 dark:text-pink-400 font-bold text-xl">{{ substr($family->wife->first_name, 0, 1) }}</span>

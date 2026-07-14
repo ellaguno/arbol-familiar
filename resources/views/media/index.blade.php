@@ -56,7 +56,7 @@
                         <a href="{{ route('media.show', $item) }}" class="block">
                             @if($item->isImage())
                                 <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                    <img src="{{ $item->url }}" alt="{{ $item->title }}"
+                                    <img src="{{ $item->thumbnail_url }}" alt="{{ $item->title }}"
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                                 </div>
                             @elseif($item->isDocument())
